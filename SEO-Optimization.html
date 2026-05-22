@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SEO Optimization | Anani RM — Get Found on Google</title>
+    <meta name="description"
+          content="Boost your Google rankings with proven SEO strategies by Anani RM. On-page, local and technical SEO for South African businesses. Negotiable, budget-friendly rates." />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600&display=swap"
+          rel="stylesheet" />
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="style.css" />
+
+    <style>
+
+        /* ── SEO page accent palette ──────────────────────────────────
+           Lime green + emerald = growth, organic, visibility, rankings.
+           Distinct from CV emerald (#00c896) — this is more yellow-green.
+        ──────────────────────────────────────────────────────────── */
+        :root {
+            --seo-lime:   #84cc16;
+            --seo-green:  #22c55e;
+            --seo-dark:   #166534;
+            --seo-red:    #ef4444;
+            --grad-seo:   linear-gradient(135deg, #84cc16, #22c55e);
+            --grad-seo-soft: linear-gradient(135deg,
+                              rgba(132,204,22,.08) 0%,
+                              rgba(34,197,94,.05) 100%);
+        }
+
+        /* ── Page Hero ──────────────────────────────────────────────── */
+        .page-hero {
+            min-height: 75vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 140px 24px 80px;
+            position: relative;
+            overflow: hidden;
+        }
+        .page-hero-content { max-width: 840px; z-index: 1; }
+
+        .hero-badge-seo {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 18px;
+            background: rgba(132,204,22,.08);
+            border: 1px solid rgba(132,204,22,.25);
+            color: var(--seo-lime);
+            font-size: .8rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            border-radius: 100px;
+            margin-bottom: 24px;
+            animation: fadeUp .7s ease both;
+        }
+
+        .badge-dot-seo {
+            width: 8px; height: 8px;
+            background: var(--seo-lime);
+            border-radius: 50%;
+            animation: pulseDotSeo 2s ease infinite;
+            flex-shrink: 0;
+        }
+        @keyframes pulseDotSeo {
+            0%,100% { box-shadow: 0 0 0 0 rgba(132,204,22,.5); }
+            50%      { box-shadow: 0 0 0 7px rgba(132,204,22,0); }
+        }
+
+        .page-hero-title {
+            font-family: var(--f-display);
+            font-size: clamp(2rem, 4.5vw, 3.7rem);
+            font-weight: 800;
+            line-height: 1.12;
+            margin-bottom: 22px;
+            animation: fadeUp .7s .1s ease both;
+        }
+
+        .gradient-text-seo {
+            background: var(--grad-seo);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-hero-subtitle {
+            color: var(--text-mid);
+            font-size: clamp(.9rem, 1.8vw, 1.1rem);
+            line-height: 1.9;
+            margin-bottom: 28px;
+            max-width: 720px;
+            margin-left: auto;
+            margin-right: auto;
+            animation: fadeUp .7s .2s ease both;
+        }
+
+        .hero-tag-pills {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 32px;
+            animation: fadeUp .7s .25s ease both;
+        }
+        .hero-tag-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 14px;
+            background: rgba(132,204,22,.07);
+            border: 1px solid rgba(132,204,22,.2);
+            color: var(--seo-lime);
+            font-size: .78rem;
+            font-weight: 600;
+            border-radius: 100px;
+        }
+
+        .page-hero-buttons {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeUp .7s .3s ease both;
+        }
+
+        .page-hero::before {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 700px; height: 420px;
+            background: radial-gradient(ellipse,
+                rgba(132,204,22,.07) 0%,
+                rgba(34,197,94,.04) 55%,
+                transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .btn-whatsapp-hero {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            padding: 14px 32px;
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: #fff;
+            font-family: var(--f-body);
+            font-weight: 700;
+            font-size: .95rem;
+            border-radius: 100px;
+            text-decoration: none;
+            transition: var(--t);
+            box-shadow: 0 0 30px rgba(37,211,102,.3);
+            white-space: nowrap;
+        }
+        .btn-whatsapp-hero:hover { transform: translateY(-3px); box-shadow: 0 0 50px rgba(37,211,102,.5); }
+
+        .btn-ghost {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 32px;
+            background: transparent;
+            color: var(--text-hi);
+            font-family: var(--f-body);
+            font-weight: 600;
+            font-size: .95rem;
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            text-decoration: none;
+            transition: var(--t);
+            white-space: nowrap;
+        }
+        .btn-ghost:hover { border-color: var(--seo-lime); color: var(--seo-lime); background: rgba(132,204,22,.05); transform: translateY(-3px); }
+
+        /* Trust bar */
+        .trust-bar { display: flex; justify-content: center; align-items: center; gap: 40px; flex-wrap: wrap; margin-top: 52px; padding-top: 32px; border-top: 1px solid var(--border); animation: fadeUp .7s .4s ease both; }
+        .trust-item { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
+        .trust-num { font-family: var(--f-display); font-size: 1.6rem; font-weight: 800; background: var(--grad-seo); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; }
+        .trust-label { font-size: .72rem; color: var(--text-lo); text-transform: uppercase; letter-spacing: 1px; }
+        .trust-divider { width: 1px; height: 36px; background: var(--border); }
+
+        /* ── Why SEO Matters ─────────────────────────────────────────── */
+        .why-section { background: linear-gradient(180deg, var(--bg-base) 0%, var(--bg-layer) 100%); }
+
+        .why-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+
+        .why-card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 36px 28px;
+            position: relative;
+            overflow: hidden;
+            transition: var(--t);
+            text-align: center;
+        }
+        .why-card:hover { transform: translateY(-8px); border-color: rgba(132,204,22,.3); background: var(--bg-glass-hov); }
+        .why-card:hover .card-glow { opacity: 1; }
+
+        .why-stat {
+            font-family: var(--f-display);
+            font-size: 3rem;
+            font-weight: 800;
+            background: var(--grad-seo);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            margin-bottom: 10px;
+            display: block;
+        }
+        .why-card h3 { font-family: var(--f-display); font-size: 1rem; font-weight: 700; color: var(--text-hi); margin-bottom: 10px; }
+        .why-card p { font-size: .875rem; color: var(--text-mid); line-height: 1.75; }
+
+        /* ── What I Optimize ─────────────────────────────────────────── */
+        .optimize-section { background: var(--bg-base); }
+
+        .optimize-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; }
+
+        .optimize-card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 34px 28px;
+            display: flex;
+            gap: 22px;
+            align-items: flex-start;
+            position: relative;
+            overflow: hidden;
+            transition: var(--t);
+        }
+        .optimize-card:hover { transform: translateY(-6px); border-color: rgba(132,204,22,.3); background: var(--bg-glass-hov); }
+        .optimize-card:hover .card-glow { opacity: 1; }
+        .optimize-card:hover .opt-icon { transform: scale(1.1); }
+
+        .opt-icon {
+            width: 54px; height: 54px;
+            background: var(--grad-seo-soft);
+            border: 1px solid rgba(132,204,22,.22);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            color: var(--seo-lime);
+            flex-shrink: 0;
+            transition: var(--t);
+        }
+
+        .opt-body h3 { font-family: var(--f-display); font-size: 1rem; font-weight: 700; color: var(--text-hi); margin-bottom: 8px; }
+        .opt-body p  { font-size: .875rem; color: var(--text-mid); line-height: 1.72; margin-bottom: 14px; }
+
+        .opt-tags { display: flex; gap: 7px; flex-wrap: wrap; }
+        .opt-tag { padding: 3px 9px; background: rgba(132,204,22,.07); border: 1px solid rgba(132,204,22,.15); color: var(--seo-lime); font-size: .68rem; font-weight: 600; border-radius: 100px; }
+
+        /* ── Before / After SEO banner ───────────────────────────────── */
+        .before-after-banner {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 22px;
+            max-width: 860px;
+            margin: 48px auto 0;
+        }
+
+        .ba-card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 24px 22px;
+        }
+
+        .ba-card.bad-ba  { opacity: .65; }
+        .ba-card.good-ba { border-color: rgba(132,204,22,.3); background: var(--grad-seo-soft); }
+
+        .ba-label { display: inline-block; padding: 3px 12px; font-size: .68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; border-radius: 100px; margin-bottom: 14px; }
+        .ba-label.bad-lbl  { background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.2); color: #f87171; }
+        .ba-label.good-lbl { background: var(--grad-seo); color: #fff; }
+
+        .ba-card h4 { font-family: var(--f-display); font-size: .95rem; font-weight: 700; color: var(--text-hi); margin-bottom: 12px; }
+
+        .ba-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+        .ba-list li { display: flex; align-items: center; gap: 9px; font-size: .83rem; color: var(--text-mid); }
+        .ba-list li i { font-size: .72rem; flex-shrink: 0; }
+        .ba-list li .fa-times { color: #f87171; }
+        .ba-list li .fa-check { color: var(--seo-lime); }
+
+        /* ── Pricing ─────────────────────────────────────────────────── */
+        .pricing-section { background: linear-gradient(180deg, var(--bg-layer) 0%, var(--bg-base) 100%); }
+
+        .packages-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-bottom: 40px; }
+
+        .package-card { background: var(--bg-glass); border: 1px solid var(--border); border-radius: 24px; padding: 36px 28px; position: relative; overflow: hidden; transition: var(--t); display: flex; flex-direction: column; }
+        .package-card:hover { transform: translateY(-8px); border-color: rgba(132,204,22,.3); background: var(--bg-glass-hov); }
+        .package-card.recommended { border-color: rgba(132,204,22,.35); background: var(--grad-seo-soft); box-shadow: 0 0 55px rgba(132,204,22,.1); }
+
+        .package-badge { display: inline-block; padding: 4px 14px; background: var(--grad-seo); color: #fff; font-size: .68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; border-radius: 100px; margin-bottom: 18px; align-self: flex-start; }
+
+        .package-name { font-family: var(--f-display); font-size: 1.1rem; font-weight: 800; color: var(--text-hi); margin-bottom: 6px; }
+        .package-tagline { font-size: .82rem; color: var(--text-lo); margin-bottom: 22px; line-height: 1.55; }
+
+        .package-price { margin-bottom: 24px; padding-bottom: 22px; border-bottom: 1px solid var(--border); }
+        .price-from { font-size: .72rem; color: var(--text-lo); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 4px; }
+        .price-amount-pkg { font-family: var(--f-display); font-size: 2.4rem; font-weight: 800; background: var(--grad-seo); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; }
+        .price-period { font-size: .78rem; color: var(--text-lo); margin-top: 4px; display: block; }
+
+        .package-includes { list-style: none; display: flex; flex-direction: column; gap: 10px; flex: 1; margin-bottom: 28px; }
+        .package-includes li { display: flex; align-items: flex-start; gap: 10px; font-size: .86rem; color: var(--text-mid); line-height: 1.55; }
+        .package-includes li i { color: var(--seo-lime); font-size: .72rem; margin-top: 3px; flex-shrink: 0; }
+
+        .btn-package { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 22px; background: transparent; border: 1px solid var(--border); color: var(--text-mid); font-family: var(--f-body); font-weight: 600; font-size: .88rem; border-radius: 100px; text-decoration: none; transition: var(--t); margin-top: auto; }
+        .btn-package:hover { border-color: var(--seo-lime); color: var(--seo-lime); background: rgba(132,204,22,.06); transform: translateY(-2px); }
+        .btn-package-featured { background: var(--grad-seo) !important; border-color: transparent !important; color: #fff !important; font-weight: 700; }
+        .btn-package-featured:hover { transform: translateY(-3px) !important; box-shadow: 0 0 30px rgba(132,204,22,.4) !important; color: #fff !important; }
+
+        /* Negotiation note */
+        .negotiation-note { background: var(--grad-seo-soft); border: 1px solid rgba(132,204,22,.2); border-radius: 20px; padding: 32px 36px; display: flex; gap: 22px; align-items: flex-start; max-width: 900px; margin: 0 auto; }
+        .note-icon-wrap { width: 56px; height: 56px; background: var(--grad-seo); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; box-shadow: 0 0 24px rgba(132,204,22,.3); }
+        .negotiation-note h4 { font-family: var(--f-display); font-size: 1rem; font-weight: 700; color: var(--seo-lime); margin-bottom: 8px; }
+        .negotiation-note p  { font-size: .88rem; color: var(--text-mid); line-height: 1.8; }
+        .negotiation-note strong { color: var(--text-hi); }
+
+        /* ── Process ─────────────────────────────────────────────────── */
+        .process-section { background: var(--bg-base); }
+
+        .steps-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; position: relative; }
+        .steps-grid::before { content: ''; position: absolute; top: 44px; left: calc(12.5% + 22px); right: calc(12.5% + 22px); height: 2px; background: repeating-linear-gradient(90deg, rgba(132,204,22,.3) 0px, rgba(132,204,22,.3) 8px, transparent 8px, transparent 16px); z-index: 0; pointer-events: none; }
+
+        .step-card { background: var(--bg-glass); border: 1px solid var(--border); border-radius: 20px; padding: 30px 20px; text-align: center; position: relative; z-index: 1; transition: var(--t); }
+        .step-card:hover { transform: translateY(-6px); border-color: rgba(132,204,22,.3); background: var(--bg-glass-hov); }
+
+        .step-number { width: 52px; height: 52px; background: var(--grad-seo); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--f-display); font-size: 1.1rem; font-weight: 800; color: #fff; margin: 0 auto 16px; box-shadow: 0 0 24px rgba(132,204,22,.35); }
+
+        .step-card h3 { font-family: var(--f-display); font-size: .95rem; font-weight: 700; color: var(--text-hi); margin-bottom: 8px; }
+        .step-card p  { font-size: .82rem; color: var(--text-mid); line-height: 1.7; }
+        .step-detail-tag { display: inline-flex; align-items: center; gap: 5px; margin-top: 12px; padding: 4px 11px; background: rgba(132,204,22,.07); border: 1px solid rgba(132,204,22,.15); border-radius: 100px; font-size: .7rem; color: var(--seo-lime); font-weight: 600; }
+
+        /* ── Final CTA ──────────────────────────────────────────────── */
+        .final-cta-section { background: linear-gradient(180deg, var(--bg-layer) 0%, var(--bg-base) 100%); padding: 100px 0; }
+
+        .final-cta-wrap { max-width: 800px; margin: 0 auto; text-align: center; background: var(--grad-seo-soft); border: 1px solid rgba(132,204,22,.25); border-radius: 28px; padding: 64px 48px; position: relative; overflow: hidden; }
+        .final-cta-wrap::before { content: ''; position: absolute; width: 320px; height: 320px; background: radial-gradient(circle, rgba(132,204,22,.1) 0%, transparent 70%); top: -100px; right: -60px; border-radius: 50%; pointer-events: none; }
+        .final-cta-wrap::after  { content: ''; position: absolute; width: 280px; height: 280px; background: radial-gradient(circle, rgba(34,197,94,.07) 0%, transparent 70%); bottom: -80px; left: -40px; border-radius: 50%; pointer-events: none; }
+
+        .cta-seo-icon { width: 80px; height: 80px; background: var(--grad-seo); border-radius: 22px; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #fff; margin: 0 auto 26px; box-shadow: 0 0 40px rgba(132,204,22,.4); position: relative; z-index: 1; animation: floatSeoIcon 3s ease-in-out infinite; }
+        @keyframes floatSeoIcon { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+
+        .final-cta-wrap h2 { font-family: var(--f-display); font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 800; margin-bottom: 14px; position: relative; z-index: 1; }
+        .final-cta-wrap > p { color: var(--text-mid); font-size: .93rem; line-height: 1.85; max-width: 580px; margin: 0 auto 30px; position: relative; z-index: 1; }
+
+        .wa-message-preview { background: rgba(37,211,102,.06); border: 1px solid rgba(37,211,102,.15); border-radius: 14px; padding: 14px 20px; margin: 0 auto 30px; max-width: 640px; font-size: .83rem; color: #57e89a; text-align: left; position: relative; z-index: 1; font-style: italic; line-height: 1.65; }
+        .wa-message-preview::before { content: '📩  Your pre-filled message:'; font-style: normal; font-weight: 700; color: #57e89a; display: block; font-size: .7rem; margin-bottom: 7px; text-transform: uppercase; letter-spacing: 1px; }
+
+        .btn-wa-large { display: inline-flex; align-items: center; gap: 12px; padding: 18px 44px; background: linear-gradient(135deg, #25D366, #128C7E); color: #fff; font-family: var(--f-body); font-weight: 800; font-size: 1.05rem; border-radius: 100px; text-decoration: none; position: relative; z-index: 1; box-shadow: 0 0 50px rgba(37,211,102,.4); transition: var(--t); white-space: nowrap; }
+        .btn-wa-large i { font-size: 1.3rem; }
+        .btn-wa-large:hover { transform: translateY(-4px) scale(1.03); box-shadow: 0 0 70px rgba(37,211,102,.6); }
+
+        .cta-footnote { font-size: .75rem; color: var(--text-lo); margin-top: 16px; position: relative; z-index: 1; }
+        .facebook-icon:hover { background: #1877f2 !important; box-shadow: 0 0 18px rgba(24,119,242,.4) !important; }
+
+        /* ── Responsive ─────────────────────────────────────────────── */
+        @media (max-width: 1024px) {
+            .why-grid      { grid-template-columns: repeat(2, 1fr); }
+            .optimize-grid { grid-template-columns: 1fr; }
+            .before-after-banner { grid-template-columns: 1fr; max-width: 520px; }
+            .packages-grid { grid-template-columns: repeat(2, 1fr); }
+            .steps-grid    { grid-template-columns: repeat(2, 1fr); }
+            .steps-grid::before { display: none; }
+        }
+        @media (max-width: 768px) {
+            .page-hero     { padding: 120px 22px 60px; }
+            .why-grid      { grid-template-columns: 1fr; }
+            .packages-grid { grid-template-columns: 1fr; }
+            .steps-grid    { grid-template-columns: 1fr; }
+            .negotiation-note { flex-direction: column; gap: 14px; }
+            .optimize-card    { flex-direction: column; }
+            .final-cta-wrap   { padding: 40px 22px; }
+            .trust-bar  { gap: 22px; }
+            .trust-divider { display: none; }
+            section { padding: 70px 0; }
+        }
+        @media (max-width: 480px) { .page-hero-title { font-size: 1.9rem; } }
+
+    </style>
+</head>
+<body>
+
+    <!-- LOADING SCREEN -->
+    <div id="loader">
+        <div class="loader-inner">
+            <div class="loader-ring"></div>
+            <div class="loader-logo">
+                <img src="images/mylog.jpg" alt="Anani RM" class="loader-logo-img" />
+                <span>Loading<span class="loader-dots">...</span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- NAVIGATION -->
+    <nav id="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">
+                <img src="images/mylog.jpg" alt="Anani RM Logo" class="nav-logo-img" />
+                <span class="nav-logo-text">Anani<span class="accent">.</span></span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html#home">Home</a></li>
+                <li><a href="index.html#services" class="active-link">Services</a></li>
+                <li><a href="index.html#about">About</a></li>
+                <li><a href="index.html#portfolio">Portfolio</a></li>
+                <li><a href="index.html#testimonials">Reviews</a></li>
+                <li><a href="index.html#contact">Contact</a></li>
+            </ul>
+            <div class="nav-right">
+                <a href="https://wa.me/27648412146" target="_blank" class="nav-cta">Let's Talk</a>
+                <button class="hamburger" id="hamburger" aria-label="Open menu">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <button class="mobile-close" id="mobileClose" aria-label="Close menu"><i class="fas fa-times"></i></button>
+        <ul>
+            <li><a href="index.html#home"         class="mobile-link">Home</a></li>
+            <li><a href="index.html#services"     class="mobile-link">Services</a></li>
+            <li><a href="index.html#about"        class="mobile-link">About</a></li>
+            <li><a href="index.html#portfolio"    class="mobile-link">Portfolio</a></li>
+            <li><a href="index.html#testimonials" class="mobile-link">Reviews</a></li>
+            <li><a href="index.html#contact"      class="mobile-link">Contact</a></li>
+        </ul>
+        <a href="https://wa.me/27648412146" target="_blank" class="mobile-whatsapp">
+            <i class="fab fa-whatsapp"></i> Chat on WhatsApp
+        </a>
+    </div>
+    <div class="menu-overlay" id="menuOverlay"></div>
+    <canvas id="particleCanvas"></canvas>
+
+
+    <!-- ============================================================ HERO -->
+    <section class="page-hero">
+        <div class="page-hero-content">
+            <div class="hero-badge-seo">
+                <span class="badge-dot-seo"></span>
+                📈 Service · SEO &amp; Google Visibility
+            </div>
+            <h1 class="page-hero-title">
+                Get Found on Google —<br>
+                <span class="gradient-text-seo">SEO That Delivers Real Results</span>
+            </h1>
+            <p class="page-hero-subtitle">
+                90% of online experiences begin with a search engine. If your business
+                doesn't appear on Google's first page, you're practically invisible.
+                I use proven, ethical SEO strategies to grow your organic traffic,
+                build your authority, and put your business in front of the right people.
+            </p>
+            <div class="hero-tag-pills">
+                <span class="hero-tag-pill"><i class="fab fa-google"></i> Google Rankings</span>
+                <span class="hero-tag-pill"><i class="fas fa-map-marker-alt"></i> Local SEO</span>
+                <span class="hero-tag-pill"><i class="fas fa-leaf"></i> Organic Traffic</span>
+            </div>
+            <div class="page-hero-buttons">
+                <a href="https://wa.me/27648412146?text=Hi%20Anani!%20I%20want%20to%20improve%20my%20Google%20rankings.%20Can%20we%20discuss%20SEO%20for%20my%20business%20and%20a%20flexible%20price%3F"
+                   target="_blank" class="btn-whatsapp-hero">
+                    <i class="fab fa-whatsapp"></i> Start Growing on Google
+                </a>
+                <a href="#packages" class="btn-ghost">
+                    <i class="fas fa-tags"></i> View SEO Packages
+                </a>
+            </div>
+            <div class="trust-bar">
+                <div class="trust-item"><span class="trust-num">90%</span><span class="trust-label">Searches on Google</span></div>
+                <div class="trust-divider"></div>
+                <div class="trust-item"><span class="trust-num">Free</span><span class="trust-label">SEO Audit on Enquiry</span></div>
+                <div class="trust-divider"></div>
+                <div class="trust-item"><span class="trust-num">Long</span><span class="trust-label">Lasting Results</span></div>
+                <div class="trust-divider"></div>
+                <div class="trust-item"><span class="trust-num">Flex</span><span class="trust-label">Negotiable Rates</span></div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ============================================================
+         SECTION 1: WHY SEO MATTERS
+    ============================================================ -->
+    <section class="why-section">
+        <div class="container">
+            <div class="section-header reveal">
+                <span class="section-tag">Why SEO?</span>
+                <h2 class="section-title">Three Reasons SEO is the <span class="gradient-text-seo">Best Investment for Your Business</span></h2>
+                <p class="section-subtitle">
+                    Unlike paid ads that stop the moment your budget runs out, good SEO keeps
+                    delivering traffic, leads, and sales — for months and years.
+                </p>
+            </div>
+            <div class="why-grid">
+
+                <div class="why-card reveal-card">
+                    <div class="card-glow"></div>
+                    <span class="why-stat">75%</span>
+                    <h3>Users Never Scroll Past Page One</h3>
+                    <p>If your website is on page 2 or beyond, most people will never find you. The first five Google results get over 67% of all clicks — ranking matters more than anything else online.</p>
+                </div>
+
+                <div class="why-card reveal-card">
+                    <div class="card-glow"></div>
+                    <span class="why-stat">Free</span>
+                    <h3>Organic Traffic Costs Nothing Per Click</h3>
+                    <p>Google Ads charge you every time someone clicks your link. SEO traffic is completely free — once you rank, visitors keep arriving without you spending a single extra cent on ads.</p>
+                </div>
+
+                <div class="why-card reveal-card">
+                    <div class="card-glow"></div>
+                    <span class="why-stat">46%</span>
+                    <h3>Of All Google Searches Are Local</h3>
+                    <p>Nearly half of all searches include a local intent — "near me", city names, or local business types. Local SEO makes sure you appear when people in your area search for what you offer.</p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ============================================================
+         SECTION 2: WHAT I OPTIMIZE
+    ============================================================ -->
+    <section class="optimize-section">
+        <div class="container">
+            <div class="section-header reveal">
+                <span class="section-tag">What I Do</span>
+                <h2 class="section-title">Four Areas I <span class="gradient-text-seo">Optimize for Rankings</span></h2>
+                <p class="section-subtitle">
+                    Effective SEO isn't a single fix — it's a combination of technical,
+                    content, and strategic improvements working together.
+                </p>
+            </div>
+            <div class="optimize-grid">
+
+                <div class="optimize-card reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="opt-icon"><i class="fas fa-file-code"></i></div>
+                    <div class="opt-body">
+                        <h3>On-Page SEO</h3>
+                        <p>Optimising everything visible and readable on your website — so Google understands exactly what each page is about and ranks it for the right search terms.</p>
+                        <div class="opt-tags">
+                            <span class="opt-tag">Title Tags</span>
+                            <span class="opt-tag">Meta Descriptions</span>
+                            <span class="opt-tag">Headings</span>
+                            <span class="opt-tag">Keyword Placement</span>
+                            <span class="opt-tag">Internal Links</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="optimize-card reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="opt-icon"><i class="fas fa-cogs"></i></div>
+                    <div class="opt-body">
+                        <h3>Technical SEO</h3>
+                        <p>Fixing the behind-the-scenes issues that stop Google from properly reading and ranking your website — speed, structure, mobile performance, and indexability.</p>
+                        <div class="opt-tags">
+                            <span class="opt-tag">Site Speed</span>
+                            <span class="opt-tag">Mobile-Friendly</span>
+                            <span class="opt-tag">Schema Markup</span>
+                            <span class="opt-tag">XML Sitemap</span>
+                            <span class="opt-tag">Core Web Vitals</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="optimize-card reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="opt-icon"><i class="fas fa-map-marker-alt"></i></div>
+                    <div class="opt-body">
+                        <h3>Local SEO</h3>
+                        <p>Getting your business to appear in local searches and Google Maps — critical for restaurants, shops, clinics, and service businesses that rely on nearby customers.</p>
+                        <div class="opt-tags">
+                            <span class="opt-tag">Google Business Profile</span>
+                            <span class="opt-tag">Local Citations</span>
+                            <span class="opt-tag">Reviews Strategy</span>
+                            <span class="opt-tag">NAP Consistency</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="optimize-card reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="opt-icon"><i class="fas fa-search"></i></div>
+                    <div class="opt-body">
+                        <h3>Keyword Research &amp; Strategy</h3>
+                        <p>Finding the exact words and phrases your target customers type into Google — then building a strategy around ranking for those specific terms ahead of your competitors.</p>
+                        <div class="opt-tags">
+                            <span class="opt-tag">Competitor Analysis</span>
+                            <span class="opt-tag">Long-Tail Keywords</span>
+                            <span class="opt-tag">Search Intent</span>
+                            <span class="opt-tag">Content Mapping</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Before / After snapshot -->
+            <div class="before-after-banner">
+                <div class="ba-card bad-ba">
+                    <span class="ba-label bad-lbl">❌ Without SEO</span>
+                    <h4>Invisible to Google</h4>
+                    <ul class="ba-list">
+                        <li><i class="fas fa-times"></i> Page 3, 4, or nowhere</li>
+                        <li><i class="fas fa-times"></i> No organic traffic coming in</li>
+                        <li><i class="fas fa-times"></i> Wasting money on ads that stop working</li>
+                        <li><i class="fas fa-times"></i> Competitors ranking above you</li>
+                    </ul>
+                </div>
+                <div class="ba-card good-ba">
+                    <span class="ba-label good-lbl">✅ With SEO</span>
+                    <h4>Visible &amp; Growing</h4>
+                    <ul class="ba-list">
+                        <li><i class="fas fa-check"></i> Appearing on Google Page 1</li>
+                        <li><i class="fas fa-check"></i> Steady free traffic every month</li>
+                        <li><i class="fas fa-check"></i> Results that compound over time</li>
+                        <li><i class="fas fa-check"></i> Outranking local competitors</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ============================================================
+         SECTION 3: PRICING
+    ============================================================ -->
+    <section class="pricing-section" id="packages">
+        <div class="container">
+            <div class="section-header reveal">
+                <span class="section-tag">SEO Packages</span>
+                <h2 class="section-title">Flexible &amp; <span class="gradient-text-seo">Budget-Friendly SEO Plans</span></h2>
+                <p class="section-subtitle">
+                    I offer SEO as a once-off service or ongoing monthly support.
+                    All prices are negotiable — message me with your goals and budget.
+                </p>
+            </div>
+            <div class="packages-grid">
+
+                <div class="package-card reveal-card">
+                    <div class="package-name">SEO Audit &amp; Report</div>
+                    <div class="package-tagline">A full analysis of your current site — what's hurting your rankings and exactly how to fix it.</div>
+                    <div class="package-price">
+                        <span class="price-from">Starting from</span>
+                        <span class="price-amount-pkg">R150</span>
+                        <span class="price-period">once-off · negotiable</span>
+                    </div>
+                    <ul class="package-includes">
+                        <li><i class="fas fa-check-circle"></i> Full on-page SEO analysis</li>
+                        <li><i class="fas fa-check-circle"></i> Technical issues report</li>
+                        <li><i class="fas fa-check-circle"></i> Competitor keyword comparison</li>
+                        <li><i class="fas fa-check-circle"></i> Google PageSpeed score review</li>
+                        <li><i class="fas fa-check-circle"></i> Actionable fix-list delivered</li>
+                    </ul>
+                    <a href="https://wa.me/27648412146?text=Hi%20Anani!%20I%27d%20like%20an%20SEO%20audit%20for%20my%20website.%20Can%20we%20discuss%20pricing%3F" target="_blank" class="btn-package">
+                        <i class="fab fa-whatsapp"></i> Get This Package
+                    </a>
+                </div>
+
+                <div class="package-card recommended reveal-card">
+                    <div class="package-badge">⭐ Best Value</div>
+                    <div class="package-name">Monthly SEO Growth</div>
+                    <div class="package-tagline">Ongoing monthly SEO work — consistent improvements that compound over time.</div>
+                    <div class="package-price">
+                        <span class="price-from">Starting from</span>
+                        <span class="price-amount-pkg">R400</span>
+                        <span class="price-period">per month · negotiable</span>
+                    </div>
+                    <ul class="package-includes">
+                        <li><i class="fas fa-check-circle"></i> Monthly keyword tracking</li>
+                        <li><i class="fas fa-check-circle"></i> On-page optimisation updates</li>
+                        <li><i class="fas fa-check-circle"></i> Google Business Profile management</li>
+                        <li><i class="fas fa-check-circle"></i> One optimised blog post/page per month</li>
+                        <li><i class="fas fa-check-circle"></i> Monthly ranking progress report</li>
+                        <li><i class="fas fa-check-circle"></i> WhatsApp check-ins</li>
+                    </ul>
+                    <a href="https://wa.me/27648412146?text=Hi%20Anani!%20I%27m%20interested%20in%20monthly%20SEO%20support.%20Can%20we%20discuss%20a%20flexible%20rate%3F" target="_blank" class="btn-package btn-package-featured">
+                        <i class="fab fa-whatsapp"></i> Get This Package
+                    </a>
+                </div>
+
+                <div class="package-card reveal-card">
+                    <div class="package-name">Full SEO Bundle</div>
+                    <div class="package-tagline">Complete SEO setup + three months of active optimization to get you ranking fast.</div>
+                    <div class="package-price">
+                        <span class="price-from">Starting from</span>
+                        <span class="price-amount-pkg">R800</span>
+                        <span class="price-period">3-month bundle · negotiable</span>
+                    </div>
+                    <ul class="package-includes">
+                        <li><i class="fas fa-check-circle"></i> Full SEO audit &amp; strategy</li>
+                        <li><i class="fas fa-check-circle"></i> Complete on-page &amp; technical fixes</li>
+                        <li><i class="fas fa-check-circle"></i> Google Business Profile setup</li>
+                        <li><i class="fas fa-check-circle"></i> 3 months of monthly SEO work</li>
+                        <li><i class="fas fa-check-circle"></i> 3 optimised blog posts</li>
+                        <li><i class="fas fa-check-circle"></i> Monthly ranking reports</li>
+                        <li><i class="fas fa-check-circle"></i> Google Analytics &amp; Search Console setup</li>
+                    </ul>
+                    <a href="https://wa.me/27648412146?text=Hi%20Anani!%20I%27m%20interested%20in%20the%20Full%20SEO%20Bundle.%20Can%20we%20discuss%20pricing%3F" target="_blank" class="btn-package">
+                        <i class="fab fa-whatsapp"></i> Get This Package
+                    </a>
+                </div>
+
+            </div>
+            <div class="negotiation-note reveal">
+                <div class="note-icon-wrap">💬</div>
+                <div>
+                    <h4>Flexible &amp; Honest Pricing</h4>
+                    <p>SEO results take time — and I want to make sure the process is <strong>affordable and sustainable</strong> for your business. These are starting prices. If your budget is smaller, we can start with just the audit and build from there. <strong>Message me with your website URL and goals</strong> — and I will give you an honest, no-pressure quote.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ============================================================
+         SECTION 4: MY SEO PROCESS
+    ============================================================ -->
+    <section class="process-section">
+        <div class="container">
+            <div class="section-header reveal">
+                <span class="section-tag">The Process</span>
+                <h2 class="section-title">How I Improve Your <span class="gradient-text-seo">Google Rankings</span></h2>
+                <p class="section-subtitle">A clear, four-step process — no jargon, no mystery. Just consistent work that moves your site up the rankings.</p>
+            </div>
+            <div class="steps-grid">
+                <div class="step-card reveal-card">
+                    <div class="step-number">1</div>
+                    <h3>Full SEO Audit</h3>
+                    <p>I analyse your current site — current rankings, technical errors, page speeds, keyword gaps, and competitor positioning. This gives us a clear baseline to work from.</p>
+                    <div class="step-detail-tag"><i class="fas fa-search"></i> Free on first enquiry</div>
+                </div>
+                <div class="step-card reveal-card">
+                    <div class="step-number">2</div>
+                    <h3>Keyword Strategy</h3>
+                    <p>Based on your business goals and target audience, I identify the exact search terms to target — balancing competition level with search volume for realistic wins.</p>
+                    <div class="step-detail-tag"><i class="fas fa-bullseye"></i> SA market focused</div>
+                </div>
+                <div class="step-card reveal-card">
+                    <div class="step-number">3</div>
+                    <h3>Implementation</h3>
+                    <p>I apply all on-page and technical fixes — updating titles, headings, content, speed, structured data, and Google Business Profile based on the agreed strategy.</p>
+                    <div class="step-detail-tag"><i class="fas fa-tools"></i> Tracked every step</div>
+                </div>
+                <div class="step-card reveal-card">
+                    <div class="step-number">4</div>
+                    <h3>Track &amp; Report</h3>
+                    <p>Every month I send you a ranking progress report — showing which keywords improved, traffic changes, and what the next actions are. No guesswork, just data.</p>
+                    <div class="step-detail-tag"><i class="fas fa-chart-line"></i> Monthly reports</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ============================================================ FINAL CTA -->
+    <section class="final-cta-section">
+        <div class="container">
+            <div class="final-cta-wrap reveal">
+                <div class="cta-seo-icon"><i class="fab fa-google"></i></div>
+                <h2>Ready to Climb <span class="gradient-text-seo">Google's Rankings?</span></h2>
+                <p>Send me your website link on WhatsApp — I will take a free look and tell you exactly where you stand and what's holding you back. No obligation, just honest advice.</p>
+                <div class="wa-message-preview">"Hi Anani! I want to improve my Google rankings. Can we discuss SEO for my business and a flexible price?"</div>
+                <a href="https://wa.me/27648412146?text=Hi%20Anani!%20I%20want%20to%20improve%20my%20Google%20rankings.%20Can%20we%20discuss%20SEO%20for%20my%20business%20and%20a%20flexible%20price%3F"
+                   target="_blank" class="btn-wa-large">
+                    <i class="fab fa-whatsapp"></i><span>Start on WhatsApp Now</span>
+                </a>
+                <p class="cta-footnote">💬 Usually responds within the hour &nbsp;·&nbsp; 📍 Thohoyandou, Limpopo &nbsp;·&nbsp; 🇿🇦 South Africa</p>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <div class="footer-logo"><img src="images/mylog.jpg" alt="Anani RM" class="footer-logo-img" />Anani<span class="accent">.</span></div>
+                    <p>Crafting premium digital experiences and AI solutions from South Africa to the world.</p>
+                    <div class="social-row">
+                        <a href="https://github.com/ramagoma-glitch"        target="_blank" class="s-icon"><i class="fab fa-github"></i></a>
+                        <a href="https://www.linkedin.com/in/anani-ramagoma" target="_blank" class="s-icon"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="https://twitter.com/AnaniRamagoma"          target="_blank" class="s-icon"><i class="fab fa-twitter"></i></a>
+                        <a href="https://www.instagram.com/anani.rm"         target="_blank" class="s-icon"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.facebook.com/AnaniRM"           target="_blank" class="s-icon facebook-icon"><i class="fab fa-facebook-f"></i></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html#home">Home</a></li>
+                        <li><a href="index.html#services">Services</a></li>
+                        <li><a href="index.html#about">About</a></li>
+                        <li><a href="index.html#portfolio">Portfolio</a></li>
+                        <li><a href="index.html#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+    <h4>Services</h4>
+    <ul>
+        <li><a href="business-websites.html">Business Websites</a></li>
+        <li><a href="cv-services.html">Curriculum Vitae <b>(CV)</b></a></li>
+        <li><a href="chatbots.html">AI Chatbots</a></li>
+        <li><a href="website-RedesingAndDesing.html">Website Redesign</a></li>
+        <li><a href="WhatsAppIntegration.html">WhatsApp Integration</a></li>
+        <li><a href="SEO-Optimization.html">SEO Optimization</a></li>
+        <li><a href="academic-applications.html">Academic Application</a></li>
+    </ul>
+</div>
+                <div class="footer-col">
+                    <h4>Contact</h4>
+                    <p><i class="fab fa-whatsapp"></i>+27 64 841 2146</p>
+                    <p><i class="fas fa-envelope"></i>Ramagoma212@gmail.com</p>
+                    <p><i class="fas fa-map-marker-alt"></i>Thohoyandou, Limpopo, SA</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; <span id="currentYear"></span> Ramagoma Muthuhadini <b>Anani</b>. All rights reserved. Built with ❤️ in South Africa.</p>
+                 <div class="footer-legal">
+                    <a href="documents/privacy.pdf" target="_blank">Privacy Policy</a>
+                    <span>·</span>
+                    <a href="documents/terms.pdf" target="_blank">Terms of Service</a>
+                </div>
+        </div>
+    </footer>
+
+    <button id="backToTop" aria-label="Back to top"><i class="fas fa-chevron-up"></i></button>
+    <script src="script.js"></script>
+</body>
+</html>

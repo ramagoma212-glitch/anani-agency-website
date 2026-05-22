@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Business Websites | Ramagoma Muthuhadini (Anani)</title>
+    <meta name="description" content="Affordable, professional business websites built by South African independent developer Anani RM. Agency quality at a fraction of the price." />
+
+    <!-- Same Google Fonts as index.html -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+    <!-- Same Font Awesome as index.html -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <!-- Shared stylesheet — keeps every design token identical to the main page -->
+    <link rel="stylesheet" href="style.css" />
+
+    <!-- ============================================================
+         PAGE-SPECIFIC STYLES
+         Only adds new classes for this page.
+         Never overrides or changes anything in style.css.
+    ============================================================ -->
+    <style>
+
+        /* ── Page Hero (replaces the full-screen home hero for sub-pages) ── */
+        .page-hero {
+            min-height: 72vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 140px 24px 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page-hero-content {
+            max-width: 780px;
+            z-index: 1;
+        }
+
+        .page-hero-content .hero-badge { justify-content: center; }
+
+        .page-hero-title {
+            font-family: var(--f-display);
+            font-size: clamp(2.2rem, 5vw, 3.8rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 22px;
+            animation: fadeUp .7s .1s ease both;
+        }
+
+        .page-hero-subtitle {
+            color: var(--text-mid);
+            font-size: clamp(.95rem, 2vw, 1.15rem);
+            line-height: 1.85;
+            margin-bottom: 38px;
+            animation: fadeUp .7s .2s ease both;
+        }
+
+        .page-hero-buttons {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeUp .7s .3s ease both;
+        }
+
+        /* Ambient glow blob behind the hero text */
+        .page-hero::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 400px;
+            background: radial-gradient(ellipse, rgba(0,212,255,.07) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── Section: value proposition ── */
+        .value-section {
+            background: linear-gradient(180deg, var(--bg-base) 0%, var(--bg-layer) 100%);
+        }
+
+        /* Big highlight number / stat used in the comparison row */
+        .highlight-stat {
+            font-family: var(--f-display);
+            font-size: 2.8rem;
+            font-weight: 800;
+            background: var(--grad);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        /* Three-column reason cards — reuses .service-card base */
+        .reason-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 22px;
+            margin-top: 0;
+        }
+
+        .reason-card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 34px 28px;
+            position: relative;
+            overflow: hidden;
+            transition: var(--t);
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+        .reason-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--border-glow);
+            background: var(--bg-glass-hov);
+        }
+        .reason-card:hover .card-glow { opacity: 1; }
+
+        .reason-number {
+            font-family: var(--f-display);
+            font-size: 3.2rem;
+            font-weight: 800;
+            background: var(--grad);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            margin-bottom: 10px;
+        }
+
+        .reason-card h3 {
+            font-family: var(--f-display);
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-hi);
+        }
+
+        .reason-card p {
+            font-size: .875rem;
+            color: var(--text-mid);
+            line-height: 1.75;
+        }
+
+        /* ── Section: what I build ── */
+        .builds-section {
+            background: var(--bg-base);
+        }
+
+        /* six-column tight grid of build-type cards */
+        .build-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 22px;
+        }
+
+        /* ── Pricing comparison ── */
+        .pricing-section {
+            background: linear-gradient(180deg, var(--bg-layer) 0%, var(--bg-base) 100%);
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 28px;
+            max-width: 860px;
+            margin: 0 auto;
+        }
+
+        /* Agency card — muted / "expensive" look */
+        .price-card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 40px 32px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: var(--t);
+        }
+
+        .price-card.agency-card {
+            opacity: .65;
+        }
+
+        /* Anani card — glowing "best value" look */
+        .price-card.anani-card {
+            border-color: rgba(0,212,255,.3);
+            background: linear-gradient(135deg, rgba(0,212,255,.07), rgba(123,47,255,.07));
+            box-shadow: 0 0 60px rgba(0,212,255,.12);
+        }
+
+        .price-card-badge {
+            display: inline-block;
+            padding: 4px 14px;
+            background: var(--grad);
+            color: #fff;
+            font-size: .7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 100px;
+            margin-bottom: 18px;
+        }
+
+        .price-card h3 {
+            font-family: var(--f-display);
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .price-amount {
+            font-family: var(--f-display);
+            font-size: 2.4rem;
+            font-weight: 800;
+            line-height: 1;
+            margin: 16px 0 6px;
+        }
+
+        .price-amount.agency-amount {
+            color: var(--text-mid);
+            text-decoration: line-through;
+            text-decoration-color: rgba(255,80,80,.5);
+        }
+
+        .price-amount.anani-amount {
+            background: var(--grad);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .price-note {
+            font-size: .82rem;
+            color: var(--text-muted, var(--text-mid));
+            margin-bottom: 24px;
+        }
+
+        .price-features {
+            list-style: none;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .price-features li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: .875rem;
+            color: var(--text-mid);
+        }
+
+        .price-features li i {
+            font-size: .75rem;
+            flex-shrink: 0;
+        }
+        .price-features li .fa-check { color: var(--green); }
+        .price-features li .fa-times  { color: #ff5050; }
+
+        /* ── Process steps ── */
+        .process-section {
+            background: var(--bg-base);
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 22px;
+            position: relative;
+        }
+
+        /* Dashed connector line between steps */
+        .steps-grid::before {
+            content: '';
+            position: absolute;
+            top: 44px;
+            left: calc(12.5% + 22px);
+            right: calc(12.5% + 22px);
+            height: 2px;
+            background: repeating-linear-gradient(
+                90deg,
+                rgba(0,212,255,.25) 0px,
+                rgba(0,212,255,.25) 8px,
+                transparent 8px,
+                transparent 16px
+            );
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .step-card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 30px 22px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            transition: var(--t);
+        }
+        .step-card:hover { transform: translateY(-6px); border-color: var(--border-glow); }
+
+        .step-number {
+            width: 52px; height: 52px;
+            background: var(--grad);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--f-display);
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #fff;
+            margin: 0 auto 16px;
+            box-shadow: 0 0 24px rgba(0,212,255,.3);
+        }
+
+        .step-card h3 {
+            font-family: var(--f-display);
+            font-size: .95rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-hi);
+        }
+
+        .step-card p {
+            font-size: .82rem;
+            color: var(--text-mid);
+            line-height: 1.7;
+        }
+
+        /* ── Preparation checklist ── */
+        .checklist-section {
+            background: linear-gradient(180deg, var(--bg-layer) 0%, var(--bg-base) 100%);
+        }
+
+        .checklist-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 22px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .checklist-card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 30px 28px;
+            display: flex;
+            gap: 18px;
+            align-items: flex-start;
+            transition: var(--t);
+        }
+        .checklist-card:hover {
+            border-color: var(--border-glow);
+            transform: translateY(-4px);
+            background: var(--bg-glass-hov);
+        }
+
+        .checklist-icon {
+            width: 50px; height: 50px;
+            background: linear-gradient(135deg, rgba(0,212,255,.15), rgba(123,47,255,.15));
+            border: 1px solid rgba(0,212,255,.2);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--cyan);
+            flex-shrink: 0;
+        }
+
+        .checklist-text h4 {
+            font-family: var(--f-display);
+            font-size: .95rem;
+            font-weight: 700;
+            color: var(--text-hi);
+            margin-bottom: 6px;
+        }
+
+        .checklist-text p {
+            font-size: .84rem;
+            color: var(--text-mid);
+            line-height: 1.7;
+        }
+
+        .checklist-items {
+            list-style: none;
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .checklist-items li {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: .82rem;
+            color: var(--text-mid);
+        }
+
+        .checklist-items li i {
+            color: var(--cyan);
+            font-size: .7rem;
+            flex-shrink: 0;
+        }
+
+        /* ── Download PDF section ── */
+        .download-section {
+            background: var(--bg-base);
+            padding: 100px 0;
+        }
+
+        .download-wrapper {
+            max-width: 820px;
+            margin: 0 auto;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(0,212,255,.07), rgba(123,47,255,.07));
+            border: 1px solid rgba(0,212,255,.25);
+            border-radius: 28px;
+            padding: 60px 48px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Decorative glow orbs inside the download card */
+        .download-wrapper::before,
+        .download-wrapper::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .download-wrapper::before {
+            width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(0,212,255,.12) 0%, transparent 70%);
+            top: -100px; right: -60px;
+        }
+        .download-wrapper::after {
+            width: 250px; height: 250px;
+            background: radial-gradient(circle, rgba(123,47,255,.12) 0%, transparent 70%);
+            bottom: -80px; left: -40px;
+        }
+
+        .download-icon {
+            width: 80px; height: 80px;
+            background: var(--grad);
+            border-radius: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: #fff;
+            margin: 0 auto 24px;
+            box-shadow: 0 0 40px rgba(0,212,255,.35);
+            position: relative;
+            z-index: 1;
+            animation: floatY 3s ease-in-out infinite;
+        }
+
+        @keyframes floatY { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+
+        .download-wrapper h2 {
+            font-family: var(--f-display);
+            font-size: clamp(1.6rem, 3vw, 2.2rem);
+            font-weight: 800;
+            margin-bottom: 14px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .download-wrapper p {
+            color: var(--text-mid);
+            font-size: .95rem;
+            line-height: 1.8;
+            max-width: 560px;
+            margin: 0 auto 32px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* What's inside the PDF — small tag pills */
+        .pdf-contents {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 36px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .pdf-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 14px;
+            background: rgba(255,255,255,.05);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            font-size: .78rem;
+            color: var(--text-mid);
+        }
+
+        .pdf-tag i { color: var(--cyan); font-size: .7rem; }
+
+        /* The download button — gold gradient to stand out */
+        .btn-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 38px;
+            background: linear-gradient(135deg, #ffd60a, #ff6b35);
+            color: #111;
+            font-family: var(--f-body);
+            font-weight: 700;
+            font-size: 1rem;
+            border: none;
+            border-radius: 100px;
+            cursor: pointer;
+            text-decoration: none;
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+            box-shadow: 0 0 40px rgba(255,214,10,.35);
+            transition: var(--t);
+        }
+
+        .btn-download::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, #ff6b35, #ffd60a);
+            opacity: 0;
+            transition: var(--t);
+        }
+
+        .btn-download span, .btn-download i { position: relative; z-index: 1; }
+
+        .btn-download:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 0 60px rgba(255,214,10,.55);
+        }
+        .btn-download:hover::after { opacity: 1; }
+
+        .download-note {
+            font-size: .78rem;
+            color: var(--text-lo);
+            margin-top: 14px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ── Final CTA strip ── */
+        .cta-section {
+            background: linear-gradient(180deg, var(--bg-layer) 0%, var(--bg-base) 100%);
+            padding: 100px 0;
+        }
+
+        .cta-inner {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .cta-inner h2 {
+            font-family: var(--f-display);
+            font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+            font-weight: 800;
+            margin-bottom: 14px;
+        }
+
+        .cta-inner p {
+            color: var(--text-mid);
+            font-size: .95rem;
+            line-height: 1.8;
+            margin-bottom: 36px;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Green WhatsApp button variant */
+        .btn-whatsapp {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 13px 30px;
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: #fff;
+            font-weight: 700;
+            font-size: .9rem;
+            border-radius: 100px;
+            text-decoration: none;
+            transition: var(--t);
+            box-shadow: 0 0 28px rgba(37,211,102,.3);
+            white-space: nowrap;
+        }
+        .btn-whatsapp:hover { transform: translateY(-3px); box-shadow: 0 0 48px rgba(37,211,102,.5); }
+
+        /* ── Responsive overrides for this page ── */
+        @media (max-width: 1024px) {
+            .reason-grid  { grid-template-columns: repeat(2, 1fr); }
+            .build-grid   { grid-template-columns: repeat(2, 1fr); }
+            .steps-grid   { grid-template-columns: repeat(2, 1fr); }
+            .steps-grid::before { display: none; }
+        }
+
+        @media (max-width: 768px) {
+            .reason-grid    { grid-template-columns: 1fr; }
+            .build-grid     { grid-template-columns: 1fr; }
+            .pricing-grid   { grid-template-columns: 1fr; }
+            .steps-grid     { grid-template-columns: 1fr; }
+            .checklist-grid { grid-template-columns: 1fr; }
+            .download-wrapper { padding: 40px 24px; }
+            .page-hero      { padding: 120px 22px 60px; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- ===== LOADING SCREEN — identical to index.html ===== -->
+    <div id="loader">
+        <div class="loader-inner">
+            <div class="loader-ring"></div>
+            <div class="loader-logo">
+                <img src="images/mylog.jpg" alt="Anani RM" class="loader-logo-img" />
+                <span>Loading<span class="loader-dots">...</span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== NAVIGATION — identical to index.html ===== -->
+    <nav id="navbar">
+        <div class="nav-container">
+
+            <a href="index.html" class="nav-logo">
+                <img src="images/mylog.jpg" alt="Anani RM Logo" class="nav-logo-img" />
+                <span class="nav-logo-text">RM<span class="accent"></span></span>
+            </a>
+
+            <ul class="nav-links">
+                <li><a href="index.html#home">Home</a></li>
+                <li><a href="index.html#services" class="active-link">Services</a></li>
+                <li><a href="index.html#about">About</a></li>
+                <li><a href="index.html#portfolio">Portfolio</a></li>
+                <li><a href="index.html#testimonials">Reviews</a></li>
+                <li><a href="index.html#contact">Contact</a></li>
+            </ul>
+
+            <div class="nav-right">
+                <a href="https://wa.me/27648412146" target="_blank" class="nav-cta">Let's Talk</a>
+                <button class="hamburger" id="hamburger" aria-label="Open menu">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Slide-Out Menu — identical to index.html -->
+    <div class="mobile-menu" id="mobileMenu">
+        <button class="mobile-close" id="mobileClose" aria-label="Close menu">
+            <i class="fas fa-times"></i>
+        </button>
+        <ul>
+            <li><a href="index.html#home"         class="mobile-link">Home</a></li>
+            <li><a href="index.html#services"     class="mobile-link">Services</a></li>
+            <li><a href="index.html#about"        class="mobile-link">About</a></li>
+            <li><a href="index.html#portfolio"    class="mobile-link">Portfolio</a></li>
+            <li><a href="index.html#testimonials" class="mobile-link">Reviews</a></li>
+            <li><a href="index.html#contact"      class="mobile-link">Contact</a></li>
+        </ul>
+        <a href="https://wa.me/27648412146" target="_blank" class="mobile-whatsapp">
+            <i class="fab fa-whatsapp"></i> Chat on WhatsApp
+        </a>
+    </div>
+    <div class="menu-overlay" id="menuOverlay"></div>
+
+    <!-- Shared particle canvas -->
+    <canvas id="particleCanvas"></canvas>
+
+
+    <!-- ============================================================
+         PAGE HERO
+         The "hook" — grabs attention the moment they land.
+    ============================================================ -->
+    <section class="page-hero">
+        <div class="page-hero-content">
+
+            <!-- Breadcrumb badge -->
+            <div class="hero-badge">
+                <span class="badge-dot"></span>
+                Service · Business Websites
+            </div>
+
+            <h1 class="page-hero-title">
+                Get a <span class="gradient-text">Premium Business Website</span><br>
+                Without the Agency Price Tag
+            </h1>
+
+            <p class="page-hero-subtitle">
+                As an independent South African developer, my overhead is low — and I pass
+                every saving directly to you. You get the same professional, fast, and
+                SEO-ready website a big agency would charge <strong>5× more</strong> to build,
+                without ever sacrificing quality or design.
+            </p>
+
+            <div class="page-hero-buttons">
+                <a href="#get-started" class="btn-primary">
+                    <span>Start My Website</span>
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+                <a href="#download" class="btn-secondary">
+                    <i class="fas fa-file-pdf"></i>
+                    <span>Download Free Guide</span>
+                </a>
+            </div>
+
+        </div>
+    </section>
+
+
+    <!-- ============================================================
+         WHY CHOOSE ME  (Value Proposition)
+         Three concrete reasons — each in a glowing card.
+    ============================================================ -->
+    <section class="value-section">
+        <div class="container">
+
+            <div class="section-header reveal">
+                <span class="section-tag">Why Choose Me</span>
+                <h2 class="section-title">Agency Quality. <span class="gradient-text">Independent Price.</span></h2>
+                <p class="section-subtitle">
+                    Big agencies charge for offices, account managers, and layers of meetings.
+                    I charge only for the work — which means your budget goes directly into building
+                    a better website for your business.
+                </p>
+            </div>
+
+            <div class="reason-grid">
+
+                <!-- Reason 1 -->
+                <div class="reason-card reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="reason-number">5×</div>
+                    <h3>More Affordable Than Agencies</h3>
+                    <p>
+                        No office rent, no middlemen, no inflated quotes. As a solo developer
+                        I keep costs minimal so you get professional results at a fraction of
+                        standard agency rates — perfect for startups and small businesses.
+                    </p>
+                </div>
+
+                <!-- Reason 2 -->
+                <div class="reason-card reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="reason-number">100%</div>
+                    <h3>Custom-Built, Never Templated</h3>
+                    <p>
+                        Every website I build is coded from scratch around your brand, your
+                        goals, and your audience — not a one-size-fits-all WordPress theme
+                        with your logo slapped on top.
+                    </p>
+                </div>
+
+                <!-- Reason 3 -->
+                <div class="reason-card reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="reason-number">1</div>
+                    <h3>Direct Line to Your Developer</h3>
+                    <p>
+                        You work with me personally — no account managers, no delayed emails
+                        between departments. Fast communication, fast revisions, fast results.
+                        WhatsApp me any time.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ============================================================
+         WHAT I BUILD  (Service Catalogue)
+         Six website types — each in a service-card style card.
+    ============================================================ -->
+    <section class="builds-section">
+        <div class="container">
+
+            <div class="section-header reveal">
+                <span class="section-tag">What I Build</span>
+                <h2 class="section-title">Every Type of <span class="gradient-text">Business Website</span></h2>
+                <p class="section-subtitle">
+                    From a simple landing page to a fully functional online store, I cover every
+                    digital touchpoint your business needs.
+                </p>
+            </div>
+
+            <div class="build-grid">
+
+                <!-- Card 1 -->
+                <div class="service-card reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="service-icon"><i class="fas fa-rocket"></i></div>
+                    <h3>Landing Pages</h3>
+                    <p>
+                        High-converting single-page websites designed to capture leads, announce
+                        a product, or promote a specific offer with a clear call-to-action.
+                    </p>
+                    <div class="service-tags">
+                        <span>Conversion</span><span>Fast</span><span>SEO</span>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="service-card featured-service reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="featured-label">🔥 Best Seller</div>
+                    <div class="service-icon"><i class="fas fa-store"></i></div>
+                    <h3>E-Commerce Stores</h3>
+                    <p>
+                        Fully functional online shops with product listings, cart, secure
+                        checkout, and payment gateway integration so you can sell 24/7.
+                    </p>
+                    <div class="service-tags">
+                        <span>Shop</span><span>Payments</span><span>Inventory</span>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="service-card reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="service-icon"><i class="fas fa-building"></i></div>
+                    <h3>Corporate / Company Sites</h3>
+                    <p>
+                        Multi-page professional websites for established businesses — covering
+                        your services, team, testimonials, and contact details in one polished
+                        online presence.
+                    </p>
+                    <div class="service-tags">
+                        <span>Professional</span><span>Multi-Page</span><span>CMS</span>
+                    </div>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="service-card reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="service-icon"><i class="fas fa-utensils"></i></div>
+                    <h3>Local Business Websites</h3>
+                    <p>
+                        Websites tailored for restaurants, salons, clinics, and other
+                        community-facing businesses — with local SEO, maps, hours,
+                        and WhatsApp booking built in.
+                    </p>
+                    <div class="service-tags">
+                        <span>Local SEO</span><span>Maps</span><span>Bookings</span>
+                    </div>
+                </div>
+
+                <!-- Card 5 -->
+                <div class="service-card reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="service-icon"><i class="fas fa-mobile-alt"></i></div>
+                    <h3>Fully Responsive Design</h3>
+                    <p>
+                        Every website I build looks perfect on phones, tablets, and desktops.
+                        Over 70 % of South African internet users browse on mobile — your
+                        site will never let them down.
+                    </p>
+                    <div class="service-tags">
+                        <span>Mobile-First</span><span>All Devices</span><span>Fast Load</span>
+                    </div>
+                </div>
+
+                <!-- Card 6 -->
+                <div class="service-card reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="service-icon seo-icon"><i class="fas fa-chart-line"></i></div>
+                    <h3>SEO-Optimised by Default</h3>
+                    <p>
+                        Every site comes with on-page SEO, fast performance scores, and clean
+                        code that Google can read — so you start ranking without paying for
+                        a separate SEO consultant.
+                    </p>
+                    <div class="service-tags">
+                        <span>Google-Ready</span><span>Schema</span><span>Speed</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ============================================================
+         PRICING COMPARISON
+         Side-by-side card showing agency cost vs my cost.
+    ============================================================ -->
+    <section class="pricing-section">
+        <div class="container">
+
+            <div class="section-header reveal">
+                <span class="section-tag">Transparent Pricing</span>
+                <h2 class="section-title">What Others Charge vs <span class="gradient-text">What I Charge</span></h2>
+                <p class="section-subtitle">
+                    The same deliverable. A completely different price. Here's why you should
+                    choose an independent developer over a traditional agency.
+                </p>
+            </div>
+
+            <div class="pricing-grid reveal">
+
+                <!-- Agency (the "expensive" column) -->
+                <div class="price-card agency-card">
+                    <h3>🏢 Big Design Agency</h3>
+                    <div class="price-amount agency-amount">R25 000+</div>
+                    <p class="price-note">average cost for a 5-page business site</p>
+                    <ul class="price-features">
+                        <li><i class="fas fa-check"></i> Professional outcome</li>
+                        <li><i class="fas fa-times"></i> Long waiting periods (weeks)</li>
+                        <li><i class="fas fa-times"></i> Multiple account managers</li>
+                        <li><i class="fas fa-times"></i> Expensive revision rounds</li>
+                        <li><i class="fas fa-times"></i> High monthly retainer fees</li>
+                        <li><i class="fas fa-times"></i> Cookie-cutter templates</li>
+                        <li><i class="fas fa-times"></i> Difficult to reach directly</li>
+                    </ul>
+                </div>
+
+                <!-- Anani RM (the "best value" column) -->
+                <div class="price-card anani-card">
+                    <div class="price-card-badge">✅ Best Value</div>
+                    <h3>💻 Anani RM (Me)</h3>
+                    <div class="price-amount anani-amount">From R800</div>
+                    <p class="price-note">starting price — final quote based on your needs</p>
+                    <ul class="price-features">
+                        <li><i class="fas fa-check"></i> Same professional quality</li>
+                        <li><i class="fas fa-check"></i> Fast turnaround (days, not weeks)</li>
+                        <li><i class="fas fa-check"></i> Direct WhatsApp communication</li>
+                        <li><i class="fas fa-check"></i> Unlimited revisions during build</li>
+                        <li><i class="fas fa-check"></i> No surprise fees</li>
+                        <li><i class="fas fa-check"></i> 100 % custom design for your brand</li>
+                        <li><i class="fas fa-check"></i> Post-launch support included</li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <!-- Sub-note below the table -->
+            <p style="text-align:center; color:var(--text-lo); font-size:.82rem; margin-top:28px;">
+                * Prices vary based on project complexity. Contact me for a free, no-obligation quote.
+            </p>
+
+        </div>
+    </section>
+
+
+    <!-- ============================================================
+         HOW IT WORKS  (4-step process)
+    ============================================================ -->
+    <section class="process-section" id="get-started">
+        <div class="container">
+
+            <div class="section-header reveal">
+                <span class="section-tag">The Process</span>
+                <h2 class="section-title">From Idea to <span class="gradient-text">Live Website</span></h2>
+                <p class="section-subtitle">A simple, transparent four-step process — no jargon, no confusion.</p>
+            </div>
+
+            <div class="steps-grid">
+
+                <div class="step-card reveal-card">
+                    <div class="step-number">1</div>
+                    <h3>Discovery Call</h3>
+                    <p>
+                        We chat on WhatsApp or a quick call. You tell me about your business,
+                        goals, and what you need. I ask the right questions.
+                    </p>
+                </div>
+
+                <div class="step-card reveal-card">
+                    <div class="step-number">2</div>
+                    <h3>Quote & Agreement</h3>
+                    <p>
+                        I send you a clear, itemised quote. No hidden costs. Once you approve,
+                        we agree on a timeline and you send the content I need.
+                    </p>
+                </div>
+
+                <div class="step-card reveal-card">
+                    <div class="step-number">3</div>
+                    <h3>Design & Build</h3>
+                    <p>
+                        I design and build your website, keeping you updated as each section
+                        is completed. You review, request changes, and I apply them fast.
+                    </p>
+                </div>
+
+                <div class="step-card reveal-card">
+                    <div class="step-number">4</div>
+                    <h3>Launch & Hand-Over</h3>
+                    <p>
+                        Your site goes live! I handle the deployment, do a final quality check,
+                        and hand you over everything — including a short tutorial if needed.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ============================================================
+         PREPARATION CHECKLIST
+         What businesses need to prepare before we start.
+    ============================================================ -->
+    <section class="checklist-section">
+        <div class="container">
+
+            <div class="section-header reveal">
+                <span class="section-tag">Before We Start</span>
+                <h2 class="section-title">What Your Business Needs to <span class="gradient-text">Prepare</span></h2>
+                <p class="section-subtitle">
+                    To build your website quickly and correctly, I'll need a few things from you.
+                    Don't worry — I'll guide you through each one, and some items are optional
+                    depending on your project.
+                </p>
+            </div>
+
+            <div class="checklist-grid">
+
+                <!-- Item 1: Branding -->
+                <div class="checklist-card reveal-card">
+                    <div class="checklist-icon"><i class="fas fa-palette"></i></div>
+                    <div class="checklist-text">
+                        <h4>Your Branding</h4>
+                        <p>Visual identity elements that make your website look "you".</p>
+                        <ul class="checklist-items">
+                            <li><i class="fas fa-circle"></i> Logo file (PNG with transparent background is best)</li>
+                            <li><i class="fas fa-circle"></i> Brand colours (hex codes, or just describe them)</li>
+                            <li><i class="fas fa-circle"></i> Preferred fonts (optional — I can suggest)</li>
+                            <li><i class="fas fa-circle"></i> Any existing design guidelines or style preferences</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Item 2: Content -->
+                <div class="checklist-card reveal-card">
+                    <div class="checklist-icon"><i class="fas fa-file-alt"></i></div>
+                    <div class="checklist-text">
+                        <h4>Your Content</h4>
+                        <p>The words and images that fill your website.</p>
+                        <ul class="checklist-items">
+                            <li><i class="fas fa-circle"></i> Written text for each page (or bullet points — I can write it)</li>
+                            <li><i class="fas fa-circle"></i> High-quality photos of your business, products, or team</li>
+                            <li><i class="fas fa-circle"></i> Your business description ("About Us" text)</li>
+                            <li><i class="fas fa-circle"></i> Product / service list with descriptions and prices (if applicable)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Item 3: Domain -->
+                <div class="checklist-card reveal-card">
+                    <div class="checklist-icon"><i class="fas fa-globe"></i></div>
+                    <div class="checklist-text">
+                        <h4>Domain Name Choice</h4>
+                        <p>Your website's address on the internet (e.g. <em>www.yourbusiness.co.za</em>).</p>
+                        <ul class="checklist-items">
+                            <li><i class="fas fa-circle"></i> Think of 2–3 options in case your first choice is taken</li>
+                            <li><i class="fas fa-circle"></i> Keep it short, memorable, and related to your business name</li>
+                            <li><i class="fas fa-circle"></i> Prefer <strong>.co.za</strong> for local SA businesses, <strong>.com</strong> for international</li>
+                            <li><i class="fas fa-circle"></i> I can register it for you or guide you to do it yourself</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Item 4: Goals -->
+                <div class="checklist-card reveal-card">
+                    <div class="checklist-icon"><i class="fas fa-bullseye"></i></div>
+                    <div class="checklist-text">
+                        <h4>Your Goals &amp; Target Audience</h4>
+                        <p>Knowing who the site is for determines every design decision.</p>
+                        <ul class="checklist-items">
+                            <li><i class="fas fa-circle"></i> Who is your ideal customer? (age, location, needs)</li>
+                            <li><i class="fas fa-circle"></i> What is the ONE main thing you want visitors to do?</li>
+                            <li><i class="fas fa-circle"></i> Do you need bookings, enquiry forms, or online sales?</li>
+                            <li><i class="fas fa-circle"></i> Any competitor websites you admire? (for style reference)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Item 5: Contact / Business Details -->
+                <div class="checklist-card reveal-card">
+                    <div class="checklist-icon"><i class="fas fa-id-badge"></i></div>
+                    <div class="checklist-text">
+                        <h4>Business Contact Details</h4>
+                        <p>All the ways customers can reach you.</p>
+                        <ul class="checklist-items">
+                            <li><i class="fas fa-circle"></i> Phone / WhatsApp number</li>
+                            <li><i class="fas fa-circle"></i> Business email address</li>
+                            <li><i class="fas fa-circle"></i> Physical address or service area</li>
+                            <li><i class="fas fa-circle"></i> Social media profile links (Facebook, Instagram, etc.)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Item 6: Hosting (optional) -->
+                <div class="checklist-card reveal-card">
+                    <div class="checklist-icon"><i class="fas fa-server"></i></div>
+                    <div class="checklist-text">
+                        <h4>Web Hosting (Optional)</h4>
+                        <p>Where your website lives on the internet. I handle this for you if needed.</p>
+                        <ul class="checklist-items">
+                            <li><i class="fas fa-circle"></i> I can recommend affordable South African hosting providers</li>
+                            <li><i class="fas fa-circle"></i> Or I can host small sites for free using modern platforms</li>
+                            <li><i class="fas fa-circle"></i> If you already have hosting, just share your login details securely</li>
+                            <li><i class="fas fa-circle"></i> Monthly hosting costs will be explained upfront — no surprises</li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ============================================================
+         PDF DOWNLOAD
+         The star CTA of this page — the free business website guide.
+    ============================================================ -->
+    <section class="download-section" id="download">
+        <div class="container">
+
+            <div class="download-wrapper reveal">
+
+                <div class="download-icon">
+                    <i class="fas fa-file-pdf"></i>
+                </div>
+
+                <h2>
+                    Free Download: <span class="gradient-text">The Ultimate Business Website Checklist</span>
+                </h2>
+
+                <p>
+                    Get my complete <strong>"Website Rules &amp; Guidelines"</strong> PDF — a practical,
+                    no-fluff guide covering everything your business website must have to succeed online.
+                    Perfect for first-time website owners and existing businesses looking to improve.
+                </p>
+
+                <!-- Sneak peek of what's inside -->
+                <div class="pdf-contents">
+                    <span class="pdf-tag"><i class="fas fa-check-circle"></i> Must-have pages checklist</span>
+                    <span class="pdf-tag"><i class="fas fa-check-circle"></i> SEO basics explained</span>
+                    <span class="pdf-tag"><i class="fas fa-check-circle"></i> Content writing tips</span>
+                    <span class="pdf-tag"><i class="fas fa-check-circle"></i> Mobile-readiness test</span>
+                    <span class="pdf-tag"><i class="fas fa-check-circle"></i> Domain name guide</span>
+                    <span class="pdf-tag"><i class="fas fa-check-circle"></i> Launch-day checklist</span>
+                    <span class="pdf-tag"><i class="fas fa-check-circle"></i> Security essentials</span>
+                    <span class="pdf-tag"><i class="fas fa-check-circle"></i> Maintenance schedule</span>
+                </div>
+
+                <!--
+                    ✅ HOW TO LINK YOUR PDF:
+                    1. Save your PDF in the same folder as this HTML file.
+                    2. Name the file exactly:  website-rules-and-guidelines.pdf
+                    3. The button below will automatically download it when clicked.
+                    4. If you rename the file, update the href="..." below to match.
+                -->
+                <a href="documents/website-rules-and-guidelines.pdf" 
+                    download="Website_Rules_and_Guidelines_by_Anani_RM.pdf" 
+                    class="btn-download">
+                    <i class="fas fa-download"></i>
+                    <span>Download Free PDF Guide</span>
+                </a>
+ 
+                <p class="download-note">
+                    📄 PDF format · Free · No email required · Instant download
+                </p>
+
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ============================================================
+         FINAL CTA  — Push them to WhatsApp or the contact form.
+    ============================================================ -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-inner reveal">
+
+                <span class="section-tag">Ready to Start?</span>
+
+                <h2>
+                    Let's Build Your <span class="gradient-text">Dream Website</span> Today
+                </h2>
+
+                <p>
+                    Drop me a message on WhatsApp and I'll reply within the hour.
+                    Tell me about your business, your budget, and your goals —
+                    and I'll send you a free, no-obligation quote.
+                </p>
+
+                <div class="cta-buttons">
+                    <a href="https://wa.me/27648412146?text=Hi%20Anani%2C%20I%20want%20a%20business%20website%20quote%20please"
+                       target="_blank" class="btn-whatsapp">
+                        <i class="fab fa-whatsapp"></i>
+                        <span>WhatsApp Me Now</span>
+                    </a>
+                    <a href="index.html#contact" class="btn-primary">
+                        <span>Send a Message</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ============================================================
+         FOOTER — identical to index.html
+    ============================================================ -->
+    <footer class="footer">
+        <div class="container">
+
+            <div class="footer-grid">
+
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <img src="images/mylog.jpg" alt="Anani RM" class="footer-logo-img" />
+                        Anani<span class="accent">.</span>
+                    </div>
+                    <p>Crafting premium digital experiences and AI solutions from South Africa to the world.</p>
+                    <div class="social-row">
+                        <a href="https://github.com/ramagoma-glitch"      target="_blank" class="s-icon"><i class="fab fa-github"></i></a>
+                        <a href="https://www.linkedin.com/in/anani-ramagoma" target="_blank" class="s-icon"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="https://twitter.com/AnaniRamagoma"        target="_blank" class="s-icon"><i class="fab fa-twitter"></i></a>
+                        <a href="https://www.instagram.com/anani.rm"       target="_blank" class="s-icon"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.facebook.com/AnaniRM"         target="_blank" class="s-icon facebook-icon"><i class="fab fa-facebook-f"></i></a>
+                    </div>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html#home">Home</a></li>
+                        <li><a href="index.html#services">Services</a></li>
+                        <li><a href="index.html#about">About</a></li>
+                        <li><a href="index.html#portfolio">Portfolio</a></li>
+                        <li><a href="index.html#contact">Contact</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+    <h4>Services</h4>
+    <ul>
+        <li><a href="business-websites.html">Business Websites</a></li>
+        <li><a href="cv-services.html">Curriculum Vitae <b>(CV)</b></a></li>
+        <li><a href="chatbots.html">AI Chatbots</a></li>
+        <li><a href="website-RedesingAndDesing.html">Website Redesign</a></li>
+        <li><a href="WhatsAppIntegration.html">WhatsApp Integration</a></li>
+        <li><a href="SEO-Optimization.html">SEO Optimization</a></li>
+        <li><a href="academic-applications.html">Academic Application</a></li>
+    </ul>
+</div>
+
+                <div class="footer-col">
+                    <h4>Contact</h4>
+                    <p><i class="fab fa-whatsapp"></i>+27 64 841 2146</p>
+                    <p><i class="fas fa-envelope"></i>Ramagoma212@gmail.com</p>
+                    <p><i class="fas fa-map-marker-alt"></i>Thohoyandou, Limpopo, SA</p>
+                </div>
+
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; <span id="currentYear"></span> Ramagoma Muthuhadini <b>Anani</b>. All rights reserved. Built with ❤️ in South Africa.</p>
+                 <div class="footer-legal">
+                    <a href="documents/privacy.pdf" target="_blank">Privacy Policy</a>
+                    <span>·</span>
+                    <a href="documents/terms.pdf" target="_blank">Terms of Service</a>
+                </div>
+            </div>
+
+        </div>
+    </footer>
+
+    <!-- Back-to-top button — identical to index.html -->
+    <button id="backToTop" aria-label="Back to top">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+
+    <!--
+        ✅ SHARED SCRIPT:
+        Uses the exact same script.js as index.html.
+        All features (loader, particles, nav, scroll reveal,
+        mobile menu, back-to-top) work automatically.
+    -->
+    <script src="script.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,2233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Grade 12 Academic Success | Anani RM — Master Your Matric</title>
+    <meta name="description"
+          content="Everything your Grade 12 learner needs to pass with distinction. Free study materials, past NSC exam papers, YouTube lesson directories, online and local tutors. Negotiable rates by Anani RM." />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600&display=swap"
+          rel="stylesheet" />
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <link rel="stylesheet" href="style.css" />
+
+    <!-- ============================================================
+         PAGE-SPECIFIC STYLES
+         Electric blue / indigo academic theme.
+         Distinct from every other service page on the site.
+    ============================================================ -->
+    <style>
+
+        /* ── Matric page accent palette ──────────────────────────────
+           Electric blue + indigo = academic trust, clarity, focus.
+        ──────────────────────────────────────────────────────────── */
+        :root {
+            --mat-blue:    #3b82f6;
+            --mat-indigo:  #6366f1;
+            --mat-sky:     #38bdf8;
+            --mat-green:   #22c55e;
+            --mat-amber:   #f59e0b;
+            --mat-red:     #ef4444;
+            --grad-mat:    linear-gradient(135deg, #3b82f6, #6366f1);
+            --grad-mat-soft: linear-gradient(135deg,
+                              rgba(59,130,246,.08) 0%,
+                              rgba(99,102,241,.05) 100%);
+        }
+
+        /* ── Page Hero ──────────────────────────────────────────────── */
+        .page-hero {
+            min-height: 75vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 140px 24px 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page-hero-content { max-width: 860px; z-index: 1; }
+
+        .hero-badge-matric {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 18px;
+            background: rgba(59,130,246,.08);
+            border: 1px solid rgba(59,130,246,.25);
+            color: var(--mat-blue);
+            font-size: .8rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            border-radius: 100px;
+            margin-bottom: 24px;
+            animation: fadeUp .7s ease both;
+        }
+
+        .badge-dot-blue {
+            width: 8px; height: 8px;
+            background: var(--mat-blue);
+            border-radius: 50%;
+            animation: pulseDotBlue 2s ease infinite;
+            flex-shrink: 0;
+        }
+        @keyframes pulseDotBlue {
+            0%,100% { box-shadow: 0 0 0 0 rgba(59,130,246,.5); }
+            50%      { box-shadow: 0 0 0 7px rgba(59,130,246,0); }
+        }
+
+        .page-hero-title {
+            font-family: var(--f-display);
+            font-size: clamp(1.9rem, 4.2vw, 3.5rem);
+            font-weight: 800;
+            line-height: 1.12;
+            margin-bottom: 22px;
+            animation: fadeUp .7s .1s ease both;
+        }
+
+        .gradient-text-mat {
+            background: var(--grad-mat);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-hero-subtitle {
+            color: var(--text-mid);
+            font-size: clamp(.9rem, 1.8vw, 1.1rem);
+            line-height: 1.9;
+            margin-bottom: 28px;
+            max-width: 740px;
+            margin-left: auto;
+            margin-right: auto;
+            animation: fadeUp .7s .2s ease both;
+        }
+
+        .hero-tag-pills {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 32px;
+            animation: fadeUp .7s .25s ease both;
+        }
+
+        .hero-tag-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 14px;
+            background: rgba(59,130,246,.07);
+            border: 1px solid rgba(59,130,246,.2);
+            color: var(--mat-blue);
+            font-size: .78rem;
+            font-weight: 600;
+            border-radius: 100px;
+        }
+
+        .page-hero-buttons {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeUp .7s .3s ease both;
+        }
+
+        /* Blue ambient glow */
+        .page-hero::before {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 700px; height: 420px;
+            background: radial-gradient(ellipse,
+                rgba(59,130,246,.08) 0%,
+                rgba(99,102,241,.04) 55%,
+                transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .btn-whatsapp-hero {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            padding: 14px 32px;
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: #fff;
+            font-family: var(--f-body);
+            font-weight: 700;
+            font-size: .95rem;
+            border-radius: 100px;
+            text-decoration: none;
+            transition: var(--t);
+            box-shadow: 0 0 30px rgba(37,211,102,.3);
+            white-space: nowrap;
+        }
+        .btn-whatsapp-hero:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 50px rgba(37,211,102,.5);
+        }
+
+        .btn-ghost {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 32px;
+            background: transparent;
+            color: var(--text-hi);
+            font-family: var(--f-body);
+            font-weight: 600;
+            font-size: .95rem;
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            text-decoration: none;
+            transition: var(--t);
+            white-space: nowrap;
+        }
+        .btn-ghost:hover {
+            border-color: var(--mat-blue);
+            color: var(--mat-blue);
+            background: rgba(59,130,246,.05);
+            transform: translateY(-3px);
+        }
+
+        /* Trust stats bar */
+        .trust-bar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            margin-top: 52px;
+            padding-top: 32px;
+            border-top: 1px solid var(--border);
+            animation: fadeUp .7s .4s ease both;
+        }
+        .trust-item { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
+        .trust-num {
+            font-family: var(--f-display);
+            font-size: 1.6rem;
+            font-weight: 800;
+            background: var(--grad-mat);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+        }
+        .trust-label { font-size: .72rem; color: var(--text-lo); text-transform: uppercase; letter-spacing: 1px; }
+        .trust-divider { width: 1px; height: 36px; background: var(--border); }
+
+        /* ── Quick Navigation Jump Links ────────────────────────────── */
+        .quick-nav {
+            background: var(--bg-layer);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            padding: 20px 0;
+            position: sticky;
+            top: 70px;
+            z-index: 100;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
+        .quick-nav-inner {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            padding: 0 24px;
+        }
+
+        .nav-jump-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 16px;
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            color: var(--text-mid);
+            font-family: var(--f-body);
+            font-size: .8rem;
+            font-weight: 600;
+            border-radius: 100px;
+            text-decoration: none;
+            transition: var(--t);
+            white-space: nowrap;
+        }
+        .nav-jump-btn:hover {
+            background: var(--grad-mat);
+            border-color: transparent;
+            color: #fff;
+            transform: translateY(-2px);
+        }
+        .nav-jump-btn i { font-size: .7rem; }
+
+        /* ── Shared Section Base ────────────────────────────────────── */
+        .resource-section { background: linear-gradient(180deg, var(--bg-base) 0%, var(--bg-layer) 100%); }
+        .papers-section   { background: var(--bg-base); }
+        .video-section    { background: linear-gradient(180deg, var(--bg-layer) 0%, var(--bg-base) 100%); }
+        .online-tutor-section { background: var(--bg-base); }
+        .local-tutor-section  { background: linear-gradient(180deg, var(--bg-layer) 0%, var(--bg-base) 100%); }
+
+        /* ── Generic Resource Card ──────────────────────────────────── */
+        .resource-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 22px;
+        }
+
+        .resource-card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 30px 26px;
+            position: relative;
+            overflow: hidden;
+            transition: var(--t);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+        }
+        .resource-card:hover {
+            transform: translateY(-7px);
+            border-color: rgba(59,130,246,.3);
+            background: var(--bg-glass-hov);
+        }
+        .resource-card:hover .card-glow { opacity: 1; }
+
+        .res-icon {
+            width: 50px; height: 50px;
+            background: linear-gradient(135deg, rgba(59,130,246,.15), rgba(99,102,241,.15));
+            border: 1px solid rgba(59,130,246,.22);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            color: var(--mat-blue);
+            margin-bottom: 16px;
+            transition: var(--t);
+            flex-shrink: 0;
+        }
+        .resource-card:hover .res-icon { transform: scale(1.1); }
+
+        /* Color variants for different section icons */
+        .res-icon.green  { color: var(--mat-green);  background: linear-gradient(135deg, rgba(34,197,94,.12), rgba(22,163,74,.1)); border-color: rgba(34,197,94,.2); }
+        .res-icon.amber  { color: var(--mat-amber);  background: linear-gradient(135deg, rgba(245,158,11,.12), rgba(217,119,6,.1)); border-color: rgba(245,158,11,.2); }
+        .res-icon.red    { color: var(--mat-red);    background: linear-gradient(135deg, rgba(239,68,68,.1), rgba(220,38,38,.08)); border-color: rgba(239,68,68,.18); }
+        .res-icon.sky    { color: var(--mat-sky);    background: linear-gradient(135deg, rgba(56,189,248,.12), rgba(14,165,233,.1)); border-color: rgba(56,189,248,.2); }
+        .res-icon.purple { color: #a78bfa;           background: linear-gradient(135deg, rgba(167,139,250,.12), rgba(139,92,246,.1)); border-color: rgba(167,139,250,.2); }
+
+        .resource-card h3 {
+            font-family: var(--f-display);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-hi);
+            margin-bottom: 8px;
+        }
+
+        .resource-card > p {
+            font-size: .85rem;
+            color: var(--text-mid);
+            line-height: 1.72;
+            margin-bottom: 14px;
+            flex: 1;
+        }
+
+        /* Subject coverage tags */
+        .res-tags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+        }
+
+        .res-tag {
+            padding: 3px 9px;
+            background: rgba(59,130,246,.07);
+            border: 1px solid rgba(59,130,246,.15);
+            color: var(--mat-blue);
+            font-size: .68rem;
+            font-weight: 600;
+            border-radius: 100px;
+        }
+
+        /* External visit button */
+        .btn-ext {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 18px;
+            background: var(--grad-mat);
+            color: #fff;
+            font-family: var(--f-body);
+            font-size: .82rem;
+            font-weight: 700;
+            border-radius: 100px;
+            text-decoration: none;
+            transition: var(--t);
+            align-self: flex-start;
+            box-shadow: 0 0 18px rgba(59,130,246,.2);
+        }
+        .btn-ext:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 28px rgba(59,130,246,.4);
+        }
+
+        /* ── Exam Papers Cards ──────────────────────────────────────── */
+        .exam-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 22px;
+        }
+
+        .exam-card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 28px 24px;
+            position: relative;
+            overflow: hidden;
+            transition: var(--t);
+            display: flex;
+            flex-direction: column;
+        }
+        .exam-card:hover {
+            transform: translateY(-7px);
+            border-color: rgba(59,130,246,.3);
+            background: var(--bg-glass-hov);
+        }
+        .exam-card:hover .card-glow { opacity: 1; }
+
+        /* Official badge for DBE */
+        .exam-official-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            background: var(--grad-mat);
+            color: #fff;
+            font-size: .65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 100px;
+            margin-bottom: 12px;
+            align-self: flex-start;
+        }
+
+        .exam-province {
+            font-size: .7rem;
+            font-weight: 700;
+            color: var(--mat-blue);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 6px;
+        }
+
+        .exam-card h3 {
+            font-family: var(--f-display);
+            font-size: .95rem;
+            font-weight: 700;
+            color: var(--text-hi);
+            margin-bottom: 8px;
+        }
+
+        .exam-card > p {
+            font-size: .83rem;
+            color: var(--text-mid);
+            line-height: 1.68;
+            margin-bottom: 16px;
+            flex: 1;
+        }
+
+        .exam-years {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .year-tag {
+            padding: 2px 8px;
+            background: rgba(255,255,255,.04);
+            border: 1px solid var(--border);
+            color: var(--text-lo);
+            font-size: .68rem;
+            font-weight: 600;
+            border-radius: 6px;
+        }
+
+        /* ── YouTube Channel Cards ──────────────────────────────────── */
+        .youtube-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 22px;
+        }
+
+        .youtube-card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 28px 24px;
+            position: relative;
+            overflow: hidden;
+            transition: var(--t);
+        }
+        .youtube-card:hover {
+            transform: translateY(-7px);
+            border-color: rgba(59,130,246,.3);
+            background: var(--bg-glass-hov);
+        }
+        .youtube-card:hover .card-glow { opacity: 1; }
+
+        .subject-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .subject-icon {
+            width: 42px; height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .subject-header h3 {
+            font-family: var(--f-display);
+            font-size: .95rem;
+            font-weight: 700;
+            color: var(--text-hi);
+        }
+
+        .subject-header span {
+            font-size: .72rem;
+            color: var(--text-lo);
+            display: block;
+            margin-top: 2px;
+        }
+
+        /* Individual channel listing inside the card */
+        .channel-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .channel-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 10px 12px;
+            background: rgba(255,255,255,.03);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            transition: var(--t);
+        }
+        .channel-item:hover {
+            border-color: rgba(59,130,246,.25);
+            background: rgba(59,130,246,.04);
+        }
+
+        .channel-info { display: flex; align-items: center; gap: 10px; }
+
+        .channel-thumb {
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, rgba(59,130,246,.2), rgba(99,102,241,.2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .75rem;
+            color: var(--mat-blue);
+            flex-shrink: 0;
+            font-weight: 800;
+            font-family: var(--f-display);
+        }
+
+        .channel-name {
+            font-size: .82rem;
+            font-weight: 600;
+            color: var(--text-hi);
+        }
+
+        .channel-desc {
+            font-size: .72rem;
+            color: var(--text-lo);
+            margin-top: 2px;
+        }
+
+        .channel-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            background: rgba(255,0,0,.1);
+            border: 1px solid rgba(255,0,0,.2);
+            color: #f87171;
+            font-size: .7rem;
+            font-weight: 700;
+            border-radius: 100px;
+            text-decoration: none;
+            transition: var(--t);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .channel-link:hover {
+            background: rgba(255,0,0,.18);
+            transform: scale(1.05);
+        }
+        .channel-link i { font-size: .65rem; }
+
+        /* ── Online Tutor Cards ─────────────────────────────────────── */
+        .online-tutor-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 22px;
+        }
+
+        .online-tutor-card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 30px 26px;
+            position: relative;
+            overflow: hidden;
+            transition: var(--t);
+            display: flex;
+            flex-direction: column;
+        }
+        .online-tutor-card:hover {
+            transform: translateY(-7px);
+            border-color: rgba(59,130,246,.3);
+            background: var(--bg-glass-hov);
+        }
+        .online-tutor-card:hover .card-glow { opacity: 1; }
+
+        .tutor-platform-logo {
+            width: 52px; height: 52px;
+            background: linear-gradient(135deg, rgba(59,130,246,.15), rgba(99,102,241,.15));
+            border: 1px solid rgba(59,130,246,.22);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            color: var(--mat-blue);
+            margin-bottom: 16px;
+            font-family: var(--f-display);
+            font-weight: 800;
+        }
+
+        .online-tutor-card h3 {
+            font-family: var(--f-display);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-hi);
+            margin-bottom: 6px;
+        }
+
+        .online-tutor-card > p {
+            font-size: .85rem;
+            color: var(--text-mid);
+            line-height: 1.72;
+            margin-bottom: 14px;
+            flex: 1;
+        }
+
+        .tutor-subjects {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .tutor-subj-tag {
+            padding: 3px 9px;
+            background: rgba(59,130,246,.06);
+            border: 1px solid rgba(59,130,246,.14);
+            color: var(--mat-blue);
+            font-size: .68rem;
+            font-weight: 600;
+            border-radius: 100px;
+        }
+
+        /* ── Local Tutor Section ────────────────────────────────────── */
+        .local-tutor-intro {
+            display: flex;
+            align-items: flex-start;
+            gap: 18px;
+            padding: 24px 28px;
+            background: rgba(245,158,11,.06);
+            border: 1px solid rgba(245,158,11,.2);
+            border-radius: 16px;
+            margin-bottom: 36px;
+        }
+
+        .local-tutor-intro i {
+            color: var(--mat-amber);
+            font-size: 1.2rem;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .local-tutor-intro p {
+            font-size: .88rem;
+            color: var(--text-mid);
+            line-height: 1.75;
+        }
+
+        .local-tutor-intro strong { color: var(--text-hi); }
+
+        /* Grid for local tutor cards */
+        .local-tutor-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 22px;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           LOCAL TUTOR CARD — TEMPLATE STRUCTURE
+           ═══════════════════════════════════════════════════════════════
+           This card is the base template for every local tutor.
+           CSS is defined once here so all duplicates look identical.
+        ═══════════════════════════════════════════════════════════════ */
+        .local-tutor-card {
+            background: var(--bg-glass);
+            border: 1px solid rgba(59,130,246,.2);
+            border-radius: 20px;
+            padding: 30px 26px;
+            position: relative;
+            overflow: hidden;
+            transition: var(--t);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .local-tutor-card:hover {
+            transform: translateY(-7px);
+            border-color: rgba(59,130,246,.4);
+            background: var(--bg-glass-hov);
+            box-shadow: 0 0 40px rgba(59,130,246,.08);
+        }
+        .local-tutor-card:hover .card-glow { opacity: 1; }
+
+        /* Tutor avatar circle with initials */
+        .tutor-avatar {
+            width: 68px; height: 68px;
+            background: var(--grad-mat);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--f-display);
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 14px;
+            box-shadow: 0 0 24px rgba(59,130,246,.3);
+            flex-shrink: 0;
+        }
+
+        .tutor-name {
+            font-family: var(--f-display);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-hi);
+            margin-bottom: 4px;
+        }
+
+        .tutor-area {
+            font-size: .75rem;
+            color: var(--mat-blue);
+            font-weight: 600;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            justify-content: center;
+        }
+
+        .tutor-area i { font-size: .7rem; }
+
+        .tutor-subjects-local {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 14px;
+        }
+
+        .tutor-subj-local {
+            padding: 3px 10px;
+            background: rgba(59,130,246,.07);
+            border: 1px solid rgba(59,130,246,.15);
+            color: var(--mat-blue);
+            font-size: .7rem;
+            font-weight: 600;
+            border-radius: 100px;
+        }
+
+        .tutor-rate {
+            font-size: .82rem;
+            color: var(--text-mid);
+            margin-bottom: 18px;
+        }
+
+        .tutor-rate strong { color: var(--text-hi); }
+
+        /* WhatsApp contact button for each tutor */
+        .btn-tutor-wa {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: #fff;
+            font-family: var(--f-body);
+            font-size: .85rem;
+            font-weight: 700;
+            border-radius: 100px;
+            text-decoration: none;
+            transition: var(--t);
+            width: 100%;
+            margin-top: auto;
+            box-shadow: 0 0 16px rgba(37,211,102,.2);
+        }
+        .btn-tutor-wa:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 28px rgba(37,211,102,.4);
+        }
+
+        /* "Coming Soon" placeholder card variant */
+        .local-tutor-card.placeholder-card {
+            border-style: dashed;
+            border-color: rgba(59,130,246,.15);
+            opacity: .55;
+        }
+
+        .placeholder-label {
+            font-size: .72rem;
+            color: var(--mat-blue);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        /* ── Negotiation Note (shared style) ────────────────────────── */
+        .negotiation-note {
+            background: var(--grad-mat-soft);
+            border: 1px solid rgba(59,130,246,.2);
+            border-radius: 20px;
+            padding: 32px 36px;
+            display: flex;
+            gap: 22px;
+            align-items: flex-start;
+            max-width: 900px;
+            margin: 40px auto 0;
+        }
+
+        .note-icon-wrap {
+            width: 56px; height: 56px;
+            background: var(--grad-mat);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            flex-shrink: 0;
+            box-shadow: 0 0 24px rgba(59,130,246,.3);
+        }
+
+        .negotiation-note h4 {
+            font-family: var(--f-display);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--mat-blue);
+            margin-bottom: 8px;
+        }
+
+        .negotiation-note p {
+            font-size: .88rem;
+            color: var(--text-mid);
+            line-height: 1.8;
+        }
+
+        .negotiation-note strong { color: var(--text-hi); }
+
+        /* ── Final CTA ──────────────────────────────────────────────── */
+        .final-cta-section {
+            background: var(--bg-base);
+            padding: 100px 0;
+        }
+
+        .final-cta-wrap {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+            background: var(--grad-mat-soft);
+            border: 1px solid rgba(59,130,246,.25);
+            border-radius: 28px;
+            padding: 64px 48px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .final-cta-wrap::before,
+        .final-cta-wrap::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .final-cta-wrap::before {
+            width: 320px; height: 320px;
+            background: radial-gradient(circle, rgba(59,130,246,.1) 0%, transparent 70%);
+            top: -100px; right: -60px;
+        }
+        .final-cta-wrap::after {
+            width: 280px; height: 280px;
+            background: radial-gradient(circle, rgba(99,102,241,.08) 0%, transparent 70%);
+            bottom: -80px; left: -40px;
+        }
+
+        .cta-mat-icon {
+            width: 80px; height: 80px;
+            background: var(--grad-mat);
+            border-radius: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: #fff;
+            margin: 0 auto 26px;
+            box-shadow: 0 0 40px rgba(59,130,246,.4);
+            position: relative;
+            z-index: 1;
+            animation: floatMatIcon 3s ease-in-out infinite;
+        }
+        @keyframes floatMatIcon {
+            0%,100% { transform: translateY(0); }
+            50%      { transform: translateY(-8px); }
+        }
+
+        .final-cta-wrap h2 {
+            font-family: var(--f-display);
+            font-size: clamp(1.5rem, 3vw, 2.2rem);
+            font-weight: 800;
+            margin-bottom: 14px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .final-cta-wrap > p {
+            color: var(--text-mid);
+            font-size: .93rem;
+            line-height: 1.85;
+            max-width: 580px;
+            margin: 0 auto 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .wa-message-preview {
+            background: rgba(37,211,102,.06);
+            border: 1px solid rgba(37,211,102,.15);
+            border-radius: 14px;
+            padding: 14px 20px;
+            margin: 0 auto 30px;
+            max-width: 640px;
+            font-size: .83rem;
+            color: #57e89a;
+            text-align: left;
+            position: relative;
+            z-index: 1;
+            font-style: italic;
+            line-height: 1.65;
+        }
+
+        .wa-message-preview::before {
+            content: '📩  Your pre-filled message:';
+            font-style: normal;
+            font-weight: 700;
+            color: #57e89a;
+            display: block;
+            font-size: .7rem;
+            margin-bottom: 7px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-wa-large {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 18px 44px;
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: #fff;
+            font-family: var(--f-body);
+            font-weight: 800;
+            font-size: 1.05rem;
+            border-radius: 100px;
+            text-decoration: none;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 0 50px rgba(37,211,102,.4);
+            transition: var(--t);
+            white-space: nowrap;
+        }
+        .btn-wa-large i { font-size: 1.3rem; }
+        .btn-wa-large:hover {
+            transform: translateY(-4px) scale(1.03);
+            box-shadow: 0 0 70px rgba(37,211,102,.6);
+        }
+
+        .cta-footnote {
+            font-size: .75rem;
+            color: var(--text-lo);
+            margin-top: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .facebook-icon:hover {
+            background: #1877f2 !important;
+            box-shadow: 0 0 18px rgba(24,119,242,.4) !important;
+        }
+
+        /* ── Responsive ─────────────────────────────────────────────── */
+        @media (max-width: 1024px) {
+            .resource-grid      { grid-template-columns: repeat(2, 1fr); }
+            .exam-grid          { grid-template-columns: repeat(2, 1fr); }
+            .youtube-grid       { grid-template-columns: repeat(2, 1fr); }
+            .online-tutor-grid  { grid-template-columns: repeat(2, 1fr); }
+            .local-tutor-grid   { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .page-hero          { padding: 120px 22px 60px; }
+            .resource-grid      { grid-template-columns: 1fr; }
+            .exam-grid          { grid-template-columns: 1fr; }
+            .youtube-grid       { grid-template-columns: 1fr; }
+            .online-tutor-grid  { grid-template-columns: 1fr; }
+            .local-tutor-grid   { grid-template-columns: 1fr; }
+            .negotiation-note   { flex-direction: column; gap: 14px; }
+            .final-cta-wrap     { padding: 40px 22px; }
+            .trust-bar          { gap: 22px; }
+            .trust-divider      { display: none; }
+            .btn-wa-large       { padding: 16px 28px; font-size: .9rem; }
+            .quick-nav          { top: 60px; }
+            section             { padding: 70px 0; }
+        }
+
+        @media (max-width: 480px) {
+            .page-hero-title    { font-size: 1.85rem; }
+            .local-tutor-intro  { flex-direction: column; gap: 10px; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- ===== LOADING SCREEN — identical across all pages ===== -->
+    <div id="loader">
+        <div class="loader-inner">
+            <div class="loader-ring"></div>
+            <div class="loader-logo">
+                <img src="images/mylog.jpg" alt="Anani RM" class="loader-logo-img" />
+                <span>Loading<span class="loader-dots">...</span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== NAVIGATION ===== -->
+    <nav id="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">
+                <img src="images/mylog.jpg" alt="Anani RM Logo" class="nav-logo-img" />
+                <span class="nav-logo-text">Anani<span class="accent">.</span></span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html#home">Home</a></li>
+                <li><a href="index.html#services" class="active-link">Services</a></li>
+                <li><a href="index.html#about">About</a></li>
+                <li><a href="index.html#portfolio">Portfolio</a></li>
+                <li><a href="index.html#testimonials">Reviews</a></li>
+                <li><a href="index.html#contact">Contact</a></li>
+            </ul>
+            <div class="nav-right">
+                <a href="https://wa.me/27648412146" target="_blank" class="nav-cta">Let's Talk</a>
+                <button class="hamburger" id="hamburger" aria-label="Open menu">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <button class="mobile-close" id="mobileClose" aria-label="Close menu">
+            <i class="fas fa-times"></i>
+        </button>
+        <ul>
+            <li><a href="index.html#home"         class="mobile-link">Home</a></li>
+            <li><a href="index.html#services"     class="mobile-link">Services</a></li>
+            <li><a href="index.html#about"        class="mobile-link">About</a></li>
+            <li><a href="index.html#portfolio"    class="mobile-link">Portfolio</a></li>
+            <li><a href="index.html#testimonials" class="mobile-link">Reviews</a></li>
+            <li><a href="index.html#contact"      class="mobile-link">Contact</a></li>
+        </ul>
+        <a href="https://wa.me/27648412146" target="_blank" class="mobile-whatsapp">
+            <i class="fab fa-whatsapp"></i> Chat on WhatsApp
+        </a>
+    </div>
+    <div class="menu-overlay" id="menuOverlay"></div>
+
+    <canvas id="particleCanvas"></canvas>
+
+
+    <!-- ============================================================
+         PAGE HERO
+    ============================================================ -->
+    <section class="page-hero">
+        <div class="page-hero-content">
+
+            <div class="hero-badge-matric">
+                <span class="badge-dot-blue"></span>
+                📚 Grade 12 Resource Hub · NSC Support
+            </div>
+
+            <h1 class="page-hero-title">
+                Master Your Matric:<br>
+                <span class="gradient-text-mat">Elite Grade 12 Resources &amp; Tutoring</span>
+            </h1>
+
+            <p class="page-hero-subtitle">
+                As a parent, you want the absolute best for your child's future.
+                This page brings together everything your learner needs — free study
+                materials, official exam papers, curated YouTube lessons, trusted online
+                tutors, and local 1-on-1 support — all in one place, with negotiable
+                and budget-friendly rates.
+            </p>
+
+            <div class="hero-tag-pills">
+                <span class="hero-tag-pill"><i class="fas fa-file-alt"></i> Exam Papers</span>
+                <span class="hero-tag-pill"><i class="fas fa-user-graduate"></i> 1-on-1 Tutoring</span>
+                <span class="hero-tag-pill"><i class="fas fa-book-open"></i> Study Guides</span>
+                <span class="hero-tag-pill"><i class="fab fa-youtube"></i> Video Lessons</span>
+            </div>
+
+            <div class="page-hero-buttons">
+                <a href="https://wa.me/27648412146?text=Hi%20Anani!%20I%20need%20tutoring%20support%20for%20my%20Grade%2012%20learner.%20Can%20we%20discuss%20a%20flexible%20rate%3F"
+                   target="_blank" class="btn-whatsapp-hero">
+                    <i class="fab fa-whatsapp"></i>
+                    <span>Enquire About Tutoring</span>
+                </a>
+                <a href="#study-materials" class="btn-ghost">
+                    <i class="fas fa-books"></i>
+                    <span>Browse Resources</span>
+                </a>
+            </div>
+
+            <div class="trust-bar">
+                <div class="trust-item">
+                    <span class="trust-num">Free</span>
+                    <span class="trust-label">Study Materials</span>
+                </div>
+                <div class="trust-divider"></div>
+                <div class="trust-item">
+                    <span class="trust-num">10+</span>
+                    <span class="trust-label">Subjects Covered</span>
+                </div>
+                <div class="trust-divider"></div>
+                <div class="trust-item">
+                    <span class="trust-num">Flex</span>
+                    <span class="trust-label">Negotiable Rates</span>
+                </div>
+                <div class="trust-divider"></div>
+                <div class="trust-item">
+                    <span class="trust-num">Local</span>
+                    <span class="trust-label">SA-Focused</span>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+
+    <!-- ============================================================
+         QUICK NAVIGATION — Sticky jump links between sections
+    ============================================================ -->
+    <div class="quick-nav">
+        <div class="quick-nav-inner">
+            <a href="#study-materials" class="nav-jump-btn">
+                <i class="fas fa-book"></i> Study Materials
+            </a>
+            <a href="#exam-papers" class="nav-jump-btn">
+                <i class="fas fa-file-alt"></i> Exam Papers
+            </a>
+            <a href="#video-lessons" class="nav-jump-btn">
+                <i class="fab fa-youtube"></i> Video Lessons
+            </a>
+            <a href="#online-tutors" class="nav-jump-btn">
+                <i class="fas fa-laptop"></i> Online Tutors
+            </a>
+            <a href="#local-tutors" class="nav-jump-btn">
+                <i class="fas fa-map-marker-alt"></i> Local Tutors
+            </a>
+        </div>
+    </div>
+
+
+    <!-- ============================================================
+         SECTION 1: FREE STUDY MATERIAL DIRECTORIES
+    ============================================================ -->
+    <section class="resource-section" id="study-materials">
+        <div class="container">
+
+            <div class="section-header reveal">
+                <span class="section-tag">Free Study Materials</span>
+                <h2 class="section-title">Premium Study Platforms — <span class="gradient-text-mat">Completely Free</span></h2>
+                <p class="section-subtitle">
+                    Your learner does not need expensive textbooks to succeed. These trusted
+                    South African and international platforms provide world-class CAPS-aligned
+                    content at no cost.
+                </p>
+            </div>
+
+            <div class="resource-grid">
+
+                <!-- Siyavula -->
+                <div class="resource-card reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="res-icon green"><i class="fas fa-atom"></i></div>
+                    <h3>Siyavula</h3>
+                    <p>
+                        Free, CAPS-aligned digital textbooks for Mathematics and Physical
+                        Sciences from Grade 10 to 12. Includes interactive practice exercises
+                        with instant feedback — ideal for independent study.
+                    </p>
+                    <div class="res-tags">
+                        <span class="res-tag">Mathematics</span>
+                        <span class="res-tag">Physical Sciences</span>
+                        <span class="res-tag">Free</span>
+                    </div>
+                    <a href="https://www.siyavula.com" target="_blank" rel="noopener noreferrer" class="btn-ext">
+                        Visit Platform <i class="fas fa-external-link-alt"></i>
+                    </a>
+                </div>
+
+                <!-- Everything Maths & Science -->
+                <div class="resource-card reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="res-icon sky"><i class="fas fa-square-root-alt"></i></div>
+                    <h3>Everything Maths &amp; Science</h3>
+                    <p>
+                        Free open-source textbooks for Maths and Science with worked
+                        examples, chapter summaries, and end-of-chapter exercises.
+                        Available online and as offline PDF downloads.
+                    </p>
+                    <div class="res-tags">
+                        <span class="res-tag">Mathematics</span>
+                        <span class="res-tag">Science</span>
+                        <span class="res-tag">PDF</span>
+                    </div>
+                    <a href="https://www.everythingmaths.co.za" target="_blank" rel="noopener noreferrer" class="btn-ext">
+                        Visit Platform <i class="fas fa-external-link-alt"></i>
+                    </a>
+                </div>
+
+                <!-- DBE eBooks -->
+                <div class="resource-card reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="res-icon"><i class="fas fa-landmark"></i></div>
+                    <h3>DBE Official eBooks</h3>
+                    <p>
+                        The official Department of Basic Education digital textbook library.
+                        Free CAPS-approved learner books for all major Grade 12 subjects
+                        across all South African languages.
+                    </p>
+                    <div class="res-tags">
+                        <span class="res-tag">All Subjects</span>
+                        <span class="res-tag">Official</span>
+                        <span class="res-tag">CAPS</span>
+                    </div>
+                    <a href="https://www.education.gov.za/Curriculum/LearnerTeacherSupportMaterial.aspx"
+                       target="_blank" rel="noopener noreferrer" class="btn-ext">
+                        Visit Platform <i class="fas fa-external-link-alt"></i>
+                    </a>
+                </div>
+
+                <!-- Studocu -->
+                <div class="resource-card reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="res-icon purple"><i class="fas fa-file-pdf"></i></div>
+                    <h3>Studocu South Africa</h3>
+                    <p>
+                        A platform where students share their own notes, summaries, and
+                        study guides. Find peer-created documents for almost every Grade 12
+                        subject — great for a different explanation of concepts.
+                    </p>
+                    <div class="res-tags">
+                        <span class="res-tag">All Subjects</span>
+                        <span class="res-tag">Student Notes</span>
+                        <span class="res-tag">Summaries</span>
+                    </div>
+                    <a href="https://www.studocu.com/en-za" target="_blank" rel="noopener noreferrer" class="btn-ext">
+                        Visit Platform <i class="fas fa-external-link-alt"></i>
+                    </a>
+                </div>
+
+                <!-- Mindset Learn -->
+                <div class="resource-card reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="res-icon amber"><i class="fas fa-brain"></i></div>
+                    <h3>Mindset Learn</h3>
+                    <p>
+                        South Africa's leading e-learning platform offering video lessons,
+                        revision notes, and activities for all major Grade 12 subjects —
+                        officially supported by the Department of Basic Education.
+                    </p>
+                    <div class="res-tags">
+                        <span class="res-tag">All Subjects</span>
+                        <span class="res-tag">Video + Notes</span>
+                        <span class="res-tag">DBE Endorsed</span>
+                    </div>
+                    <a href="https://learn.mindset.co.za" target="_blank" rel="noopener noreferrer" class="btn-ext">
+                        Visit Platform <i class="fas fa-external-link-alt"></i>
+                    </a>
+                </div>
+
+                <!-- Brainline -->
+                <div class="resource-card reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="res-icon red"><i class="fas fa-graduation-cap"></i></div>
+                    <h3>Brainline</h3>
+                    <p>
+                        A popular South African online school and resource hub offering
+                        CAPS-aligned study materials, practice questions, and structured
+                        learning pathways for Grade 12 learners.
+                    </p>
+                    <div class="res-tags">
+                        <span class="res-tag">Grade 10–12</span>
+                        <span class="res-tag">Structured</span>
+                        <span class="res-tag">CAPS</span>
+                    </div>
+                    <a href="https://brainline.co.za" target="_blank" rel="noopener noreferrer" class="btn-ext">
+                        Visit Platform <i class="fas fa-external-link-alt"></i>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ============================================================
+         SECTION 2: PAST EXAM PAPERS DATABASE
+    ============================================================ -->
+    <section class="papers-section" id="exam-papers">
+        <div class="container">
+
+            <div class="section-header reveal">
+                <span class="section-tag">Past Exam Papers</span>
+                <h2 class="section-title">Official NSC Exam Papers &amp; <span class="gradient-text-mat">Marking Guidelines</span></h2>
+                <p class="section-subtitle">
+                    Practising past papers is the single most effective way to prepare for
+                    NSC examinations. These are the official portals where question papers
+                    and memoranda are published free of charge.
+                </p>
+            </div>
+
+            <div class="exam-grid">
+
+                <!-- DBE National -->
+                <div class="exam-card reveal-card">
+                    <div class="card-glow"></div>
+                    <span class="exam-official-badge">✅ Most Complete</span>
+                    <div class="exam-province">National · All Provinces</div>
+                    <h3>DBE Official NSC Papers</h3>
+                    <p>
+                        The primary source for all NSC past question papers and memoranda.
+                        Covers all subjects and all provinces from multiple years.
+                        Always start here.
+                    </p>
+                    <div class="exam-years">
+                        <span class="year-tag">2024</span><span class="year-tag">2023</span>
+                        <span class="year-tag">2022</span><span class="year-tag">2019</span>
+                        <span class="year-tag">2018</span>
+                    </div>
+                    <a href="https://www.education.gov.za/Curriculum/NationalSeniorCertificate/NSCPastExaminationpapers.aspx"
+                       target="_blank" rel="noopener noreferrer" class="btn-ext">
+                        Download Papers <i class="fas fa-download"></i>
+                    </a>
+                </div>
+
+                <!-- Ecexams -->
+                <div class="exam-card reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="exam-province">National Aggregate · Popular</div>
+                    <h3>Ecexams.co.za</h3>
+                    <p>
+                        A well-known South African website that aggregates NSC past papers
+                        from multiple years across all provinces into one easy-to-navigate
+                        collection. Simple search and download.
+                    </p>
+                    <div class="exam-years">
+                        <span class="year-tag">2024</span><span class="year-tag">2023</span>
+                        <span class="year-tag">2022</span><span class="year-tag">2021</span>
+                    </div>
+                    <a href="https://ecexams.co.za" target="_blank" rel="noopener noreferrer" class="btn-ext">
+                        Download Papers <i class="fas fa-download"></i>
+                    </a>
+                </div>
+
+                <!-- Gauteng -->
+                <div class="exam-card reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="exam-province">Gauteng Province</div>
+                    <h3>Gauteng DOE Exam Papers</h3>
+                    <p>
+                        Gauteng Department of Education official portal for provincial
+                        NSC examination papers, preparatory exams, and memoranda for
+                        Grade 12 learners in Gauteng.
+                    </p>
+                    <div class="exam-years">
+                        <span class="year-tag">2024</span><span class="year-tag">2023</span>
+                        <span class="year-tag">2022</span>
+                    </div>
+                    <a href="https://www.education.gpg.gov.za/Examinations/Pages/NSC-Past-Papers.aspx"
+                       target="_blank" rel="noopener noreferrer" class="btn-ext">
+                        Download Papers <i class="fas fa-download"></i>
+                    </a>
+                </div>
+
+                <!-- Limpopo -->
+                <div class="exam-card reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="exam-province">Limpopo Province</div>
+                    <h3>Limpopo DOE Exam Papers</h3>
+                    <p>
+                        Limpopo Department of Education official resources and exam
+                        papers portal — particularly useful for learners in Limpopo
+                        including Vhembe, Capricorn, and Waterberg districts.
+                    </p>
+                    <div class="exam-years">
+                        <span class="year-tag">2024</span><span class="year-tag">2023</span>
+                        <span class="year-tag">2022</span>
+                    </div>
+                    <a href="https://www.limpopo.gov.za/education"
+                       target="_blank" rel="noopener noreferrer" class="btn-ext">
+                        Download Papers <i class="fas fa-download"></i>
+                    </a>
+                </div>
+
+                <!-- Western Cape -->
+                <div class="exam-card reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="exam-province">Western Cape Province</div>
+                    <h3>WCED Exam Papers</h3>
+                    <p>
+                        Western Cape Education Department past papers and preparatory
+                        exam resources. Known for high-quality provincially-set papers
+                        that complement the national DBE set.
+                    </p>
+                    <div class="exam-years">
+                        <span class="year-tag">2024</span><span class="year-tag">2023</span>
+                        <span class="year-tag">2022</span>
+                    </div>
+                    <a href="https://wcedonline.westerncape.gov.za/Examinations"
+                       target="_blank" rel="noopener noreferrer" class="btn-ext">
+                        Download Papers <i class="fas fa-download"></i>
+                    </a>
+                </div>
+
+                <!-- KZN -->
+                <div class="exam-card reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="exam-province">KwaZulu-Natal Province</div>
+                    <h3>KZN DOE Exam Papers</h3>
+                    <p>
+                        KwaZulu-Natal Department of Education exam paper portal.
+                        KZN provincial preparatory papers are widely used by learners
+                        across South Africa for additional exam practice.
+                    </p>
+                    <div class="exam-years">
+                        <span class="year-tag">2024</span><span class="year-tag">2023</span>
+                        <span class="year-tag">2022</span>
+                    </div>
+                    <a href="https://www.kzneducation.gov.za"
+                       target="_blank" rel="noopener noreferrer" class="btn-ext">
+                        Download Papers <i class="fas fa-download"></i>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ============================================================
+         SECTION 3: ONLINE VIDEO LESSONS — YouTube Directory
+    ============================================================ -->
+    <section class="video-section" id="video-lessons">
+        <div class="container">
+
+            <div class="section-header reveal">
+                <span class="section-tag">Video Lessons</span>
+                <h2 class="section-title">Top South African <span class="gradient-text-mat">YouTube Education Channels</span></h2>
+                <p class="section-subtitle">
+                    Free, high-quality video lessons from trusted South African educators —
+                    organised by subject so your learner can find help for exactly what they
+                    are struggling with, when they need it.
+                </p>
+            </div>
+
+            <div class="youtube-grid">
+
+                <!-- Mathematics -->
+                <div class="youtube-card reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="subject-header">
+                        <div class="subject-icon res-icon" style="width:42px;height:42px;background:linear-gradient(135deg,rgba(59,130,246,.18),rgba(99,102,241,.15));border:1px solid rgba(59,130,246,.22);font-size:1.05rem;color:var(--mat-blue);">
+                            <i class="fas fa-calculator"></i>
+                        </div>
+                        <div>
+                            <h3>Mathematics</h3>
+                            <span>Pure Maths &amp; Maths Literacy</span>
+                        </div>
+                    </div>
+                    <ul class="channel-list">
+                        <li class="channel-item">
+                            <div class="channel-info">
+                                <div class="channel-thumb">ML</div>
+                                <div>
+                                    <div class="channel-name">Mindset Learn SA</div>
+                                    <div class="channel-desc">Full CAPS Grade 12 curriculum coverage</div>
+                                </div>
+                            </div>
+                            <a href="https://www.youtube.com/@MindsetLearnSA" target="_blank" rel="noopener noreferrer" class="channel-link">
+                                <i class="fab fa-youtube"></i> Watch
+                            </a>
+                        </li>
+                        <li class="channel-item">
+                            <div class="channel-info">
+                                <div class="channel-thumb">KM</div>
+                                <div>
+                                    <div class="channel-name">KevinMathsSA</div>
+                                    <div class="channel-desc">Step-by-step Grade 12 Maths tutorials</div>
+                                </div>
+                            </div>
+                            <a href="https://www.youtube.com/@kevinmathssa" target="_blank" rel="noopener noreferrer" class="channel-link">
+                                <i class="fab fa-youtube"></i> Watch
+                            </a>
+                        </li>
+                        <li class="channel-item">
+                            <div class="channel-info">
+                                <div class="channel-thumb">KA</div>
+                                <div>
+                                    <div class="channel-name">Khan Academy</div>
+                                    <div class="channel-desc">World-class free maths from basics to advanced</div>
+                                </div>
+                            </div>
+                            <a href="https://www.youtube.com/@khanacademy" target="_blank" rel="noopener noreferrer" class="channel-link">
+                                <i class="fab fa-youtube"></i> Watch
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Physical Sciences -->
+                <div class="youtube-card reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="subject-header">
+                        <div class="subject-icon res-icon sky" style="width:42px;height:42px;font-size:1.05rem;">
+                            <i class="fas fa-flask"></i>
+                        </div>
+                        <div>
+                            <h3>Physical Sciences</h3>
+                            <span>Physics &amp; Chemistry</span>
+                        </div>
+                    </div>
+                    <ul class="channel-list">
+                        <li class="channel-item">
+                            <div class="channel-info">
+                                <div class="channel-thumb">SC</div>
+                                <div>
+                                    <div class="channel-name">Science Clinic</div>
+                                    <div class="channel-desc">NSC-focused Physics &amp; Chemistry lessons</div>
+                                </div>
+                            </div>
+                            <a href="https://www.youtube.com/@scienceclinicmaths" target="_blank" rel="noopener noreferrer" class="channel-link">
+                                <i class="fab fa-youtube"></i> Watch
+                            </a>
+                        </li>
+                        <li class="channel-item">
+                            <div class="channel-info">
+                                <div class="channel-thumb">ML</div>
+                                <div>
+                                    <div class="channel-name">Mindset Learn Physics</div>
+                                    <div class="channel-desc">Full Grade 12 Physical Sciences CAPS</div>
+                                </div>
+                            </div>
+                            <a href="https://www.youtube.com/@MindsetLearnSA" target="_blank" rel="noopener noreferrer" class="channel-link">
+                                <i class="fab fa-youtube"></i> Watch
+                            </a>
+                        </li>
+                        <li class="channel-item">
+                            <div class="channel-info">
+                                <div class="channel-thumb">CC</div>
+                                <div>
+                                    <div class="channel-name">Crash Course Chemistry</div>
+                                    <div class="channel-desc">Engaging chemistry concepts explained clearly</div>
+                                </div>
+                            </div>
+                            <a href="https://www.youtube.com/@crashcourse" target="_blank" rel="noopener noreferrer" class="channel-link">
+                                <i class="fab fa-youtube"></i> Watch
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Life Sciences -->
+                <div class="youtube-card reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="subject-header">
+                        <div class="subject-icon res-icon green" style="width:42px;height:42px;font-size:1.05rem;">
+                            <i class="fas fa-dna"></i>
+                        </div>
+                        <div>
+                            <h3>Life Sciences</h3>
+                            <span>Biology &amp; Human Sciences</span>
+                        </div>
+                    </div>
+                    <ul class="channel-list">
+                        <li class="channel-item">
+                            <div class="channel-info">
+                                <div class="channel-thumb">ML</div>
+                                <div>
+                                    <div class="channel-name">Mindset Learn Biology</div>
+                                    <div class="channel-desc">Grade 12 Life Sciences full series</div>
+                                </div>
+                            </div>
+                            <a href="https://www.youtube.com/@MindsetLearnSA" target="_blank" rel="noopener noreferrer" class="channel-link">
+                                <i class="fab fa-youtube"></i> Watch
+                            </a>
+                        </li>
+                        <li class="channel-item">
+                            <div class="channel-info">
+                                <div class="channel-thumb">CB</div>
+                                <div>
+                                    <div class="channel-name">Crash Course Biology</div>
+                                    <div class="channel-desc">Engaging, visual biology concept explanations</div>
+                                </div>
+                            </div>
+                            <a href="https://www.youtube.com/@crashcourse" target="_blank" rel="noopener noreferrer" class="channel-link">
+                                <i class="fab fa-youtube"></i> Watch
+                            </a>
+                        </li>
+                        <li class="channel-item">
+                            <div class="channel-info">
+                                <div class="channel-thumb">AS</div>
+                                <div>
+                                    <div class="channel-name">Amoeba Sisters</div>
+                                    <div class="channel-desc">Fun, animated biology for visual learners</div>
+                                </div>
+                            </div>
+                            <a href="https://www.youtube.com/@AmoebaSisters" target="_blank" rel="noopener noreferrer" class="channel-link">
+                                <i class="fab fa-youtube"></i> Watch
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Accounting -->
+                <div class="youtube-card reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="subject-header">
+                        <div class="subject-icon res-icon amber" style="width:42px;height:42px;font-size:1.05rem;">
+                            <i class="fas fa-calculator"></i>
+                        </div>
+                        <div>
+                            <h3>Accounting</h3>
+                            <span>Financial Accounting &amp; Statements</span>
+                        </div>
+                    </div>
+                    <ul class="channel-list">
+                        <li class="channel-item">
+                            <div class="channel-info">
+                                <div class="channel-thumb">ML</div>
+                                <div>
+                                    <div class="channel-name">Mindset Learn Accounting</div>
+                                    <div class="channel-desc">Grade 12 Accounting CAPS full series</div>
+                                </div>
+                            </div>
+                            <a href="https://www.youtube.com/@MindsetLearnSA" target="_blank" rel="noopener noreferrer" class="channel-link">
+                                <i class="fab fa-youtube"></i> Watch
+                            </a>
+                        </li>
+                        <li class="channel-item">
+                            <div class="channel-info">
+                                <div class="channel-thumb">SA</div>
+                                <div>
+                                    <div class="channel-name">SA Accounting Academy</div>
+                                    <div class="channel-desc">Exam-focused accounting tutorials</div>
+                                </div>
+                            </div>
+                            <a href="https://www.youtube.com/results?search_query=sa+accounting+academy+grade+12" target="_blank" rel="noopener noreferrer" class="channel-link">
+                                <i class="fab fa-youtube"></i> Watch
+                            </a>
+                        </li>
+                        <li class="channel-item">
+                            <div class="channel-info">
+                                <div class="channel-thumb">AC</div>
+                                <div>
+                                    <div class="channel-name">Accounting for Grade 12 SA</div>
+                                    <div class="channel-desc">Ledger, trial balance &amp; financial statements</div>
+                                </div>
+                            </div>
+                            <a href="https://www.youtube.com/results?search_query=grade+12+accounting+south+africa" target="_blank" rel="noopener noreferrer" class="channel-link">
+                                <i class="fab fa-youtube"></i> Watch
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Geography -->
+                <div class="youtube-card reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="subject-header">
+                        <div class="subject-icon res-icon" style="width:42px;height:42px;font-size:1.05rem;background:linear-gradient(135deg,rgba(59,130,246,.18),rgba(99,102,241,.15));border:1px solid rgba(59,130,246,.22);color:var(--mat-blue);">
+                            <i class="fas fa-globe-africa"></i>
+                        </div>
+                        <div>
+                            <h3>Geography</h3>
+                            <span>Physical &amp; Human Geography</span>
+                        </div>
+                    </div>
+                    <ul class="channel-list">
+                        <li class="channel-item">
+                            <div class="channel-info">
+                                <div class="channel-thumb">ML</div>
+                                <div>
+                                    <div class="channel-name">Mindset Learn Geography</div>
+                                    <div class="channel-desc">CAPS Grade 12 Geography lesson series</div>
+                                </div>
+                            </div>
+                            <a href="https://www.youtube.com/@MindsetLearnSA" target="_blank" rel="noopener noreferrer" class="channel-link">
+                                <i class="fab fa-youtube"></i> Watch
+                            </a>
+                        </li>
+                        <li class="channel-item">
+                            <div class="channel-info">
+                                <div class="channel-thumb">GS</div>
+                                <div>
+                                    <div class="channel-name">Geography SA Tutorials</div>
+                                    <div class="channel-desc">Exam-focused South African Geography</div>
+                                </div>
+                            </div>
+                            <a href="https://www.youtube.com/results?search_query=grade+12+geography+south+africa+tutorials" target="_blank" rel="noopener noreferrer" class="channel-link">
+                                <i class="fab fa-youtube"></i> Watch
+                            </a>
+                        </li>
+                        <li class="channel-item">
+                            <div class="channel-info">
+                                <div class="channel-thumb">CG</div>
+                                <div>
+                                    <div class="channel-name">Crash Course Geography</div>
+                                    <div class="channel-desc">Engaging global geography concepts</div>
+                                </div>
+                            </div>
+                            <a href="https://www.youtube.com/@crashcourse" target="_blank" rel="noopener noreferrer" class="channel-link">
+                                <i class="fab fa-youtube"></i> Watch
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- English HL / FAL -->
+                <div class="youtube-card reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="subject-header">
+                        <div class="subject-icon res-icon purple" style="width:42px;height:42px;font-size:1.05rem;">
+                            <i class="fas fa-pen-nib"></i>
+                        </div>
+                        <div>
+                            <h3>English HL &amp; FAL</h3>
+                            <span>Language, Literature &amp; Writing</span>
+                        </div>
+                    </div>
+                    <ul class="channel-list">
+                        <li class="channel-item">
+                            <div class="channel-info">
+                                <div class="channel-thumb">ML</div>
+                                <div>
+                                    <div class="channel-name">Mindset Learn English</div>
+                                    <div class="channel-desc">Grade 12 English HL &amp; FAL CAPS series</div>
+                                </div>
+                            </div>
+                            <a href="https://www.youtube.com/@MindsetLearnSA" target="_blank" rel="noopener noreferrer" class="channel-link">
+                                <i class="fab fa-youtube"></i> Watch
+                            </a>
+                        </li>
+                        <li class="channel-item">
+                            <div class="channel-info">
+                                <div class="channel-thumb">SN</div>
+                                <div>
+                                    <div class="channel-name">SparkNotes</div>
+                                    <div class="channel-desc">Set works, poetry &amp; literature guides</div>
+                                </div>
+                            </div>
+                            <a href="https://www.youtube.com/@sparknotes" target="_blank" rel="noopener noreferrer" class="channel-link">
+                                <i class="fab fa-youtube"></i> Watch
+                            </a>
+                        </li>
+                        <li class="channel-item">
+                            <div class="channel-info">
+                                <div class="channel-thumb">EL</div>
+                                <div>
+                                    <div class="channel-name">English Language Club</div>
+                                    <div class="channel-desc">Essay writing, comprehension &amp; language</div>
+                                </div>
+                            </div>
+                            <a href="https://www.youtube.com/results?search_query=grade+12+english+home+language+south+africa" target="_blank" rel="noopener noreferrer" class="channel-link">
+                                <i class="fab fa-youtube"></i> Watch
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ============================================================
+         SECTION 4: NATIONAL ONLINE TUTORS
+    ============================================================ -->
+    <section class="online-tutor-section" id="online-tutors">
+        <div class="container">
+
+            <div class="section-header reveal">
+                <span class="section-tag">Online Tutors</span>
+                <h2 class="section-title">Recommended Digital <span class="gradient-text-mat">1-on-1 Tutoring Services</span></h2>
+                <p class="section-subtitle">
+                    These national platforms connect your learner with qualified, vetted tutors
+                    for all major high school subjects — accessible from anywhere in South Africa.
+                </p>
+            </div>
+
+            <div class="online-tutor-grid">
+
+                <!-- Superprof -->
+                <div class="online-tutor-card reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="tutor-platform-logo"><i class="fas fa-chalkboard-teacher"></i></div>
+                    <h3>Superprof South Africa</h3>
+                    <p>
+                        One of the largest tutoring marketplaces in South Africa with thousands of
+                        tutors across all subjects. You can filter by subject, price range, location,
+                        and availability to find the right match.
+                    </p>
+                    <div class="tutor-subjects">
+                        <span class="tutor-subj-tag">Maths</span>
+                        <span class="tutor-subj-tag">Sciences</span>
+                        <span class="tutor-subj-tag">English</span>
+                        <span class="tutor-subj-tag">All Subjects</span>
+                    </div>
+                    <a href="https://www.superprof.co.za" target="_blank" rel="noopener noreferrer" class="btn-ext" style="margin-top:auto;">
+                        Find a Tutor <i class="fas fa-external-link-alt"></i>
+                    </a>
+                </div>
+
+                <!-- Teachme2 -->
+                <div class="online-tutor-card reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="tutor-platform-logo"><i class="fas fa-user-graduate"></i></div>
+                    <h3>Teachme2</h3>
+                    <p>
+                        A South African platform focused on connecting learners with qualified
+                        matric and tertiary tutors. Offers both online and in-person sessions
+                        across major SA cities and towns.
+                    </p>
+                    <div class="tutor-subjects">
+                        <span class="tutor-subj-tag">Maths</span>
+                        <span class="tutor-subj-tag">Accounting</span>
+                        <span class="tutor-subj-tag">Sciences</span>
+                        <span class="tutor-subj-tag">Grade 12</span>
+                    </div>
+                    <a href="https://www.teachme2.co.za" target="_blank" rel="noopener noreferrer" class="btn-ext" style="margin-top:auto;">
+                        Find a Tutor <i class="fas fa-external-link-alt"></i>
+                    </a>
+                </div>
+
+                <!-- UrStudying -->
+                <div class="online-tutor-card reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="tutor-platform-logo"><i class="fas fa-laptop-code"></i></div>
+                    <h3>UrStudying SA</h3>
+                    <p>
+                        An online study platform and tutoring connection service specifically
+                        designed for South African high school students — offering group sessions,
+                        private tutoring, and structured study programmes.
+                    </p>
+                    <div class="tutor-subjects">
+                        <span class="tutor-subj-tag">All Subjects</span>
+                        <span class="tutor-subj-tag">Group Study</span>
+                        <span class="tutor-subj-tag">1-on-1</span>
+                    </div>
+                    <a href="https://www.urstudying.com" target="_blank" rel="noopener noreferrer" class="btn-ext" style="margin-top:auto;">
+                        Find a Tutor <i class="fas fa-external-link-alt"></i>
+                    </a>
+                </div>
+
+                <!-- Tutor Doctor -->
+                <div class="online-tutor-card reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="tutor-platform-logo"><i class="fas fa-stethoscope"></i></div>
+                    <h3>Tutor Doctor SA</h3>
+                    <p>
+                        A professional tutoring franchise with South African branches offering
+                        personalised 1-on-1 sessions at home or online, tailored specifically
+                        to each learner's weaknesses and learning style.
+                    </p>
+                    <div class="tutor-subjects">
+                        <span class="tutor-subj-tag">Personalised</span>
+                        <span class="tutor-subj-tag">All Grades</span>
+                        <span class="tutor-subj-tag">NSC Focus</span>
+                    </div>
+                    <a href="https://tutordoctor.co.za" target="_blank" rel="noopener noreferrer" class="btn-ext" style="margin-top:auto;">
+                        Find a Tutor <i class="fas fa-external-link-alt"></i>
+                    </a>
+                </div>
+
+                <!-- GetSmarter / Wits Plus -->
+                <div class="online-tutor-card reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="tutor-platform-logo"><i class="fas fa-university"></i></div>
+                    <h3>Wits Plus Online</h3>
+                    <p>
+                        University of the Witwatersrand's community education and distance
+                        learning division — offering structured tutoring and matric support
+                        programmes for Grade 12 learners nationally.
+                    </p>
+                    <div class="tutor-subjects">
+                        <span class="tutor-subj-tag">Matric Prep</span>
+                        <span class="tutor-subj-tag">Distance</span>
+                        <span class="tutor-subj-tag">Structured</span>
+                    </div>
+                    <a href="https://www.wits.ac.za/witsplus/" target="_blank" rel="noopener noreferrer" class="btn-ext" style="margin-top:auto;">
+                        Learn More <i class="fas fa-external-link-alt"></i>
+                    </a>
+                </div>
+
+                <!-- Anani RM Tutoring -->
+                <div class="online-tutor-card reveal-card" style="border-color:rgba(59,130,246,.35);background:var(--grad-mat-soft);">
+                    <div class="card-glow"></div>
+                    <div class="tutor-platform-logo" style="background:var(--grad-mat);">
+                        <img src="images/ana.jpg" alt="Anani RM"
+                             style="width:100%;height:100%;object-fit:cover;object-position:top center;border-radius:12px;" />
+                    </div>
+                    <h3>Anani RM — Personal Tutoring</h3>
+                    <p>
+                        Direct, personal 1-on-1 support from me via WhatsApp or video call.
+                        I work at your learner's own pace, covering weak areas with patience
+                        and positivity. <strong>100% negotiable rates</strong>.
+                    </p>
+                    <div class="tutor-subjects">
+                        <span class="tutor-subj-tag">Maths lit</span>
+                        <span class="tutor-subj-tag">Website Development</span>
+                        <span class="tutor-subj-tag">Flexible</span>
+                        <span class="tutor-subj-tag">Negotiable</span>
+                    </div>
+                    <a href="https://wa.me/27648412146?text=Hi%20Anani!%20I%20need%20tutoring%20support%20for%20my%20Grade%2012%20learner.%20Can%20we%20discuss%20a%20flexible%20rate%3F"
+                       target="_blank" class="btn-ext" style="margin-top:auto;">
+                        <i class="fab fa-whatsapp"></i> Book Directly
+                    </a>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+
+    <!-- ============================================================
+         SECTION 5: LOCAL PERSONAL TUTORS
+         ════════════════════════════════════════════════════════════
+         DEVELOPER NOTE — HOW TO ADD A NEW LOCAL TUTOR:
+         ════════════════════════════════════════════════════════════
+         1. Copy the entire block marked [TUTOR CARD TEMPLATE START]
+            to [TUTOR CARD TEMPLATE END] below.
+         2. Paste your copy inside the <div class="local-tutor-grid">
+         3. Replace every placeholder value as instructed in the comments.
+         4. Remove the  placeholder-card  class from the new card.
+         5. Save and refresh — the new card matches all existing ones.
+         ════════════════════════════════════════════════════════════
+    ============================================================ -->
+    <section class="local-tutor-section" id="local-tutors">
+        <div class="container">
+
+            <div class="section-header reveal">
+                <span class="section-tag">Local Tutors</span>
+                <h2 class="section-title">Community-Based <span class="gradient-text-mat">Local Tutors Near You</span></h2>
+                <p class="section-subtitle">
+                    Familiar faces from your area who know the community, speak your language,
+                    and understand the unique challenges facing local Grade 12 learners.
+                    In-person sessions available — budget-friendly and negotiable rates.
+                </p>
+            </div>
+
+            <!-- Info banner for parents -->
+            <div class="local-tutor-intro reveal">
+                <i class="fas fa-info-circle"></i>
+                <p>
+                    <strong>For Parents:</strong> These local tutors have been selected by our
+                    community network. Each one is available for <strong>in-person sessions</strong>
+                    in or near Thohoyandou, Limpopo. Simply tap their WhatsApp button to chat
+                    about availability, subjects, and a price that works for your family.
+                    All rates are <strong>fully negotiable</strong>.
+                </p>
+            </div>
+
+            <div class="local-tutor-grid">
+
+                <!-- ╔═══════════════════════════════════════════════════════╗
+                     ║   TUTOR CARD TEMPLATE START — COPY FROM HERE         ║
+                     ║   Instructions:                                       ║
+                     ║   · Replace "TN" with tutor's initials (2 letters)   ║
+                     ║   · Replace "Tutor Full Name" with their real name    ║
+                     ║   · Replace "Thohoyandou, Limpopo" with their area    ║
+                     ║   · Edit the <span> tags with their real subjects     ║
+                     ║   · Replace "From R XX/hr" with their actual rate     ║
+                     ║   · Replace 2764XXXXXXXX with their WhatsApp number   ║
+                     ║     (keep country code 27, remove the leading 0)      ║
+                     ║   · Remove the class "placeholder-card" when done     ║
+                     ╚═══════════════════════════════════════════════════════╝ -->
+                <div class="local-tutor-card placeholder-card reveal-card">
+                    <div class="card-glow"></div>
+                    <!-- Tutor initials go inside the avatar circle -->
+                    <div class="tutor-avatar">TN</div>
+                    <!-- Replace "Tutor Full Name" below -->
+                    <div class="tutor-name">Tutor Full Name</div>
+                    <!-- Replace location text below -->
+                    <div class="tutor-area"><i class="fas fa-map-marker-alt"></i> Thohoyandou, Limpopo</div>
+                    <!-- Add or remove subject tags as needed -->
+                    <div class="tutor-subjects-local">
+                        <span class="tutor-subj-local">Subject 1</span>
+                        <span class="tutor-subj-local">Subject 2</span>
+                        <span class="tutor-subj-local">Subject 3</span>
+                    </div>
+                    <!-- Replace rate text below -->
+                    <div class="tutor-rate">Rate: <strong>From R XX / hr</strong> · Negotiable</div>
+                    <!-- Replace 2764XXXXXXXX with their full WhatsApp number (country code 27) -->
+                    <a href="https://wa.me/2764XXXXXXXX?text=Hi!%20I%20saw%20your%20tutoring%20profile%20on%20Anani%20RM's%20website.%20I%20need%20help%20with%20Grade%2012.%20Are%20you%20available%3F"
+                       target="_blank" class="btn-tutor-wa">
+                        <i class="fab fa-whatsapp"></i> Contact on WhatsApp
+                    </a>
+                </div>
+                <!-- ╔═══════════════════════════════════════════════════════╗
+                     ║   TUTOR CARD TEMPLATE END                             ║
+                     ╚═══════════════════════════════════════════════════════╝ -->
+
+
+                <!-- ╔═══════════════════════════════════════════════════════╗
+                     ║   SECOND PLACEHOLDER — Ready to fill in               ║
+                     ║   Copy this block and repeat as many times as needed  ║
+                     ╚═══════════════════════════════════════════════════════╝ -->
+                <div class="local-tutor-card placeholder-card reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="tutor-avatar">TN</div>
+                    <div class="tutor-name">Tutor Full Name</div>
+                    <div class="tutor-area"><i class="fas fa-map-marker-alt"></i> Area, Limpopo</div>
+                    <div class="tutor-subjects-local">
+                        <span class="tutor-subj-local">Subject 1</span>
+                        <span class="tutor-subj-local">Subject 2</span>
+                    </div>
+                    <div class="tutor-rate">Rate: <strong>From R XX / hr</strong> · Negotiable</div>
+                    <a href="https://wa.me/2764XXXXXXXX?text=Hi!%20I%20saw%20your%20tutoring%20profile%20on%20Anani%20RM's%20website.%20I%20need%20help%20with%20Grade%2012.%20Are%20you%20available%3F"
+                       target="_blank" class="btn-tutor-wa">
+                        <i class="fab fa-whatsapp"></i> Contact on WhatsApp
+                    </a>
+                </div>
+
+                <!-- ╔═══════════════════════════════════════════════════════╗
+                     ║   THIRD PLACEHOLDER — Ready to fill in                ║
+                     ╚═══════════════════════════════════════════════════════╝ -->
+                <div class="local-tutor-card placeholder-card reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="tutor-avatar">TN</div>
+                    <div class="tutor-name">Tutor Full Name</div>
+                    <div class="tutor-area"><i class="fas fa-map-marker-alt"></i> Area, Limpopo</div>
+                    <div class="tutor-subjects-local">
+                        <span class="tutor-subj-local">Subject 1</span>
+                        <span class="tutor-subj-local">Subject 2</span>
+                    </div>
+                    <div class="tutor-rate">Rate: <strong>From R XX / hr</strong> · Negotiable</div>
+                    <a href="https://wa.me/2764XXXXXXXX?text=Hi!%20I%20saw%20your%20tutoring%20profile%20on%20Anani%20RM's%20website.%20I%20need%20help%20with%20Grade%2012.%20Are%20you%20available%3F"
+                       target="_blank" class="btn-tutor-wa">
+                        <i class="fab fa-whatsapp"></i> Contact on WhatsApp
+                    </a>
+                </div>
+
+            </div><!-- /.local-tutor-grid -->
+
+            <!-- Pricing note -->
+            <div class="negotiation-note reveal">
+                <div class="note-icon-wrap">💬</div>
+                <div>
+                    <h4>Our Tutoring Rate Promise</h4>
+                    <p>
+                        Whether you choose me directly or one of our local tutors — all rates
+                        are <strong>negotiable and budget-friendly</strong>. No family should
+                        miss out on proper academic support because of cost. WhatsApp us and
+                        we will find an arrangement that works. <strong>Your child's pass
+                        matters more than a fixed price.</strong>
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+
+    <!-- ============================================================
+         FINAL WHATSAPP CTA
+    ============================================================ -->
+    <section class="final-cta-section">
+        <div class="container">
+            <div class="final-cta-wrap reveal">
+
+                <div class="cta-mat-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+
+                <h2>
+                    Ready to Give Your Learner<br>
+                    <span class="gradient-text-mat">Every Advantage?</span>
+                </h2>
+
+                <p>
+                    Don't let your child face matric alone. Message me now — whether you
+                    need a personal tutor, help finding the right resources, or just guidance
+                    on where to start. <strong>Every Grade 12 learner deserves proper support.</strong>
+                </p>
+
+                <div class="wa-message-preview">
+                    "Hi Anani! I need tutoring support for my Grade 12 learner.
+                    Can we discuss a flexible rate and where to start?"
+                </div>
+
+                <a href="https://wa.me/27648412146?text=Hi%20Anani!%20I%20need%20tutoring%20support%20for%20my%20Grade%2012%20learner.%20Can%20we%20discuss%20a%20flexible%20rate%20and%20where%20to%20start%3F"
+                   target="_blank" class="btn-wa-large">
+                    <i class="fab fa-whatsapp"></i>
+                    <span>Chat on WhatsApp Now</span>
+                </a>
+
+                <p class="cta-footnote">
+                    💬 Usually responds within the hour &nbsp;·&nbsp;
+                    📍 Based in Thohoyandou, Limpopo &nbsp;·&nbsp;
+                    🇿🇦 Supporting SA learners
+                </p>
+
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ============================================================
+         FOOTER
+    ============================================================ -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <img src="images/mylog.jpg" alt="Anani RM" class="footer-logo-img" />
+                        Anani<span class="accent">.</span>
+                    </div>
+                    <p>Crafting premium digital experiences and AI solutions from South Africa to the world.</p>
+                    <div class="social-row">
+                        <a href="https://github.com/ramagoma-glitch"        target="_blank" class="s-icon"><i class="fab fa-github"></i></a>
+                        <a href="https://www.linkedin.com/in/anani-ramagoma" target="_blank" class="s-icon"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="https://twitter.com/AnaniRamagoma"          target="_blank" class="s-icon"><i class="fab fa-twitter"></i></a>
+                        <a href="https://www.instagram.com/anani.rm"         target="_blank" class="s-icon"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.facebook.com/AnaniRM"           target="_blank" class="s-icon facebook-icon"><i class="fab fa-facebook-f"></i></a>
+                    </div>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html#home">Home</a></li>
+                        <li><a href="index.html#services">Services</a></li>
+                        <li><a href="index.html#about">About</a></li>
+                        <li><a href="index.html#portfolio">Portfolio</a></li>
+                        <li><a href="index.html#contact">Contact</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+    <h4>Services</h4>
+    <ul>
+        <li><a href="business-websites.html">Business Websites</a></li>
+        <li><a href="cv-services.html">Curriculum Vitae <b>(CV)</b></a></li>
+        <li><a href="chatbots.html">AI Chatbots</a></li>
+        <li><a href="website-RedesingAndDesing.html">Website Redesign</a></li>
+        <li><a href="WhatsAppIntegration.html">WhatsApp Integration</a></li>
+        <li><a href="SEO-Optimization.html">SEO Optimization</a></li>
+        <li><a href="academic-applications.html">Academic Application</a></li>
+    </ul>
+</div>
+
+                <div class="footer-col">
+                    <h4>Contact</h4>
+                    <p><i class="fab fa-whatsapp"></i>+27 64 841 2146</p>
+                    <p><i class="fas fa-envelope"></i>Ramagoma212@gmail.com</p>
+                    <p><i class="fas fa-map-marker-alt"></i>Thohoyandou, Limpopo, SA</p>
+                </div>
+
+            </div>
+
+            <div class="footer-bottom">
+                <p>
+                    &copy; <span id="currentYear"></span>
+                    Ramagoma Muthuhadini <b>Anani</b>. All rights reserved.
+                    Built with ❤️ in South Africa.
+                </p>
+                 <div class="footer-legal">
+                    <a href="documents/privacy.pdf" target="_blank">Privacy Policy</a>
+                    <span>·</span>
+                    <a href="documents/terms.pdf" target="_blank">Terms of Service</a>
+                </div>
+            </div>
+
+        </div>
+    </footer>
+
+    <button id="backToTop" aria-label="Back to top">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+
+    <script src="script.js"></script>
+
+</body>
+</html>

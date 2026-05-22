@@ -1,0 +1,1547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Portfolio Websites | Anani RM — Stunning Personal Portfolios</title>
+    <meta name="description"
+          content="Stand out online with a unique, responsive personal portfolio website by Anani RM. Built for freelancers, photographers, artists, graduates and job seekers in South Africa." />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600&display=swap"
+          rel="stylesheet" />
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <link rel="stylesheet" href="style.css" />
+
+    <!-- ============================================================
+         PAGE-SPECIFIC STYLES
+         Creative orange / warm coral theme for Portfolio page.
+         Distinct from: Academic (gold), CV (emerald), Chatbots (purple),
+         WhatsApp (green), Business (cyan).
+    ============================================================ -->
+    <style>
+
+        /* ── Portfolio page accent palette ───────────────────────────
+           Warm orange = creativity, energy, personal brand, ambition.
+        ──────────────────────────────────────────────────────────── */
+        :root {
+            --port-orange:  #f97316;
+            --port-amber:   #f59e0b;
+            --port-light:   #fdba74;
+            --port-red:     #ff453a;
+            --grad-port:    linear-gradient(135deg, #f97316, #f59e0b);
+            --grad-port-soft: linear-gradient(135deg,
+                               rgba(249,115,22,.08) 0%,
+                               rgba(245,158,11,.05) 100%);
+        }
+
+        /* ── Page Hero ──────────────────────────────────────────────── */
+        .page-hero {
+            min-height: 75vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 140px 24px 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page-hero-content {
+            max-width: 840px;
+            z-index: 1;
+        }
+
+        /* Orange creative badge */
+        .hero-badge-port {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 18px;
+            background: rgba(249,115,22,.08);
+            border: 1px solid rgba(249,115,22,.25);
+            color: var(--port-orange);
+            font-size: .8rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            border-radius: 100px;
+            margin-bottom: 24px;
+            animation: fadeUp .7s ease both;
+        }
+
+        .badge-dot-port {
+            width: 8px; height: 8px;
+            background: var(--port-orange);
+            border-radius: 50%;
+            animation: pulseDotPort 2s ease infinite;
+            flex-shrink: 0;
+        }
+        @keyframes pulseDotPort {
+            0%,100% { box-shadow: 0 0 0 0 rgba(249,115,22,.5); }
+            50%      { box-shadow: 0 0 0 7px rgba(249,115,22,0); }
+        }
+
+        .page-hero-title {
+            font-family: var(--f-display);
+            font-size: clamp(2rem, 4.5vw, 3.7rem);
+            font-weight: 800;
+            line-height: 1.12;
+            margin-bottom: 22px;
+            animation: fadeUp .7s .1s ease both;
+        }
+
+        /* Orange gradient text */
+        .gradient-text-port {
+            background: var(--grad-port);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-hero-subtitle {
+            color: var(--text-mid);
+            font-size: clamp(.9rem, 1.8vw, 1.1rem);
+            line-height: 1.9;
+            margin-bottom: 28px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            animation: fadeUp .7s .2s ease both;
+        }
+
+        /* Tag pills row below subtitle */
+        .hero-tag-pills {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 32px;
+            animation: fadeUp .7s .25s ease both;
+        }
+
+        .hero-tag-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 14px;
+            background: rgba(249,115,22,.07);
+            border: 1px solid rgba(249,115,22,.2);
+            color: var(--port-orange);
+            font-size: .78rem;
+            font-weight: 600;
+            border-radius: 100px;
+        }
+
+        .page-hero-buttons {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeUp .7s .3s ease both;
+        }
+
+        /* Ambient glow */
+        .page-hero::before {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 700px; height: 420px;
+            background: radial-gradient(ellipse,
+                rgba(249,115,22,.07) 0%,
+                rgba(245,158,11,.04) 50%,
+                transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* WhatsApp button */
+        .btn-whatsapp-hero {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            padding: 14px 32px;
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: #fff;
+            font-family: var(--f-body);
+            font-weight: 700;
+            font-size: .95rem;
+            border-radius: 100px;
+            text-decoration: none;
+            transition: var(--t);
+            box-shadow: 0 0 30px rgba(37,211,102,.3);
+            white-space: nowrap;
+        }
+        .btn-whatsapp-hero:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 50px rgba(37,211,102,.5);
+        }
+
+        /* Ghost outline button */
+        .btn-ghost {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 32px;
+            background: transparent;
+            color: var(--text-hi);
+            font-family: var(--f-body);
+            font-weight: 600;
+            font-size: .95rem;
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            text-decoration: none;
+            transition: var(--t);
+            white-space: nowrap;
+        }
+        .btn-ghost:hover {
+            border-color: var(--port-orange);
+            color: var(--port-orange);
+            background: rgba(249,115,22,.05);
+            transform: translateY(-3px);
+        }
+
+        /* Trust stats bar */
+        .trust-bar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            margin-top: 52px;
+            padding-top: 32px;
+            border-top: 1px solid var(--border);
+            animation: fadeUp .7s .4s ease both;
+        }
+
+        .trust-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            text-align: center;
+        }
+
+        .trust-num {
+            font-family: var(--f-display);
+            font-size: 1.6rem;
+            font-weight: 800;
+            background: var(--grad-port);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+        }
+
+        .trust-label {
+            font-size: .72rem;
+            color: var(--text-lo);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .trust-divider { width: 1px; height: 36px; background: var(--border); }
+
+        /* ── Why Portfolio Beats a CV (Comparison) ─────────────────── */
+        .compare-section {
+            background: linear-gradient(180deg, var(--bg-base) 0%, var(--bg-layer) 100%);
+        }
+
+        .compare-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 28px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .compare-card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 36px 30px;
+            position: relative;
+            overflow: hidden;
+            transition: var(--t);
+        }
+
+        /* Left — "old way" dim look */
+        .compare-card.old-way { opacity: .6; }
+
+        /* Right — "better way" glowing */
+        .compare-card.new-way {
+            border-color: rgba(249,115,22,.3);
+            background: var(--grad-port-soft);
+            box-shadow: 0 0 50px rgba(249,115,22,.09);
+        }
+
+        .compare-label {
+            display: inline-block;
+            padding: 4px 14px;
+            font-size: .7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 100px;
+            margin-bottom: 18px;
+        }
+
+        .compare-label.bad-label {
+            background: rgba(255,69,58,.1);
+            border: 1px solid rgba(255,69,58,.2);
+            color: #ff7b6e;
+        }
+
+        .compare-label.good-label {
+            background: var(--grad-port);
+            color: #fff;
+        }
+
+        .compare-card h3 {
+            font-family: var(--f-display);
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--text-hi);
+            margin-bottom: 20px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .compare-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 11px;
+        }
+
+        .compare-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: .875rem;
+            color: var(--text-mid);
+            line-height: 1.5;
+        }
+
+        .compare-list li i { font-size: .75rem; margin-top: 2px; flex-shrink: 0; }
+        .compare-list li .fa-times  { color: #ff7b6e; }
+        .compare-list li .fa-check  { color: var(--port-orange); }
+
+        /* ── Portfolio Features ─────────────────────────────────────── */
+        .features-section { background: var(--bg-base); }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 22px;
+        }
+
+        .feature-card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 36px 28px;
+            position: relative;
+            overflow: hidden;
+            transition: var(--t);
+            backdrop-filter: blur(10px);
+        }
+        .feature-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(249,115,22,.3);
+            background: var(--bg-glass-hov);
+        }
+        .feature-card:hover .card-glow { opacity: 1; }
+
+        .feature-icon {
+            width: 54px; height: 54px;
+            background: linear-gradient(135deg,
+                rgba(249,115,22,.15), rgba(245,158,11,.15));
+            border: 1px solid rgba(249,115,22,.22);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            color: var(--port-orange);
+            margin-bottom: 18px;
+            transition: var(--t);
+        }
+        .feature-card:hover .feature-icon { transform: scale(1.1); }
+
+        .feature-card h3 {
+            font-family: var(--f-display);
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-hi);
+            margin-bottom: 10px;
+        }
+
+        .feature-card > p {
+            font-size: .875rem;
+            color: var(--text-mid);
+            line-height: 1.75;
+            margin-bottom: 18px;
+        }
+
+        .feature-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .feature-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            font-size: .82rem;
+            color: var(--text-mid);
+            line-height: 1.5;
+        }
+
+        .feature-list li i {
+            color: var(--port-orange);
+            font-size: .65rem;
+            margin-top: 3px;
+            flex-shrink: 0;
+        }
+
+        /* ── Who It's Built For ─────────────────────────────────────── */
+        .audience-section {
+            background: linear-gradient(180deg, var(--bg-layer) 0%, var(--bg-base) 100%);
+        }
+
+        .audience-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+        }
+
+        .audience-card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 26px 20px;
+            text-align: center;
+            transition: var(--t);
+            position: relative;
+            overflow: hidden;
+        }
+        .audience-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(249,115,22,.3);
+            background: var(--bg-glass-hov);
+        }
+        .audience-card:hover .card-glow { opacity: 1; }
+
+        .audience-emoji {
+            font-size: 2.2rem;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .audience-card h4 {
+            font-family: var(--f-display);
+            font-size: .92rem;
+            font-weight: 700;
+            color: var(--text-hi);
+            margin-bottom: 6px;
+        }
+
+        .audience-card p {
+            font-size: .78rem;
+            color: var(--text-mid);
+            line-height: 1.6;
+        }
+
+        /* ── Pricing ────────────────────────────────────────────────── */
+        .pricing-section { background: var(--bg-base); }
+
+        .packages-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 22px;
+            margin-bottom: 40px;
+        }
+
+        .package-card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 36px 28px;
+            position: relative;
+            overflow: hidden;
+            transition: var(--t);
+            display: flex;
+            flex-direction: column;
+        }
+        .package-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(249,115,22,.3);
+            background: var(--bg-glass-hov);
+        }
+
+        .package-card.recommended {
+            border-color: rgba(249,115,22,.35);
+            background: var(--grad-port-soft);
+            box-shadow: 0 0 55px rgba(249,115,22,.1);
+        }
+
+        .package-badge {
+            display: inline-block;
+            padding: 4px 14px;
+            background: var(--grad-port);
+            color: #fff;
+            font-size: .68rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 100px;
+            margin-bottom: 18px;
+            align-self: flex-start;
+        }
+
+        .package-name {
+            font-family: var(--f-display);
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--text-hi);
+            margin-bottom: 6px;
+        }
+
+        .package-tagline {
+            font-size: .82rem;
+            color: var(--text-lo);
+            margin-bottom: 22px;
+            line-height: 1.55;
+        }
+
+        .package-price {
+            margin-bottom: 24px;
+            padding-bottom: 22px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .price-from {
+            font-size: .72rem;
+            color: var(--text-lo);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .price-amount-pkg {
+            font-family: var(--f-display);
+            font-size: 2.4rem;
+            font-weight: 800;
+            background: var(--grad-port);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+        }
+
+        .price-period {
+            font-size: .78rem;
+            color: var(--text-lo);
+            margin-top: 4px;
+            display: block;
+        }
+
+        .package-includes {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex: 1;
+            margin-bottom: 28px;
+        }
+
+        .package-includes li {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: .86rem;
+            color: var(--text-mid);
+            line-height: 1.55;
+        }
+
+        .package-includes li i {
+            color: var(--port-orange);
+            font-size: .72rem;
+            margin-top: 3px;
+            flex-shrink: 0;
+        }
+
+        .btn-package {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 22px;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-mid);
+            font-family: var(--f-body);
+            font-weight: 600;
+            font-size: .88rem;
+            border-radius: 100px;
+            text-decoration: none;
+            transition: var(--t);
+            margin-top: auto;
+        }
+        .btn-package:hover {
+            border-color: var(--port-orange);
+            color: var(--port-orange);
+            background: rgba(249,115,22,.06);
+            transform: translateY(-2px);
+        }
+
+        .btn-package-featured {
+            background: var(--grad-port) !important;
+            border-color: transparent !important;
+            color: #fff !important;
+            font-weight: 700;
+        }
+        .btn-package-featured:hover {
+            transform: translateY(-3px) !important;
+            box-shadow: 0 0 30px rgba(249,115,22,.4) !important;
+            color: #fff !important;
+        }
+
+        /* Negotiation note */
+        .negotiation-note {
+            background: var(--grad-port-soft);
+            border: 1px solid rgba(249,115,22,.2);
+            border-radius: 20px;
+            padding: 32px 36px;
+            display: flex;
+            gap: 22px;
+            align-items: flex-start;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .note-icon-wrap {
+            width: 56px; height: 56px;
+            background: var(--grad-port);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            flex-shrink: 0;
+            box-shadow: 0 0 24px rgba(249,115,22,.3);
+        }
+
+        .negotiation-note h4 {
+            font-family: var(--f-display);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--port-orange);
+            margin-bottom: 8px;
+        }
+
+        .negotiation-note p {
+            font-size: .88rem;
+            color: var(--text-mid);
+            line-height: 1.8;
+        }
+
+        .negotiation-note strong { color: var(--text-hi); }
+
+        /* ── Collaborative Build Process ────────────────────────────── */
+        .process-section { background: linear-gradient(180deg, var(--bg-layer) 0%, var(--bg-base) 100%); }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 22px;
+            position: relative;
+        }
+
+        /* Dashed connector line between steps */
+        .steps-grid::before {
+            content: '';
+            position: absolute;
+            top: 44px;
+            left: calc(12.5% + 22px);
+            right: calc(12.5% + 22px);
+            height: 2px;
+            background: repeating-linear-gradient(
+                90deg,
+                rgba(249,115,22,.3) 0px,
+                rgba(249,115,22,.3) 8px,
+                transparent 8px,
+                transparent 16px
+            );
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .step-card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 30px 20px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            transition: var(--t);
+        }
+        .step-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(249,115,22,.3);
+            background: var(--bg-glass-hov);
+        }
+
+        .step-number {
+            width: 52px; height: 52px;
+            background: var(--grad-port);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--f-display);
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #fff;
+            margin: 0 auto 16px;
+            box-shadow: 0 0 24px rgba(249,115,22,.35);
+        }
+
+        .step-card h3 {
+            font-family: var(--f-display);
+            font-size: .95rem;
+            font-weight: 700;
+            color: var(--text-hi);
+            margin-bottom: 8px;
+        }
+
+        .step-card p {
+            font-size: .82rem;
+            color: var(--text-mid);
+            line-height: 1.7;
+        }
+
+        .step-detail-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 12px;
+            padding: 4px 11px;
+            background: rgba(249,115,22,.07);
+            border: 1px solid rgba(249,115,22,.15);
+            border-radius: 100px;
+            font-size: .7rem;
+            color: var(--port-orange);
+            font-weight: 600;
+        }
+
+        /* ── Final CTA ──────────────────────────────────────────────── */
+        .final-cta-section {
+            background: var(--bg-base);
+            padding: 100px 0;
+        }
+
+        .final-cta-wrap {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+            background: var(--grad-port-soft);
+            border: 1px solid rgba(249,115,22,.25);
+            border-radius: 28px;
+            padding: 64px 48px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .final-cta-wrap::before,
+        .final-cta-wrap::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .final-cta-wrap::before {
+            width: 320px; height: 320px;
+            background: radial-gradient(circle, rgba(249,115,22,.1) 0%, transparent 70%);
+            top: -100px; right: -60px;
+        }
+        .final-cta-wrap::after {
+            width: 280px; height: 280px;
+            background: radial-gradient(circle, rgba(245,158,11,.08) 0%, transparent 70%);
+            bottom: -80px; left: -40px;
+        }
+
+        .cta-port-icon {
+            width: 80px; height: 80px;
+            background: var(--grad-port);
+            border-radius: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: #fff;
+            margin: 0 auto 26px;
+            box-shadow: 0 0 40px rgba(249,115,22,.4);
+            position: relative;
+            z-index: 1;
+            animation: floatPortIcon 3s ease-in-out infinite;
+        }
+        @keyframes floatPortIcon {
+            0%,100% { transform: translateY(0); }
+            50%      { transform: translateY(-8px); }
+        }
+
+        .final-cta-wrap h2 {
+            font-family: var(--f-display);
+            font-size: clamp(1.5rem, 3vw, 2.2rem);
+            font-weight: 800;
+            margin-bottom: 14px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .final-cta-wrap > p {
+            color: var(--text-mid);
+            font-size: .93rem;
+            line-height: 1.85;
+            max-width: 580px;
+            margin: 0 auto 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .wa-message-preview {
+            background: rgba(37,211,102,.06);
+            border: 1px solid rgba(37,211,102,.15);
+            border-radius: 14px;
+            padding: 14px 20px;
+            margin: 0 auto 30px;
+            max-width: 640px;
+            font-size: .83rem;
+            color: #57e89a;
+            text-align: left;
+            position: relative;
+            z-index: 1;
+            font-style: italic;
+            line-height: 1.65;
+        }
+
+        .wa-message-preview::before {
+            content: '📩  Your pre-filled message:';
+            font-style: normal;
+            font-weight: 700;
+            color: #57e89a;
+            display: block;
+            font-size: .7rem;
+            margin-bottom: 7px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-wa-large {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 18px 44px;
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: #fff;
+            font-family: var(--f-body);
+            font-weight: 800;
+            font-size: 1.05rem;
+            border-radius: 100px;
+            text-decoration: none;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 0 50px rgba(37,211,102,.4);
+            transition: var(--t);
+            white-space: nowrap;
+        }
+        .btn-wa-large i { font-size: 1.3rem; }
+        .btn-wa-large:hover {
+            transform: translateY(-4px) scale(1.03);
+            box-shadow: 0 0 70px rgba(37,211,102,.6);
+        }
+
+        .cta-footnote {
+            font-size: .75rem;
+            color: var(--text-lo);
+            margin-top: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Facebook brand hover */
+        .facebook-icon:hover {
+            background: #1877f2 !important;
+            box-shadow: 0 0 18px rgba(24,119,242,.4) !important;
+        }
+
+        /* ── Responsive ─────────────────────────────────────────────── */
+        @media (max-width: 1024px) {
+            .compare-grid    { grid-template-columns: 1fr; max-width: 520px; }
+            .features-grid   { grid-template-columns: repeat(2, 1fr); }
+            .audience-grid   { grid-template-columns: repeat(2, 1fr); }
+            .packages-grid   { grid-template-columns: repeat(2, 1fr); }
+            .steps-grid      { grid-template-columns: repeat(2, 1fr); }
+            .steps-grid::before { display: none; }
+        }
+
+        @media (max-width: 768px) {
+            .page-hero        { padding: 120px 22px 60px; }
+            .features-grid    { grid-template-columns: 1fr; }
+            .audience-grid    { grid-template-columns: repeat(2, 1fr); }
+            .packages-grid    { grid-template-columns: 1fr; }
+            .steps-grid       { grid-template-columns: 1fr; }
+            .negotiation-note { flex-direction: column; gap: 14px; }
+            .final-cta-wrap   { padding: 40px 22px; }
+            .trust-bar        { gap: 22px; }
+            .trust-divider    { display: none; }
+            .btn-wa-large     { padding: 16px 28px; font-size: .9rem; }
+            section           { padding: 70px 0; }
+        }
+
+        @media (max-width: 480px) {
+            .page-hero-title  { font-size: 1.95rem; }
+            .package-card     { padding: 26px 20px; }
+            .audience-grid    { grid-template-columns: 1fr; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- ===== LOADING SCREEN ===== -->
+    <div id="loader">
+        <div class="loader-inner">
+            <div class="loader-ring"></div>
+            <div class="loader-logo">
+                <img src="images/mylog.jpg" alt="Anani RM" class="loader-logo-img" />
+                <span>Loading<span class="loader-dots">...</span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== NAVIGATION ===== -->
+    <nav id="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">
+                <img src="images/mylog.jpg" alt="Anani RM Logo" class="nav-logo-img" />
+                <span class="nav-logo-text">Anani<span class="accent">.</span></span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html#home">Home</a></li>
+                <li><a href="index.html#services" class="active-link">Services</a></li>
+                <li><a href="index.html#about">About</a></li>
+                <li><a href="index.html#portfolio">Portfolio</a></li>
+                <li><a href="index.html#testimonials">Reviews</a></li>
+                <li><a href="index.html#contact">Contact</a></li>
+            </ul>
+            <div class="nav-right">
+                <a href="https://wa.me/27648422146" target="_blank" class="nav-cta">Let's Talk</a>
+                <button class="hamburger" id="hamburger" aria-label="Open menu">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <button class="mobile-close" id="mobileClose" aria-label="Close menu">
+            <i class="fas fa-times"></i>
+        </button>
+        <ul>
+            <li><a href="index.html#home"         class="mobile-link">Home</a></li>
+            <li><a href="index.html#services"     class="mobile-link">Services</a></li>
+            <li><a href="index.html#about"        class="mobile-link">About</a></li>
+            <li><a href="index.html#portfolio"    class="mobile-link">Portfolio</a></li>
+            <li><a href="index.html#testimonials" class="mobile-link">Reviews</a></li>
+            <li><a href="index.html#contact"      class="mobile-link">Contact</a></li>
+        </ul>
+        <a href="https://wa.me/27648422146" target="_blank" class="mobile-whatsapp">
+            <i class="fab fa-whatsapp"></i> Chat on WhatsApp
+        </a>
+    </div>
+    <div class="menu-overlay" id="menuOverlay"></div>
+
+    <canvas id="particleCanvas"></canvas>
+
+
+    <!-- ============================================================
+         1. PAGE HERO
+    ============================================================ -->
+    <section class="page-hero">
+        <div class="page-hero-content">
+
+            <div class="hero-badge-port">
+                <span class="badge-dot-port"></span>
+                🎨 Service · Personal Portfolio Websites
+            </div>
+
+            <h1 class="page-hero-title">
+                Showcase Your Work with a<br>
+                <span class="gradient-text-port">Stunning Personal Portfolio</span>
+            </h1>
+
+            <p class="page-hero-subtitle">
+                Whether you are a freelancer, photographer, artist, or job seeker —
+                stand out online with a unique, fully responsive digital resume that
+                tells your story better than any paper CV ever could.
+            </p>
+
+            <!-- Tag pills -->
+            <div class="hero-tag-pills">
+                <span class="hero-tag-pill"><i class="fas fa-paint-brush"></i> UI/UX Design</span>
+                <span class="hero-tag-pill"><i class="fas fa-mobile-alt"></i> Mobile Friendly</span>
+                <span class="hero-tag-pill"><i class="fas fa-fingerprint"></i> Personal Brand</span>
+            </div>
+
+            <div class="page-hero-buttons">
+                <a href="https://wa.me/27648422146?text=Hi!%20I%20want%20to%20build%20a%20personal%20portfolio%20website.%20Let%27s%20chat%20about%20my%20vision%20and%20a%20budget%20that%20works%20for%20me."
+                   target="_blank"
+                   class="btn-whatsapp-hero">
+                    <i class="fab fa-whatsapp"></i>
+                    <span>Get Started on WhatsApp</span>
+                </a>
+                <a href="#packages" class="btn-ghost">
+                    <i class="fas fa-tags"></i>
+                    <span>View Starter Packages</span>
+                </a>
+            </div>
+
+            <!-- Trust stats -->
+            <div class="trust-bar">
+                <div class="trust-item">
+                    <span class="trust-num">100%</span>
+                    <span class="trust-label">Custom-Built</span>
+                </div>
+                <div class="trust-divider"></div>
+                <div class="trust-item">
+                    <span class="trust-num">Mobile</span>
+                    <span class="trust-label">First Design</span>
+                </div>
+                <div class="trust-divider"></div>
+                <div class="trust-item">
+                    <span class="trust-num">Flex</span>
+                    <span class="trust-label">Negotiable Price</span>
+                </div>
+                <div class="trust-divider"></div>
+                <div class="trust-item">
+                    <span class="trust-num">Fast</span>
+                    <span class="trust-label">Turnaround</span>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+
+    <!-- ============================================================
+         2. WHY A PORTFOLIO BEATS A STANDARD CV
+    ============================================================ -->
+    <section class="compare-section">
+        <div class="container">
+
+            <div class="section-header reveal">
+                <span class="section-tag">Why It Matters</span>
+                <h2 class="section-title">Your Portfolio Website vs <span class="gradient-text-port">A Standard CV</span></h2>
+                <p class="section-subtitle">
+                    A CV tells a hiring manager what you did. A portfolio website
+                    shows them exactly who you are, what you can do, and why you
+                    are worth hiring — all in one click.
+                </p>
+            </div>
+
+            <div class="compare-grid">
+
+                <!-- Left: Old way (CV) -->
+                <div class="compare-card old-way">
+                    <span class="compare-label bad-label">📄 Standard CV / Resume</span>
+                    <h3>Forgettable in a Pile of 200</h3>
+                    <ul class="compare-list">
+                        <li><i class="fas fa-times"></i> Static text — no visual impact or personality</li>
+                        <li><i class="fas fa-times"></i> Gets deleted or lost after one quick read</li>
+                        <li><i class="fas fa-times"></i> Cannot show actual work — only describes it</li>
+                        <li><i class="fas fa-times"></i> Formatting breaks across different devices</li>
+                        <li><i class="fas fa-times"></i> No way to demonstrate technical or creative skills</li>
+                        <li><i class="fas fa-times"></i> No links, no interactivity, no personality</li>
+                        <li><i class="fas fa-times"></i> Needs to be updated and re-sent manually</li>
+                    </ul>
+                </div>
+
+                <!-- Right: Portfolio website -->
+                <div class="compare-card new-way">
+                    <span class="compare-label good-label">🌐 Personal Portfolio Website</span>
+                    <h3>Memorable, Shareable, Always Online</h3>
+                    <ul class="compare-list">
+                        <li><i class="fas fa-check"></i> Visual, animated, and uniquely branded to YOU</li>
+                        <li><i class="fas fa-check"></i> Lives at a permanent URL — share it everywhere</li>
+                        <li><i class="fas fa-check"></i> Show real projects, galleries, and case studies</li>
+                        <li><i class="fas fa-check"></i> Looks perfect on every phone, tablet &amp; desktop</li>
+                        <li><i class="fas fa-check"></i> Proves your skills by existing as a working website</li>
+                        <li><i class="fas fa-check"></i> Contact forms, social links &amp; WhatsApp built-in</li>
+                        <li><i class="fas fa-check"></i> Update content once — visible to everyone instantly</li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ============================================================
+         3. WHO IT'S BUILT FOR
+    ============================================================ -->
+    <section class="audience-section">
+        <div class="container">
+
+            <div class="section-header reveal">
+                <span class="section-tag">Who It's For</span>
+                <h2 class="section-title">A Portfolio for <span class="gradient-text-port">Every Creative & Professional</span></h2>
+                <p class="section-subtitle">
+                    If you have a skill, a story, or a body of work to share —
+                    you need a portfolio. Here are the people I build for most.
+                </p>
+            </div>
+
+            <div class="audience-grid">
+
+                <div class="audience-card reveal-card">
+                    <div class="card-glow"></div>
+                    <span class="audience-emoji">👨‍💻</span>
+                    <h4>Developers &amp; Tech Grads</h4>
+                    <p>Showcase GitHub projects, skills stacks, and internship work to land your first role.</p>
+                </div>
+
+                <div class="audience-card reveal-card">
+                    <div class="card-glow"></div>
+                    <span class="audience-emoji">📸</span>
+                    <h4>Photographers &amp; Artists</h4>
+                    <p>Display your best work in a clean gallery format that clients can browse and book from.</p>
+                </div>
+
+                <div class="audience-card reveal-card">
+                    <div class="card-glow"></div>
+                    <span class="audience-emoji">🎓</span>
+                    <h4>Job Seekers &amp; Graduates</h4>
+                    <p>Stand out from the crowd with a professional online profile that goes beyond a paper CV.</p>
+                </div>
+
+                <div class="audience-card reveal-card">
+                    <div class="card-glow"></div>
+                    <span class="audience-emoji">💼</span>
+                    <h4>Freelancers &amp; Consultants</h4>
+                    <p>Build credibility, attract clients, and let your past work do the selling for you.</p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ============================================================
+         4. PORTFOLIO FEATURES
+    ============================================================ -->
+    <section class="features-section">
+        <div class="container">
+
+            <div class="section-header reveal">
+                <span class="section-tag">What's Inside</span>
+                <h2 class="section-title">Every Feature Your <span class="gradient-text-port">Portfolio Needs</span></h2>
+                <p class="section-subtitle">
+                    Every portfolio I build includes these core sections and features — all
+                    designed to impress, perform, and convert visitors into opportunities.
+                </p>
+            </div>
+
+            <div class="features-grid">
+
+                <!-- Feature 1: Interactive Gallery -->
+                <div class="feature-card reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="feature-icon"><i class="fas fa-images"></i></div>
+                    <h3>Interactive Project Gallery</h3>
+                    <p>
+                        A visually rich, filterable gallery that lets visitors browse your
+                        work by category — with hover animations, project descriptions,
+                        and links to live demos or case studies.
+                    </p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-circle"></i> Category filter buttons (Web, Design, Photography, etc.)</li>
+                        <li><i class="fas fa-circle"></i> Smooth hover zoom and overlay effects</li>
+                        <li><i class="fas fa-circle"></i> Project title, description, and external links</li>
+                        <li><i class="fas fa-circle"></i> Mobile-optimised touch-friendly browsing</li>
+                    </ul>
+                </div>
+
+                <!-- Feature 2: Personal Brand & About -->
+                <div class="feature-card reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="feature-icon"><i class="fas fa-user-circle"></i></div>
+                    <h3>Personal Brand &amp; About Section</h3>
+                    <p>
+                        A dedicated section that introduces you — your story, what
+                        you do, your skills, and what you stand for. Designed to leave
+                        a lasting impression in the first 10 seconds.
+                    </p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-circle"></i> Professional profile photo placement</li>
+                        <li><i class="fas fa-circle"></i> Animated skill bars or tag clouds</li>
+                        <li><i class="fas fa-circle"></i> Education &amp; experience timeline</li>
+                        <li><i class="fas fa-circle"></i> Downloadable CV button integrated</li>
+                    </ul>
+                </div>
+
+                <!-- Feature 3: Contact & Conversion -->
+                <div class="feature-card reveal-card">
+                    <div class="card-glow"></div>
+                    <div class="feature-icon"><i class="fas fa-paper-plane"></i></div>
+                    <h3>Contact Form &amp; Social Integration</h3>
+                    <p>
+                        Make it easy for clients, employers, and collaborators to reach
+                        you. Multiple contact options so no opportunity slips through
+                        the cracks.
+                    </p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-circle"></i> Working contact form delivered to your inbox</li>
+                        <li><i class="fas fa-circle"></i> WhatsApp direct link button</li>
+                        <li><i class="fas fa-circle"></i> Linked social icons (LinkedIn, GitHub, Instagram)</li>
+                        <li><i class="fas fa-circle"></i> Email address with anti-spam protection</li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ============================================================
+         5. PRICING — Negotiable Starter Packages
+    ============================================================ -->
+    <section class="pricing-section" id="packages">
+        <div class="container">
+
+            <div class="section-header reveal">
+                <span class="section-tag">Starter Packages</span>
+                <h2 class="section-title">Highly Negotiable <span class="gradient-text-port">Rates for Every Budget</span></h2>
+                <p class="section-subtitle">
+                    These are starting guides only. Every portfolio is different —
+                    if you have a specific vision or a tight budget, just message me
+                    and we will make it work.
+                </p>
+            </div>
+
+            <div class="packages-grid">
+
+                <!-- Package 1: Simple Portfolio -->
+                <div class="package-card reveal-card">
+                    <div class="package-name">Simple Portfolio</div>
+                    <div class="package-tagline">
+                        One clean page. Perfect for job seekers, students, and those starting out.
+                    </div>
+                    <div class="package-price">
+                        <span class="price-from">Starting from</span>
+                        <span class="price-amount-pkg">R200</span>
+                        <span class="price-period">once-off · negotiable</span>
+                    </div>
+                    <ul class="package-includes">
+                        <li><i class="fas fa-check-circle"></i> Single-page responsive layout</li>
+                        <li><i class="fas fa-check-circle"></i> Hero, About, Skills &amp; Contact sections</li>
+                        <li><i class="fas fa-check-circle"></i> Basic project showcase (up to 4 items)</li>
+                        <li><i class="fas fa-check-circle"></i> Social media links integrated</li>
+                        <li><i class="fas fa-check-circle"></i> Mobile-friendly on all devices</li>
+                        <li><i class="fas fa-check-circle"></i> Delivered in 3–5 working days</li>
+                    </ul>
+                    <a href="https://wa.me/27648422146?text=Hi%20Anani!%20I'm%20interested%20in%20the%20Simple%20Portfolio%20package.%20Can%20we%20discuss%20pricing%3F"
+                       target="_blank" class="btn-package">
+                        <i class="fab fa-whatsapp"></i> Get This Package
+                    </a>
+                </div>
+
+                <!-- Package 2: Multi-Page Portfolio — RECOMMENDED -->
+                <div class="package-card recommended reveal-card">
+                    <div class="package-badge">⭐ Most Popular</div>
+                    <div class="package-name">Multi-Page Portfolio</div>
+                    <div class="package-tagline">
+                        A full personal website with separate pages for a polished, professional feel.
+                    </div>
+                    <div class="package-price">
+                        <span class="price-from">Starting from</span>
+                        <span class="price-amount-pkg">R350</span>
+                        <span class="price-period">once-off · negotiable</span>
+                    </div>
+                    <ul class="package-includes">
+                        <li><i class="fas fa-check-circle"></i> Everything in Simple Portfolio</li>
+                        <li><i class="fas fa-check-circle"></i> Separate Home, About, Projects &amp; Contact pages</li>
+                        <li><i class="fas fa-check-circle"></i> Animated page transitions &amp; scroll effects</li>
+                        <li><i class="fas fa-check-circle"></i> Filterable project gallery (up to 10 items)</li>
+                        <li><i class="fas fa-check-circle"></i> Working contact form (emails you directly)</li>
+                        <li><i class="fas fa-check-circle"></i> Custom colour scheme matching your brand</li>
+                        <li><i class="fas fa-check-circle"></i> Two revision rounds included</li>
+                    </ul>
+                    <a href="https://wa.me/27648422146?text=Hi%20Anani!%20I'm%20interested%20in%20the%20Multi-Page%20Portfolio%20package.%20Let%27s%20chat%20about%20a%20flexible%20price."
+                       target="_blank" class="btn-package btn-package-featured">
+                        <i class="fab fa-whatsapp"></i> Get This Package
+                    </a>
+                </div>
+
+                <!-- Package 3: Premium Creative -->
+                <div class="package-card reveal-card">
+                    <div class="package-name">Premium Creative Portfolio</div>
+                    <div class="package-tagline">
+                        For creatives who want animations, galleries, and a truly unique online presence.
+                    </div>
+                    <div class="package-price">
+                        <span class="price-from">Starting from</span>
+                        <span class="price-amount-pkg">R550</span>
+                        <span class="price-period">once-off · negotiable</span>
+                    </div>
+                    <ul class="package-includes">
+                        <li><i class="fas fa-check-circle"></i> Everything in Multi-Page Portfolio</li>
+                        <li><i class="fas fa-check-circle"></i> Advanced scroll animations &amp; parallax effects</li>
+                        <li><i class="fas fa-check-circle"></i> Lightbox image/video gallery for photographers</li>
+                        <li><i class="fas fa-check-circle"></i> Optional blog or updates section</li>
+                        <li><i class="fas fa-check-circle"></i> SEO meta tags &amp; Google-ready structure</li>
+                        <li><i class="fas fa-check-circle"></i> Unlimited revisions during the build phase</li>
+                        <li><i class="fas fa-check-circle"></i> 14-day post-launch support</li>
+                    </ul>
+                    <a href="https://wa.me/27648422146?text=Hi%20Anani!%20I'm%20interested%20in%20the%20Premium%20Creative%20Portfolio%20package.%20Can%20we%20discuss%20a%20flexible%20price%3F"
+                       target="_blank" class="btn-package">
+                        <i class="fab fa-whatsapp"></i> Get This Package
+                    </a>
+                </div>
+
+            </div><!-- /.packages-grid -->
+
+            <!-- Negotiation note -->
+            <div class="negotiation-note reveal">
+                <div class="note-icon-wrap">💬</div>
+                <div>
+                    <h4>Honest Note on Pricing</h4>
+                    <p>
+                        I am <strong>still building my portfolio</strong> as a developer, which means
+                        my rates are <strong>highly flexible and open to negotiation</strong>. Whether
+                        you are a student with R100 or a freelancer with a bigger budget —
+                        reach out and we will have an honest conversation about what is possible.
+                        <strong>Your budget is not a barrier. Your vision is the priority.</strong>
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+
+    <!-- ============================================================
+         6. COLLABORATIVE BUILD PROCESS — 4 Steps
+    ============================================================ -->
+    <section class="process-section">
+        <div class="container">
+
+            <div class="section-header reveal">
+                <span class="section-tag">How We Work</span>
+                <h2 class="section-title">My Collaborative <span class="gradient-text-port">Build Process</span></h2>
+                <p class="section-subtitle">
+                    Simple, creative, and done at your pace. From first chat to live website —
+                    here is exactly what to expect.
+                </p>
+            </div>
+
+            <div class="steps-grid">
+
+                <!-- Step 1 -->
+                <div class="step-card reveal-card">
+                    <div class="step-number">1</div>
+                    <h3>Vision &amp; Brand Chat</h3>
+                    <p>
+                        We start with a WhatsApp conversation. Tell me about your field,
+                        the impression you want to leave, any websites you admire, and
+                        your preferred colours or style. Your vision guides everything.
+                    </p>
+                    <div class="step-detail-tag">
+                        <i class="fab fa-whatsapp"></i> Free · No Commitment
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="step-card reveal-card">
+                    <div class="step-number">2</div>
+                    <h3>Design Planning</h3>
+                    <p>
+                        I plan the page structure, choose a colour palette that matches
+                        your personality, and agree on the layout with you before writing
+                        a single line of code — so there are no surprises later.
+                    </p>
+                    <div class="step-detail-tag">
+                        <i class="fas fa-pencil-ruler"></i> You approve before build
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="step-card reveal-card">
+                    <div class="step-number">3</div>
+                    <h3>Build &amp; Polish</h3>
+                    <p>
+                        I code the full website, add your content, projects, and
+                        photos, then apply animations and finishing touches until
+                        every detail looks premium and performs fast.
+                    </p>
+                    <div class="step-detail-tag">
+                        <i class="fas fa-code"></i> Regular progress updates
+                    </div>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="step-card reveal-card">
+                    <div class="step-number">4</div>
+                    <h3>Launch &amp; Share</h3>
+                    <p>
+                        Your portfolio goes live. I handle deployment, give you a
+                        clean shareable URL, and walk you through how to update your
+                        content whenever needed. Then it is all yours.
+                    </p>
+                    <div class="step-detail-tag">
+                        <i class="fas fa-rocket"></i> Live &amp; ready to share
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ============================================================
+         7. FINAL WHATSAPP CTA
+    ============================================================ -->
+    <section class="final-cta-section">
+        <div class="container">
+            <div class="final-cta-wrap reveal">
+
+                <div class="cta-port-icon">
+                    <i class="fas fa-palette"></i>
+                </div>
+
+                <h2>
+                    Ready to Own Your<br>
+                    <span class="gradient-text-port">Corner of the Internet?</span>
+                </h2>
+
+                <p>
+                    Your work deserves to be seen. Message me right now with your vision,
+                    your budget, or just a few words about what you do — and I will take
+                    it from there. <strong>Let's build something that makes people remember you.</strong>
+                </p>
+
+                <!-- Pre-filled message preview -->
+                <div class="wa-message-preview">
+                    "Hi! I want to build a personal portfolio website. Let's chat
+                    about my vision and a budget that works for me."
+                </div>
+
+                <a href="https://wa.me/27648422146?text=Hi!%20I%20want%20to%20build%20a%20personal%20portfolio%20website.%20Let%27s%20chat%20about%20my%20vision%20and%20a%20budget%20that%20works%20for%20me."
+                   target="_blank"
+                   class="btn-wa-large">
+                    <i class="fab fa-whatsapp"></i>
+                    <span>Start on WhatsApp Now</span>
+                </a>
+
+                <p class="cta-footnote">
+                    💬 Usually responds within the hour &nbsp;·&nbsp;
+                    📍 Based in Thohoyandou, Limpopo &nbsp;·&nbsp;
+                    🇿🇦 Proudly South African
+                </p>
+
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ============================================================
+         FOOTER
+    ============================================================ -->
+    <footer class="footer">
+        <div class="container">
+
+            <div class="footer-grid">
+
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <img src="images/mylog.jpg" alt="Anani RM" class="footer-logo-img" />
+                        Anani<span class="accent">.</span>
+                    </div>
+                    <p>Crafting premium digital experiences and AI solutions from South Africa to the world.</p>
+                    <div class="social-row">
+                        <a href="https://github.com/ramagoma-glitch"        target="_blank" class="s-icon"><i class="fab fa-github"></i></a>
+                        <a href="https://www.linkedin.com/in/anani-ramagoma" target="_blank" class="s-icon"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="https://twitter.com/AnaniRamagoma"          target="_blank" class="s-icon"><i class="fab fa-twitter"></i></a>
+                        <a href="https://www.instagram.com/anani.rm"         target="_blank" class="s-icon"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.facebook.com/AnaniRM"           target="_blank" class="s-icon facebook-icon"><i class="fab fa-facebook-f"></i></a>
+                    </div>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html#home">Home</a></li>
+                        <li><a href="index.html#services">Services</a></li>
+                        <li><a href="index.html#about">About</a></li>
+                        <li><a href="index.html#portfolio">Portfolio</a></li>
+                        <li><a href="index.html#contact">Contact</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+    <h4>Services</h4>
+    <ul>
+        <li><a href="business-websites.html">Business Websites</a></li>
+        <li><a href="cv-services.html">Curriculum Vitae <b>(CV)</b></a></li>
+        <li><a href="chatbots.html">AI Chatbots</a></li>
+        <li><a href="website-RedesingAndDesing.html">Website Redesign</a></li>
+        <li><a href="WhatsAppIntegration.html">WhatsApp Integration</a></li>
+        <li><a href="SEO-Optimization.html">SEO Optimization</a></li>
+        <li><a href="academic-applications.html">Academic Application</a></li>
+    </ul>
+</div>
+
+                <div class="footer-col">
+                    <h4>Contact</h4>
+                    <p><i class="fab fa-whatsapp"></i>+27 64 841 2146</p>
+                    <p><i class="fas fa-envelope"></i>Ramagoma212@gmail.com</p>
+                    <p><i class="fas fa-map-marker-alt"></i>Thohoyandou, Limpopo, SA</p>
+                </div>
+
+            </div>
+
+            <div class="footer-bottom">
+                <p>
+                    &copy; <span id="currentYear"></span>
+                    Ramagoma Muthuhadini <b>Anani</b>. All rights reserved.
+                    Built with ❤️ in South Africa.
+                </p>
+                 <div class="footer-legal">
+                    <a href="documents/privacy.pdf" target="_blank">Privacy Policy</a>
+                    <span>·</span>
+                    <a href="documents/terms.pdf" target="_blank">Terms of Service</a>
+                </div>
+            </div>
+
+        </div>
+    </footer>
+
+    <button id="backToTop" aria-label="Back to top">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+
+    <script src="script.js"></script>
+
+</body>
+</html>

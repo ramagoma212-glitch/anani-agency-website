@@ -176,6 +176,90 @@ button { font-family: var(--f-body); }
     box-shadow: 0 0 12px rgba(0,212,255,.25);
     transition: var(--t);
 }
+
+/* ── Logo pill container — wraps the image + text into a
+       glowing WhatsApp-green clickable pill button ──────────── */
+.nav-logo-pill {
+    padding: 5px 16px 5px 5px;        /* tight left so image sits on edge */
+    background: rgba(37, 211, 102, .06);
+    border: 1px solid rgba(37, 211, 102, .22);
+    border-radius: 50px;               /* full pill shape */
+    transition: all 0.3s cubic-bezier(.4,0,.2,1);
+    text-decoration: none;
+}
+
+.nav-logo-pill:hover {
+    background: rgba(37, 211, 102, .13);
+    border-color: rgba(37, 211, 102, .45);
+    box-shadow: 0 0 22px rgba(37, 211, 102, .25);
+    transform: translateY(-2px);
+}
+
+/* Image inside the pill — stays circular */
+.nav-logo-pill .nav-logo-img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: top center;
+    border: 2px solid rgba(37, 211, 102, .4);
+    box-shadow: 0 0 10px rgba(37, 211, 102, .3);
+    transition: all 0.3s cubic-bezier(.4,0,.2,1);
+    flex-shrink: 0;
+}
+
+.nav-logo-pill:hover .nav-logo-img {
+    border-color: #25D366;
+    box-shadow: 0 0 18px rgba(37, 211, 102, .5);
+}
+
+/* Column wrapper for the two lines of text */
+.nav-logo-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    line-height: 1.2;
+}
+
+/* Main name text — unchanged look */
+.nav-logo-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #f0f0ff;
+    letter-spacing: -.3px;
+}
+
+/* Sub-label "Try AI Auto-Reply" — WhatsApp green accent */
+.nav-logo-sublabel {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-family: 'Outfit', sans-serif;
+    font-size: .62rem;
+    font-weight: 700;
+    color: #25D366;
+    letter-spacing: .4px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.nav-logo-sublabel i {
+    font-size: .6rem;
+    animation: waPulse 2s ease infinite;
+}
+
+@keyframes waPulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: .55; }
+}
+
+/* ── Mobile: hide the sublabel on very small screens
+       to keep the nav bar clean ──────────────────────────────── */
+@media (max-width: 380px) {
+    .nav-logo-sublabel { display: none; }
+    .nav-logo-pill     { padding: 5px 10px 5px 5px; }
+}
 .nav-logo:hover .nav-logo-img {
     border-color: var(--cyan);
     box-shadow: 0 0 24px rgba(0,212,255,.5);
@@ -1452,4 +1536,241 @@ section { padding: var(--section-gap); position: relative; }
     .section-title { font-size: 1.7rem; }
 
     .nav-logo-text { display: none; } /* show only image on very small screens */
+}
+/* ── Base badge container (Desktop pill) ──────────────────── */
+.wa-autoreply-badge {
+    /* Fixed to the right side of the viewport, below the navbar */
+    position: fixed;
+    top: 88px;                   /* sits just below the sticky nav */
+    right: 20px;
+    z-index: 998;                /* below modals, above everything else */
+
+    /* Pill shape */
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 18px 8px 8px;
+    border-radius: 50px;
+    text-decoration: none;
+    cursor: pointer;
+
+    /* Dark premium glass background */
+    background: rgba(5, 5, 16, 0.88);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(37, 211, 102, 0.35);
+    box-shadow:
+        0 0 28px rgba(37, 211, 102, 0.15),
+        0 4px 24px rgba(0, 0, 0, 0.45),
+        inset 0 0 0 1px rgba(255,255,255,.03);
+
+    /* Smooth transitions */
+    transition: all 0.35s cubic-bezier(.4, 0, .2, 1);
+
+    /* Gentle floating animation */
+    animation: waBadgeFloat 3.5s ease-in-out infinite;
+}
+
+/* Hover — badge glows brighter and lifts */
+.wa-autoreply-badge:hover {
+    border-color: rgba(37, 211, 102, 0.7);
+    background: rgba(5, 5, 16, 0.96);
+    box-shadow:
+        0 0 45px rgba(37, 211, 102, 0.35),
+        0 8px 32px rgba(0, 0, 0, 0.5);
+    transform: translateY(-3px) scale(1.02);
+    animation-play-state: paused;  /* pause float on hover */
+}
+
+@keyframes waBadgeFloat {
+    0%, 100% { transform: translateY(0px);  }
+    50%       { transform: translateY(-5px); }
+}
+
+
+/* ── Pulsing live-indicator dot ───────────────────────────── */
+.wa-badge-dot {
+    position: absolute;
+    top: 7px;
+    right: 9px;
+    width: 8px;
+    height: 8px;
+    background: #25D366;
+    border-radius: 50%;
+    border: 1.5px solid rgba(5,5,16,.8);
+    animation: waDotPulse 2s ease-in-out infinite;
+    flex-shrink: 0;
+}
+
+@keyframes waDotPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(37,211,102,.55); }
+    60%       { box-shadow: 0 0 0 7px rgba(37,211,102,0); }
+}
+
+
+/* ── Bot image — circular ─────────────────────────────────── */
+.wa-badge-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;         /* perfect circle */
+    object-fit: cover;
+    object-position: center;
+    border: 2px solid rgba(37, 211, 102, 0.5);
+    box-shadow: 0 0 14px rgba(37, 211, 102, 0.3);
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.wa-autoreply-badge:hover .wa-badge-img {
+    border-color: #25D366;
+    box-shadow: 0 0 22px rgba(37, 211, 102, 0.55);
+    transform: scale(1.06);
+}
+
+
+/* ── Text block: title + subtitle ────────────────────────── */
+.wa-badge-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    line-height: 1.2;
+}
+
+.wa-badge-title {
+    font-family: 'Syne', sans-serif;
+    font-size: .72rem;
+    font-weight: 800;
+    color: #25D366;
+    letter-spacing: .6px;
+    white-space: nowrap;
+    text-transform: uppercase;
+}
+
+.wa-badge-sub {
+    font-family: 'Outfit', sans-serif;
+    font-size: .6rem;
+    font-weight: 500;
+    color: rgba(136, 136, 170, 0.75);
+    white-space: nowrap;
+    letter-spacing: .2px;
+}
+
+
+/* ── WhatsApp icon ────────────────────────────────────────── */
+.wa-badge-icon {
+    font-size: 1.25rem;
+    color: #25D366;
+    flex-shrink: 0;
+    animation: waIconBounce 2.5s ease-in-out infinite;
+    transition: transform 0.3s ease;
+}
+
+.wa-autoreply-badge:hover .wa-badge-icon {
+    animation-play-state: paused;
+    transform: scale(1.2) rotate(-5deg);
+}
+
+@keyframes waIconBounce {
+    0%, 100% { transform: scale(1);    }
+    50%       { transform: scale(1.18); }
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   MOBILE — Converts to a circular FAB in the bottom-right
+   corner so it never crowds the hero text or nav on phones.
+════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+    .wa-autoreply-badge {
+        /* Lift off the right rail, switch to bottom FAB position */
+        top: auto;
+        right: 18px;
+        bottom: 92px;           /* above the back-to-top button  */
+
+        /* Collapse pill into a circle */
+        padding: 10px;
+        border-radius: 50%;     /* full circle */
+        gap: 0;
+
+        /* Stronger glow on mobile so it stands out */
+        box-shadow:
+            0 0 32px rgba(37,211,102,.28),
+            0 4px 24px rgba(0,0,0,.55);
+
+        animation: waBadgeFloat 3.5s ease-in-out infinite;
+    }
+
+    .wa-autoreply-badge:hover,
+    .wa-autoreply-badge:active {
+        transform: scale(1.1);
+        box-shadow: 0 0 46px rgba(37,211,102,.45), 0 4px 28px rgba(0,0,0,.55);
+        animation-play-state: paused;
+    }
+
+    /* Hide the text content — FAB only shows the image */
+    .wa-badge-text,
+    .wa-badge-icon {
+        display: none;
+    }
+
+    /* Larger tap target image on mobile */
+    .wa-badge-img {
+        width: 44px;
+        height: 44px;
+    }
+
+    /* Reposition the live dot on the circular FAB */
+    .wa-badge-dot {
+        top: 5px;
+        right: 5px;
+        width: 10px;
+        height: 10px;
+        border-width: 2px;
+    }
+
+    /* ── Tooltip label appears to the LEFT of the FAB on tap ─── */
+    .wa-autoreply-badge::after {
+        content: 'Try AI Auto-Reply!!';
+        position: absolute;
+        right: 66px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(5, 5, 16, .96);
+        border: 1px solid rgba(37,211,102,.35);
+        color: #25D366;
+        font-family: 'Outfit', sans-serif;
+        font-size: .7rem;
+        font-weight: 700;
+        letter-spacing: .4px;
+        text-transform: uppercase;
+        padding: 5px 12px;
+        border-radius: 20px;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        box-shadow: 0 0 14px rgba(37,211,102,.2);
+        transition: opacity .25s ease;
+    }
+
+    /* Show tooltip on hover / tap */
+    .wa-autoreply-badge:hover::after,
+    .wa-autoreply-badge:active::after {
+        opacity: 1;
+    }
+}
+
+
+/* ── Extra-small phones (≤ 380px) ────────────────────────── */
+@media (max-width: 380px) {
+
+    .wa-autoreply-badge {
+        right: 14px;
+        bottom: 88px;
+    }
+
+    .wa-badge-img {
+        width: 40px;
+        height: 40px;
+    }
 }

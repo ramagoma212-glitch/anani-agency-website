@@ -41,10 +41,27 @@
         <div class="nav-container">
 
             <!-- Logo — save mylog.jpg in the same folder as index.html -->
-            <a href="#home" class="nav-logo">
-                <img src="images/mylog.jpg" alt="Anani RM Logo" class="nav-logo-img" />
-                <span class="nav-logo-text">RM<span class="accent"></span></span>
-            </a>
+           <a href="https://wa.me/27754738149?text=Hi%20Anani,%20I%27m%20interested%20in%20your%20digital%20services!"
+   target="_blank"
+   rel="noopener noreferrer"
+   class="nav-logo nav-logo-pill"
+   aria-label="Chat with Anani on WhatsApp — AI Auto-Reply Active">
+
+    <!-- Circular profile photo — save as images/mylog.jpg -->
+    <img src="images/mylog.jpg"
+         alt="Anani RM"
+         class="nav-logo-img" />
+
+    <!-- Two-line text: name + AI auto-reply hint -->
+    <div class="nav-logo-info">
+        <span class="nav-logo-name">Anani<span class="accent">.</span></span>
+        <span class="nav-logo-sublabel">
+            <i class="fab fa-whatsapp"></i>
+            Try WA🤖 AI Auto-Reply!!
+        </span>
+    </div>
+
+</a>
 
             <!-- Desktop Links -->
             <ul class="nav-links">
@@ -58,7 +75,12 @@
 
             <!-- CTA + Hamburger -->
             <div class="nav-right">
-                <a href="https://wa.me/27648412146" target="_blank" class="nav-cta">Let's Talk</a>
+                <a href="https://wa.me/27754738149?text=Hi%20Anani,%20I%27m%20interested%20in%20your%20digital%20services!"
+   target="_blank"
+   rel="noopener noreferrer"
+   class="nav-cta">
+    Let's Talk
+</a>
                 <button class="hamburger" id="hamburger" aria-label="Open menu">
                     <span></span>
                     <span></span>
@@ -128,10 +150,13 @@
                     <i class="fas fa-arrow-right"></i>
                 </a>
                 <!-- "Get In Touch" opens WhatsApp directly -->
-                <a href="https://wa.me/27648412146" target="_blank" class="btn-secondary">
-                    <i class="fab fa-whatsapp"></i>
-                    <span>Get In Touch</span>
-                </a>
+                <a href="https://wa.me/27754738149?text=Hi%20Anani,%20I%27m%20interested%20in%20your%20digital%20services!"
+   target="_blank"
+   rel="noopener noreferrer"
+   class="btn-secondary">
+    <i class="fab fa-whatsapp"></i>
+    <span>Get In Touch</span>
+</a>
             </div>
 
             <!-- Stats row -->
@@ -804,6 +829,36 @@
     </footer>
 
     <!-- Back-to-top floating button -->
+     <a href="https://wa.me/27754738149?text=Hi%20Anani,%20I%27m%20interested%20in%20your%20digital%20services!"
+   target="_blank"
+   rel="noopener noreferrer"
+   class="wa-autoreply-badge"
+   title="Chat with Anani — WhatsApp AI Auto-Reply is Live!"
+   aria-label="Try WhatsApp AI Auto-Reply">
+
+    <!-- Live pulsing green dot — signals the bot is active -->
+    <span class="wa-badge-dot"></span>
+
+    <!--
+        ✅ IMPORTANT — IMAGE FILE:
+        Save your WhatsApp bot logo image in your project at:
+            images/whatsappbot.png
+        If your file is .jpg or .webp, update the src below to match.
+    -->
+    <img src="images/whatsappbot.jpg"
+         alt="WhatsApp AI Bot"
+         class="wa-badge-img" />
+
+    <!-- Text: visible on desktop, hidden on mobile FAB -->
+    <div class="wa-badge-text">
+        <span class="wa-badge-title">TRY WA AI AUTO-REPLY!!</span>
+        <span class="wa-badge-sub">AI Active · 24/7 Instant Reply</span>
+    </div>
+
+    <!-- WhatsApp icon -->
+    <i class="fab fa-whatsapp wa-badge-icon"></i>
+
+</a>
     <button id="backToTop" aria-label="Back to top">
         <i class="fas fa-chevron-up"></i>
     </button>
@@ -811,7 +866,7 @@
     <script src="script.js"></script>
 
     <script>
-    (function(){if(!window.chatbase||window.chatbase("getState")!=="initialized"){window.chatbase=(...arguments)=>{if(!window.chatbase.q){window.chatbase.q=[]}window.chatbase.q.push(arguments)};window.chatbase=new Proxy(window.chatbase,{get(target,prop){if(prop==="q"){return target.q}return(...args)=>target(prop,...args)}})}const onLoad=function(){const script=document.createElement("script");script.src="https://www.chatbase.co/embed.min.js";script.id="PaBSfA_sO1HjjLRo1lc3t";script.domain="www.chatbase.co";document.body.appendChild(script)};if(document.readyState==="complete"){onLoad()}else{window.addEventListener("load",onLoad)}})();
+    (function(){if(!window.chatbase||window.chatbase("getState")!=="initialized"){window.chatbase=(...args)=>{if(!window.chatbase.q){window.chatbase.q=[]}window.chatbase.q.push(args)};window.chatbase=new Proxy(window.chatbase,{get(target,prop){if(prop==="q"){return target.q}return(...args)=>target(prop,...args)}})}const onLoad=function(){const script=document.createElement("script");script.src="https://www.chatbase.co/embed.min.js";script.id="PaBSfA_sO1HjjLRo1lc3t";script.domain="www.chatbase.co";document.body.appendChild(script)};if(document.readyState==="complete"){onLoad()}else{window.addEventListener("load",onLoad)}})();
 </script>
 </body>
 </html>

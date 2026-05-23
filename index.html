@@ -900,6 +900,9 @@
     </div>
 
     <script src="script.js"></script>
+    <script>
+    (function(){if(!window.chatbase||window.chatbase("getState")!=="initialized"){window.chatbase=(...args)=>{if(!window.chatbase.q){window.chatbase.q=[]}window.chatbase.q.push(args)};window.chatbase=new Proxy(window.chatbase,{get(target,prop){if(prop==="q"){return target.q}return(...args)=>target(prop,...args)}})}const onLoad=function(){const script=document.createElement("script");script.src="https://www.chatbase.co/embed.min.js";script.id="PaBSfA_sO1HjjLRo1lc3t";script.domain="www.chatbase.co";document.body.appendChild(script)};if(document.readyState==="complete"){onLoad()}else{window.addEventListener("load",onLoad)}})();
+    </script>
 
     <script>
     (function () {
@@ -927,75 +930,24 @@
     })();
     </script>
 
+    
+
     <script>
-    (function(){if(!window.chatbase||window.chatbase("getState")!=="initialized"){window.chatbase=(...args)=>{if(!window.chatbase.q){window.chatbase.q=[]}window.chatbase.q.push(args)};window.chatbase=new Proxy(window.chatbase,{get(target,prop){if(prop==="q"){return target.q}return(...args)=>target(prop,...args)}})}const onLoad=function(){const script=document.createElement("script");script.src="https://www.chatbase.co/embed.min.js";script.id="PaBSfA_sO1HjjLRo1lc3t";script.domain="www.chatbase.co";document.body.appendChild(script)};if(document.readyState==="complete"){onLoad()}else{window.addEventListener("load",onLoad)}})();
-    </script>
-
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-      import { getAuth, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider, OAuthProvider } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-
-      const firebaseConfig = {
-        apiKey: "AIzaSyA56QwynvqaB0Iniar90VH9tpaO8AYA0x8",
-        authDomain: "rm-digital-1a4ef.firebaseapp.com",
-        projectId: "rm-digital-1a4ef",
-        storageBucket: "rm-digital-1a4ef.firebasestorage.app",
-        messagingSenderId: "648699110691",
-        appId: "1:648699110691:web:ccd9233130c7fe91a75896",
-        measurementId: "G-DP1QC8N3PP"
-      };
-
-      // Initialize Firebase & Auth
-      const app = initializeApp(firebaseConfig);
-      const auth = getAuth(app);
-
-      // Wire Up Button Click Handlers to trigger popups:
-      
-      // Google Auth Trigger
-      document.getElementById('google-login-btn')?.addEventListener('click', async () => {
-        const provider = new GoogleAuthProvider();
-        try {
-          const result = await signInWithPopup(auth, provider);
-          alert(`Welcome to RM Digital, ${result.user.displayName}!`);
-          document.getElementById('login-modal').classList.remove('active');
-          document.body.style.overflow = '';
-        } catch (error) {
-          console.error("Google Auth Error:", error);
-          alert("Login failed or popup closed. Please try again.");
-        }
+      // Placeholder layout button popups while backend is paused
+      document.getElementById('google-login-btn')?.addEventListener('click', () => {
+        alert("Google authentication UI layout ready! (Backend connection paused)");
       });
 
-      // Apple Auth Trigger
-      document.getElementById('apple-login-btn')?.addEventListener('click', async () => {
-        const provider = new OAuthProvider('apple.com');
-        try {
-          const result = await signInWithPopup(auth, provider);
-          alert(`Welcome to RM Digital, ${result.user.displayName || 'Client'}!`);
-          document.getElementById('login-modal').classList.remove('active');
-          document.body.style.overflow = '';
-        } catch (error) {
-          console.error("Apple Auth Error:", error);
-          alert("Apple authentication failed.");
-        }
+      document.getElementById('apple-login-btn')?.addEventListener('click', () => {
+        alert("Apple authentication UI layout ready! (Backend connection paused)");
       });
 
-      // Facebook Auth Trigger
-      document.getElementById('facebook-login-btn')?.addEventListener('click', async () => {
-        const provider = new FacebookAuthProvider();
-        try {
-          const result = await signInWithPopup(auth, provider);
-          alert(`Welcome to RM Digital, ${result.user.displayName}!`);
-          document.getElementById('login-modal').classList.remove('active');
-          document.body.style.overflow = '';
-        } catch (error) {
-          console.error("Facebook Auth Error:", error);
-          alert("Facebook authentication failed.");
-        }
+      document.getElementById('facebook-login-btn')?.addEventListener('click', () => {
+        alert("Facebook authentication UI layout ready! (Backend connection paused)");
       });
 
-      // Input Form Continue Trigger
       document.getElementById('login-continue-btn')?.addEventListener('click', () => {
-        alert("Phone / Email authentication initialized! Processing secure OTP link validation setup.");
+        alert("Email / Phone form entry container layout ready! (Backend connection paused)");
       });
     </script>
 </body>

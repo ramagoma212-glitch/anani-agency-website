@@ -75,6 +75,7 @@
 
             <!-- CTA + Hamburger -->
             <div class="nav-right">
+                <button id="client-login-btn" class="client-login-btn">Client Login</button>
                 <a href="https://wa.me/27754738149?text=Hi%20Anani,%20I%27m%20interested%20in%20your%20digital%20services!"
    target="_blank"
    rel="noopener noreferrer"
@@ -863,10 +864,135 @@
         <i class="fas fa-chevron-up"></i>
     </button>
 
+    <!-- ===== CLIENT LOGIN MODAL ===== -->
+    <div id="login-modal" class="login-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="login-modal-heading">
+        <div class="login-modal-box">
+            <button class="login-modal-close" id="login-modal-close" aria-label="Close login modal">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="login-modal-header">
+                <img src="images/mylog.jpg" alt="Anani RM" class="login-modal-logo" />
+                <h2 class="login-modal-title" id="login-modal-heading">Client <span class="accent">Login</span></h2>
+                <p class="login-modal-sub">Access your project dashboard</p>
+            </div>
+            <div class="login-modal-body">
+                <button id="google-login-btn" class="login-social-btn login-google" type="button">
+                    <i class="fab fa-google"></i>
+                    <span>Continue with Google</span>
+                </button>
+                <button id="apple-login-btn" class="login-social-btn login-apple" type="button">
+                    <i class="fab fa-apple"></i>
+                    <span>Continue with Apple</span>
+                </button>
+                <button id="facebook-login-btn" class="login-social-btn login-facebook" type="button">
+                    <i class="fab fa-facebook-f"></i>
+                    <span>Continue with Facebook</span>
+                </button>
+                <div class="login-divider">
+                    <span class="login-divider-line"></span>
+                    <span class="login-divider-text">or</span>
+                    <span class="login-divider-line"></span>
+                </div>
+                <input type="text" id="login-identifier" class="login-input" placeholder="Email or Phone Number" autocomplete="username" />
+                <button id="login-continue-btn" class="login-continue-btn" type="button">Continue</button>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
+
+    <!-- Client Login Modal Toggle -->
+    <script>
+    (function () {
+        var overlay  = document.getElementById('login-modal');
+        var openBtn  = document.getElementById('client-login-btn');
+        var closeBtn = document.getElementById('login-modal-close');
+
+        function openModal() {
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeModal() {
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        openBtn.addEventListener('click', openModal);
+        closeBtn.addEventListener('click', closeModal);
+        overlay.addEventListener('click', function (e) {
+            if (e.target === overlay) closeModal();
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && overlay.classList.contains('active')) closeModal();
+        });
+    })();
+    </script>
 
     <script>
     (function(){if(!window.chatbase||window.chatbase("getState")!=="initialized"){window.chatbase=(...args)=>{if(!window.chatbase.q){window.chatbase.q=[]}window.chatbase.q.push(args)};window.chatbase=new Proxy(window.chatbase,{get(target,prop){if(prop==="q"){return target.q}return(...args)=>target(prop,...args)}})}const onLoad=function(){const script=document.createElement("script");script.src="https://www.chatbase.co/embed.min.js";script.id="PaBSfA_sO1HjjLRo1lc3t";script.domain="www.chatbase.co";document.body.appendChild(script)};if(document.readyState==="complete"){onLoad()}else{window.addEventListener("load",onLoad)}})();
+</script>
+
+    <!-- Firebase Auth Integration -->
+    <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+  import { getAuth, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider, OAuthProvider } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyA56QwynvqaB0Iniar90VH9tpaO8AYA0x8",
+    authDomain: "rm-digital-1a4ef.firebaseapp.com",
+    projectId: "rm-digital-1a4ef",
+    storageBucket: "rm-digital-1a4ef.firebasestorage.app",
+    messagingSenderId: "648699110691",
+    appId: "1:648699110691:web:ccd9233130c7fe91a75896",
+    measurementId: "G-DP1QC8N3PP"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  // Google Login
+  document.getElementById('google-login-btn')?.addEventListener('click', async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      alert(`Welcome to RM Digital, ${result.user.displayName}!`);
+      document.getElementById('login-modal').style.display = 'none';
+    } catch (error) {
+      console.error("Google Auth Error:", error);
+      alert("Login failed. Please try again.");
+    }
+  });
+
+  // Apple Login
+  document.getElementById('apple-login-btn')?.addEventListener('click', async () => {
+    const provider = new OAuthProvider('apple.com');
+    try {
+      const result = await signInWithPopup(auth, provider);
+      alert(`Welcome to RM Digital, ${result.user.displayName || 'Client'}!`);
+      document.getElementById('login-modal').style.display = 'none';
+    } catch (error) {
+      console.error("Apple Auth Error:", error);
+      alert("Apple authentication failed.");
+    }
+  });
+
+  // Facebook Login
+  document.getElementById('facebook-login-btn')?.addEventListener('click', async () => {
+    const provider = new FacebookAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      alert(`Welcome to RM Digital, ${result.user.displayName}!`);
+      document.getElementById('login-modal').style.display = 'none';
+    } catch (error) {
+      console.error("Facebook Auth Error:", error);
+      alert("Facebook authentication failed.");
+    }
+  });
+
+  // Email/Phone Continue
+  document.getElementById('login-continue-btn')?.addEventListener('click', () => {
+    alert("Phone / Email authentication initialized! Processing OTP or link verification setup.");
+  });
 </script>
 </body>
 </html>

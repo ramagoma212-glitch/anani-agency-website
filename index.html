@@ -75,6 +75,7 @@
 
             <!-- CTA + Hamburger -->
             <div class="nav-right">
+                 <button id="client-login-btn" class="client-login-btn">Login or Sign Up</button>
                 <a href="https://wa.me/27754738149?text=Hi%20Anani,%20I%27m%20interested%20in%20your%20digital%20services!"
    target="_blank"
    rel="noopener noreferrer"
@@ -863,7 +864,69 @@
         <i class="fas fa-chevron-up"></i>
     </button>
 
+       <!-- ===== CLIENT LOGIN MODAL ===== -->
+    <div id="login-modal-overlay" class="login-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="login-modal-heading">
+        <div class="login-modal-box">
+            <button class="login-modal-close" id="login-modal-close" aria-label="Close login modal">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="login-modal-header">
+                <img src="images/mylog.jpg" alt="Anani RM" class="login-modal-logo" />
+                <h2 class="login-modal-title" id="login-modal-heading">Client <span class="accent">Login</span></h2>
+                <p class="login-modal-sub">Access your project dashboard</p>
+            </div>
+            <div class="login-modal-body">
+                <button class="login-social-btn login-google" type="button">
+                    <i class="fab fa-google"></i>
+                    <span>Continue with Google</span>
+                </button>
+                <button class="login-social-btn login-apple" type="button">
+                    <i class="fab fa-apple"></i>
+                    <span>Continue with Apple</span>
+                </button>
+                <button class="login-social-btn login-facebook" type="button">
+                    <i class="fab fa-facebook-f"></i>
+                    <span>Continue with Facebook</span>
+                </button>
+                <div class="login-divider">
+                    <span class="login-divider-line"></span>
+                    <span class="login-divider-text">or</span>
+                    <span class="login-divider-line"></span>
+                </div>
+                <input type="text" id="login-identifier" class="login-input" placeholder="Email or Phone Number" autocomplete="username" />
+                <button class="login-continue-btn" type="button">Continue</button>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
+
+        <!-- Client Login Modal Toggle -->
+    <script>
+    (function () {
+        var overlay  = document.getElementById('login-modal-overlay');
+        var openBtn  = document.getElementById('client-login-btn');
+        var closeBtn = document.getElementById('login-modal-close');
+
+        function openModal() {
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeModal() {
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        openBtn.addEventListener('click', openModal);
+        closeBtn.addEventListener('click', closeModal);
+        overlay.addEventListener('click', function (e) {
+            if (e.target === overlay) closeModal();
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && overlay.classList.contains('active')) closeModal();
+        });
+    })();
+    </script>
 
     <script>
     (function(){if(!window.chatbase||window.chatbase("getState")!=="initialized"){window.chatbase=(...args)=>{if(!window.chatbase.q){window.chatbase.q=[]}window.chatbase.q.push(args)};window.chatbase=new Proxy(window.chatbase,{get(target,prop){if(prop==="q"){return target.q}return(...args)=>target(prop,...args)}})}const onLoad=function(){const script=document.createElement("script");script.src="https://www.chatbase.co/embed.min.js";script.id="PaBSfA_sO1HjjLRo1lc3t";script.domain="www.chatbase.co";document.body.appendChild(script)};if(document.readyState==="complete"){onLoad()}else{window.addEventListener("load",onLoad)}})();

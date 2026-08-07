@@ -3,8 +3,35 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Anani portfolio | Web Developer & AI Solutions Creator</title>
-    <meta name="description" content="South African web developer and AI solutions creator. Building premium digital experiences and intelligent systems." />
+    <title>RMdigitals | Web Development, SEO &amp; AI Solutions for South African Businesses</title>
+    <meta name="description" content="RMdigitals, led by Ramagoma Muthuhadini (Anani), builds professional websites, SEO and AI automation for South African businesses. Based in Thohoyandou, Limpopo — serving clients nationwide." />
+
+    <!-- SEO NOTE: rmdigitals.co.za is a placeholder domain (not yet registered).
+         Once a real domain is live, find-and-replace "https://www.rmdigitals.co.za"
+         across every HTML file, sitemap.xml and robots.txt. -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png" />
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+
+    <link rel="canonical" href="https://www.rmdigitals.co.za/" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="RMdigitals" />
+    <meta property="og:title" content="RMdigitals | Web Development, SEO &amp; AI Solutions for South African Businesses" />
+    <meta property="og:description" content="RMdigitals, led by Ramagoma Muthuhadini (Anani), builds professional websites, SEO and AI automation for South African businesses. Based in Thohoyandou, Limpopo — serving clients nationwide." />
+    <meta property="og:url" content="https://www.rmdigitals.co.za/" />
+    <meta property="og:image" content="https://www.rmdigitals.co.za/images/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="en_ZA" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="RMdigitals | Web Development, SEO &amp; AI Solutions for South African Businesses" />
+    <meta name="twitter:description" content="RMdigitals, led by Ramagoma Muthuhadini (Anani), builds professional websites, SEO and AI automation for South African businesses. Based in Thohoyandou, Limpopo — serving clients nationwide." />
+    <meta name="twitter:image" content="https://www.rmdigitals.co.za/images/og-image.jpg" />
+
 
     <!-- Google Fonts: Syne (display) + Outfit (body) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -21,6 +48,53 @@
     </script>
 
     <link rel="stylesheet" href="style.css" />
+
+    <script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@graph": [
+        {
+            "@type": "WebSite",
+            "@id": "https://www.rmdigitals.co.za/#website",
+            "name": "RMdigitals",
+            "url": "https://www.rmdigitals.co.za/",
+            "inLanguage": "en-ZA"
+        },
+        {
+            "@type": "ProfessionalService",
+            "@id": "https://www.rmdigitals.co.za/#organization",
+            "name": "RMdigitals",
+            "image": "https://www.rmdigitals.co.za/images/og-image.jpg",
+            "url": "https://www.rmdigitals.co.za/",
+            "telephone": "+27648412146",
+            "email": "ramagoma212@gmail.com",
+            "address": {
+                "@type": "PostalAddress",
+                "addressLocality": "Thohoyandou",
+                "addressRegion": "Limpopo",
+                "addressCountry": "ZA"
+            },
+            "areaServed": {
+                "@type": "Country",
+                "name": "South Africa"
+            },
+            "founder": {
+                "@type": "Person",
+                "name": "Ramagoma Muthuhadini",
+                "alternateName": "Anani"
+            },
+            "sameAs": [
+                "https://github.com/ramagoma-glitch",
+                "https://www.linkedin.com/in/anani-ramagoma",
+                "https://twitter.com/AnaniRamagoma",
+                "https://www.instagram.com/anani.rm",
+                "https://www.facebook.com/AnaniRM"
+            ],
+            "priceRange": "R4,500 - R25,000+"
+        }
+    ]
+}
+    </script>
 </head>
 <body>
 
@@ -30,7 +104,7 @@
         <div class="loader-inner">
             <div class="loader-ring"></div>
             <div class="loader-logo">
-                <img src="images/mylog.jpg" alt="Anani RM" class="loader-logo-img" />
+                <img src="images/mylog.webp" alt="Anani RM" class="loader-logo-img" width="52" height="52" />
                 <span>Loading<span class="loader-dots">...</span></span>
             </div>
         </div>
@@ -40,48 +114,40 @@
     <nav id="navbar">
         <div class="nav-container">
 
-            <!-- Logo — save mylog.jpg in the same folder as index.html -->
-           <a href="https://wa.me/27754738149?text=Hi%20Anani,%20I%27m%20interested%20in%20your%20digital%20services!"
-   target="_blank"
-   rel="noopener noreferrer"
-   class="nav-logo nav-logo-pill"
-   aria-label="Chat with Anani on WhatsApp — AI Auto-Reply Active">
+            <a href="#home" class="nav-logo">
+                <img src="images/mylog.webp" alt="RMdigitals — Anani Ramagoma, web developer in Thohoyandou, Limpopo" class="nav-logo-img" width="40" height="40" />
+                <span class="nav-logo-text">RM<span class="accent"></span></span>
+            </a>
 
-    <!-- Circular profile photo — save as images/mylog.jpg -->
-    <img src="images/mylog.jpg"
-         alt="Anani RM"
-         class="nav-logo-img" />
-
-    <!-- Two-line text: name + AI auto-reply hint -->
-    <div class="nav-logo-info">
-        <span class="nav-logo-name">RM<span class="accent"></span></span>
-       <!--- <span class="nav-logo-sublabel">
-            <i class="fab fa-whatsapp"></i>
-            Try WA🤖 AI Auto-Reply!!
-        </span> -->
-    </div>
-
-</a>
-
-            <!-- Desktop Links -->
             <ul class="nav-links">
                 <li><a href="#home">Home</a></li>
-                <li><a href="#services">Services</a></li>
-                <li><a href="#about">About</a></li>
+                <li class="has-dropdown">
+                    <a href="#services-websites" class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">Websites <i class="fas fa-chevron-down chevron"></i></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="business-websites.html">Business Websites</a></li>
+                        <li><a href="ecommerce-websites.html">Ecommerce Websites</a></li>
+                        <li><a href="website-RedesingAndDesing.html">Website Redesign</a></li>
+                        <li><a href="PortfolioWebsite.html">Portfolio Websites</a></li>
+                    </ul>
+                </li>
+                <li class="has-dropdown">
+                    <a href="#enhance-website" class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">Website Add-Ons <i class="fas fa-chevron-down chevron"></i></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="SEO-Optimization.html">SEO</a></li>
+                        <li><a href="chatbots.html">AI Website Chatbots</a></li>
+                        <li><a href="WhatsAppIntegration.html">WhatsApp Integration</a></li>
+                        <li><a href="pricing.html#maintenance">Website Maintenance</a></li>
+                    </ul>
+                </li>
                 <li><a href="#portfolio">Portfolio</a></li>
-                <li><a href="#testimonials">Reviews</a></li>
+                <li><a href="pricing.html">Pricing</a></li>
+                <li><a href="#about">About</a></li>
                 <li><a href="#contact">Contact</a></li>
             </ul>
 
-            <!-- CTA + Hamburger -->
             <div class="nav-right">
-                 <button id="client-login-btn" class="client-login-btn">Login or Sign Up</button>
-                <a href="https://wa.me/27754738149?text=Hi%20Anani,%20I%27m%20interested%20in%20your%20digital%20services!"
-   target="_blank"
-   rel="noopener noreferrer"
-   class="nav-cta">
-    Let's Talk
-</a>
+                <a href="https://wa.me/27648412146?text=Hi%20Anani%2C%20I%27m%20interested%20in%20your%20website%20development%2C%20SEO%20or%20AI%20services%21"
+                   target="_blank" rel="noopener noreferrer" class="nav-cta">Chat on WhatsApp</a>
                 <button class="hamburger" id="hamburger" aria-label="Open menu">
                     <span></span>
                     <span></span>
@@ -98,17 +164,36 @@
         </button>
         <ul>
             <li><a href="#home" class="mobile-link">Home</a></li>
-            <li><a href="#services" class="mobile-link">Services</a></li>
-            <li><a href="#about" class="mobile-link">About</a></li>
+
+            <li class="mobile-group">
+                <span class="mobile-group-label">Websites</span>
+                <ul class="mobile-sublist">
+                    <li><a href="business-websites.html" class="mobile-link">Business Websites</a></li>
+                    <li><a href="ecommerce-websites.html" class="mobile-link">Ecommerce Websites</a></li>
+                    <li><a href="website-RedesingAndDesing.html" class="mobile-link">Website Redesign</a></li>
+                    <li><a href="PortfolioWebsite.html" class="mobile-link">Portfolio Websites</a></li>
+                </ul>
+            </li>
+
+            <li class="mobile-group">
+                <span class="mobile-group-label">Website Add-Ons</span>
+                <ul class="mobile-sublist">
+                    <li><a href="SEO-Optimization.html" class="mobile-link">SEO</a></li>
+                    <li><a href="chatbots.html" class="mobile-link">AI Website Chatbots</a></li>
+                    <li><a href="WhatsAppIntegration.html" class="mobile-link">WhatsApp Integration</a></li>
+                    <li><a href="pricing.html#maintenance" class="mobile-link">Website Maintenance</a></li>
+                </ul>
+            </li>
+
             <li><a href="#portfolio" class="mobile-link">Portfolio</a></li>
-            <li><a href="#testimonials" class="mobile-link">Reviews</a></li>
+            <li><a href="pricing.html" class="mobile-link">Pricing</a></li>
+            <li><a href="#about" class="mobile-link">About</a></li>
             <li><a href="#contact" class="mobile-link">Contact</a></li>
         </ul>
         <a href="https://wa.me/27648412146" target="_blank" class="mobile-whatsapp">
             <i class="fab fa-whatsapp"></i> Chat on WhatsApp
         </a>
     </div>
-    <!-- Overlay backdrop for mobile menu -->
     <div class="menu-overlay" id="menuOverlay"></div>
 
     <!-- ============================================================
@@ -130,35 +215,36 @@
 
             <!-- Main heading -->
             <h1 class="hero-title">
-                Hi, I'm<br>
-                <span class="gradient-text">Ramagoma Muthuhadini<br>(Anani)</span>
+                Professional Websites Built to Help<br>
+                <span class="gradient-text">South African Businesses Grow</span>
             </h1>
 
             <!-- Animated typing subtitle -->
             <div class="hero-subtitle">
-                I'm a <span class="typed-text" id="typedText"></span><span class="cursor-blink">|</span>
+                By Ramagoma Muthuhadini (Anani) — <span class="typed-text" id="typedText"></span><span class="cursor-blink">|</span>
             </div>
 
             <!-- Short description -->
             <p class="hero-description">
-                Based in South Africa — I craft premium digital experiences and intelligent AI solutions that help businesses thrive in the modern world.
+                Web development, SEO and smart digital solutions for businesses that want a professional online presence and more opportunities to reach customers.
             </p>
 
             <!-- CTA Buttons -->
             <div class="hero-buttons">
-                <a href="#portfolio" class="btn-primary">
-                    <span>View My Work</span>
+                <a href="#contact" class="btn-primary">
+                    <span>Get a Website Quote</span>
                     <i class="fas fa-arrow-right"></i>
                 </a>
-                <!-- "Get In Touch" opens WhatsApp directly -->
-                <a href="https://wa.me/27754738149?text=Hi%20Anani,%20I%27m%20interested%20in%20your%20digital%20services!"
-   target="_blank"
-   rel="noopener noreferrer"
-   class="btn-secondary">
-    <i class="fab fa-whatsapp"></i>
-    <span>Get In Touch</span>
-</a>
+                <a href="pricing.html#websites" class="btn-secondary">
+                    <i class="fas fa-globe"></i>
+                    <span>View Website Packages</span>
+                </a>
             </div>
+
+            <!-- Smaller supporting link -->
+            <a href="#portfolio" class="hero-view-work-link">
+                <i class="fas fa-arrow-right"></i> View Our Work
+            </a>
 
             <!-- Stats row -->
             <div class="hero-stats">
@@ -185,7 +271,7 @@
             <div class="glow-ring"></div>
             <div class="hero-avatar-wrap">
                 <div class="avatar-box">
-                    <img src="images/ram.jpg" alt="Ramagoma Muthuhadini - Anani" class="avatar-img" />
+                    <img src="images/ram.webp" alt="Ramagoma Muthuhadini - Anani" class="avatar-img" width="280" height="280" />
                 </div>
 
                 <!-- Floating tech badge elements -->
@@ -198,132 +284,153 @@
     </section>
 
     <!-- ============================================================
-         SERVICES SECTION
+         SERVICES SECTION — Website Development · SEO · AI & Automation
     ============================================================ -->
     <section id="services" class="services">
         <div class="container">
 
             <div class="section-header reveal">
-                <span class="section-tag">What I Do</span>
-                <h2 class="section-title">Services I <span class="gradient-text">Offer</span></h2>
-                <p class="section-subtitle">From cutting-edge web development to AI-powered solutions — I deliver premium digital services tailored for your business.</p>
+                <span class="section-tag">What We Do</span>
+                <h2 class="section-title">Professional <span class="gradient-text">Website Development</span></h2>
+                <p class="section-subtitle">We build professional, responsive websites for South African businesses — with SEO, AI and WhatsApp add-ons available to enhance the sites we build.</p>
             </div>
 
-            <div class="services-grid">
-
-                 <!-- Card 1 — Tertiary Applications ✅ NEW -->
-                <div class="service-card reveal-card" id="academic-card">
-                    <div class="card-glow"></div>
-                     <div class="featured-label">👩‍🎓 Most Popular</div>
-                    <div class="service-icon academic-icon">
-                        <i class="fas fa-graduation-cap"></i>
-                    </div>
-                    <h3>Tertiary Applications</h3>
-                    <p>Stress-free university and college application assistance for Grade 12 learners. We check admission requirements, track deadlines, and handle portal submissions.</p>
-                    <div class="service-tags">
-                        <span>APS Check</span><span>University</span><span>TVET College</span>
+            <!-- CATEGORY 1 — Website Development -->
+            <div class="service-category" id="services-websites">
+                <div class="service-category-header reveal">
+                    <div class="service-category-icon"><i class="fas fa-globe"></i></div>
+                    <div>
+                        <h3>Website Development</h3>
+                        <p>Professional, responsive websites built for South African businesses — fast, mobile-friendly, and designed to turn visitors into customers.</p>
                     </div>
                 </div>
 
-                <!-- Card 9 — Grade 12 Academic Success ✅ NEW -->
-                <div class="service-card reveal-card" id="matric-excellence-card">
-                    <div class="card-glow"></div>
-                        <div class="service-icon matric-icon">
-                            <i class="fas fa-graduation-cap"></i>
-                </div>
-                        <h3>Grade 12 Academic Success</h3>
-                         <p>Premium online &amp; local tutoring connection for Grade 12 learners. Access curated study materials, past exam papers, YouTube lesson directories, and expert subject tutors.</p>
+                <div class="services-grid">
+
+                    <div class="service-card reveal-card" id="business-card">
+                        <div class="card-glow"></div>
+                        <div class="service-icon"><i class="fas fa-globe"></i></div>
+                        <h3>Business Websites</h3>
+                        <p>Professional, conversion-focused websites that represent your brand and drive measurable business results online.</p>
                         <div class="service-tags">
-                     <span>Exam Papers</span><span>1-on-1 Tutoring</span><span>Study Guides</span>
-                </div>
+                            <span>HTML/CSS</span><span>React</span><span>CMS</span>
+                        </div>
+                    </div>
+
+                    <div class="service-card featured-service reveal-card" id="ecommerce-card">
+                        <div class="card-glow"></div>
+                        <div class="featured-label">🛒 New</div>
+                        <div class="service-icon"><i class="fas fa-cart-shopping"></i></div>
+                        <h3>Ecommerce Websites</h3>
+                        <p>Online stores built to sell — product catalogues, secure checkout and payment gateway integration for South African businesses.</p>
+                        <div class="service-tags">
+                            <span>Payments</span><span>Product Catalogue</span><span>Mobile-Ready</span>
+                        </div>
+                    </div>
+
+                    <div class="service-card featured-service reveal-card" id="redesign-card">
+                        <div class="card-glow"></div>
+                        <div class="service-icon"><i class="fas fa-wand-magic-sparkles"></i></div>
+                        <h3>Website Redesign</h3>
+                        <p>Transform your outdated website into a fast, modern, high-performance digital experience that truly impresses visitors.</p>
+                        <div class="service-tags">
+                            <span>UI/UX</span><span>Figma</span><span>Speed</span>
+                        </div>
+                    </div>
+
+                    <div class="service-card reveal-card" id="portfolio-card">
+                        <div class="card-glow"></div>
+                        <div class="service-icon"><i class="fas fa-briefcase"></i></div>
+                        <h3>Portfolio Websites</h3>
+                        <p>Stunning personal portfolio sites that showcase your unique work and attract the right clients and opportunities.</p>
+                        <div class="service-tags">
+                            <span>Creative</span><span>Animated</span><span>Fast</span>
+                        </div>
+                    </div>
+
+                </div><!-- /.services-grid -->
+
+                <p class="service-category-footnote">
+                    Also available: simple <strong>Landing Pages</strong> for campaigns and launches, and
+                    <strong>Custom Web Systems</strong> with logins, dashboards and business automation for
+                    more advanced projects.
+                    <a href="pricing.html#websites">See all website packages <i class="fas fa-arrow-right"></i></a>
+                </p>
+            </div><!-- /#services-websites -->
+
+            <!-- ENHANCE YOUR WEBSITE — secondary, supports the core website-development
+                 business (SEO / AI Chatbots / WhatsApp / Maintenance are website add-ons,
+                 not standalone businesses). Deliberately smaller than Website Development. -->
+            <div class="service-category enhance-website" id="enhance-website">
+                <div class="section-header reveal" style="margin-bottom:36px;">
+                    <span class="section-tag">Website Add-Ons</span>
+                    <h3 class="section-title-sm">Enhance Your <span class="gradient-text">Website</span></h3>
+                    <p class="section-subtitle">Optional add-ons for website clients — SEO, AI chat, WhatsApp and ongoing maintenance.</p>
                 </div>
 
-                
-                 <!-- Card 4 — CV Creation (Popular) — NEW ✅ -->
-               <div class="service-card cv-service reveal-card" id="cv-card">
-                    <div class="card-glow"></div>
-                    <div class="popular-label">⭐ Popular</div>
-                    <div class="service-icon cv-icon"><i class="fas fa-id-card"></i></div>
-                    <h3>CV That Gets You The Job</h3>
-                    <p>Professional, ATS-optimised CVs crafted to get past screening systems and land you interviews at top companies.</p>
-                    <div class="service-tags">
-                        <span>ATS-Ready</span><span>Design</span><span>LinkedIn</span>
+                <div class="service-category-header reveal">
+                    <div class="service-category-icon seo-icon"><i class="fas fa-chart-line"></i></div>
+                    <div>
+                        <h3>SEO &amp; Google Visibility</h3>
+                        <p>Technical and on-page SEO added to your website — built on proven, ethical practices. No provider can ethically guarantee a specific ranking, and we won't claim to.</p>
                     </div>
                 </div>
 
+                <div class="seo-feature-grid reveal-card">
+                    <span><i class="fas fa-check"></i> Technical SEO</span>
+                    <span><i class="fas fa-check"></i> On-Page SEO</span>
+                    <span><i class="fas fa-check"></i> Google Search Console</span>
+                    <span><i class="fas fa-check"></i> Google Business Profile</span>
+                    <span><i class="fas fa-check"></i> Local SEO</span>
+                    <span><i class="fas fa-check"></i> Keyword Optimisation</span>
+                </div>
 
-               <!-- Card 2 — Business Websites -->
-                <div class="service-card reveal-card" id="business-card">
-                    <div class="card-glow"></div>
-                    <div class="service-icon"><i class="fas fa-globe"></i></div>
-                    <h3>Business Websites</h3>
-                    <p>Professional, conversion-focused websites that represent your brand and drive measurable business results online.</p>
-                    <div class="service-tags">
-                        <span>HTML/CSS</span><span>React</span><span>CMS</span>
+                <a href="SEO-Optimization.html" class="btn-secondary service-category-cta">
+                    <span>Explore Website SEO</span>
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+
+                <div class="service-category-header reveal" style="margin-top:44px;">
+                    <div class="service-category-icon"><i class="fas fa-robot"></i></div>
+                    <div>
+                        <h3>AI &amp; WhatsApp Add-Ons</h3>
+                        <p>From a simple WhatsApp click-to-chat link to a fully automated AI chatbot added to your website — automation that fits your business's stage and budget.</p>
                     </div>
                 </div>
 
-                <!-- Card 3 — AI Chatbots (Most Popular) -->
-                <div class="service-card featured-service reveal-card" id="chatbot-card">
-                    <div class="card-glow"></div>
-                    <div class="featured-label">🔥 Most Popular</div>
-                    <div class="service-icon"><i class="fas fa-robot"></i></div>
-                    <h3>AI Chatbots</h3>
-                    <p>Smart conversational AI chatbots that engage your customers 24/7 and automate your business support processes.</p>
-                    <div class="service-tags">
-                        <span>OpenAI</span><span>NLP</span><span>Python</span>
+                <div class="services-grid services-grid--2">
+
+                    <div class="service-card featured-service reveal-card" id="chatbot-card">
+                        <div class="card-glow"></div>
+                        <div class="featured-label">🔥 Popular</div>
+                        <div class="service-icon"><i class="fas fa-robot"></i></div>
+                        <h3>AI Website Chatbots</h3>
+                        <p>Smart conversational AI chatbots that engage your customers 24/7 and automate your website's support process.</p>
+                        <div class="service-tags">
+                            <span>OpenAI</span><span>NLP</span><span>Python</span>
+                        </div>
                     </div>
-                </div>
 
-               
-                <!-- Card 5 — Website Redesign -->
-               <div class="service-card featured-service reveal-card" id="chatbot-card">
-
-                    <div class="card-glow"></div>
-                    <div class="service-icon"><i class="fas fa-wand-magic-sparkles"></i></div>
-                    <h3>Website Redesign</h3>
-                    <p>Transform your outdated website into a fast, modern, high-performance digital experience that truly impresses visitors.</p>
-                    <div class="service-tags">
-                        <span>UI/UX</span><span>Figma</span><span>Speed</span>
+                    <div class="service-card whatsapp-service reveal-card" id="whatsapp-card">
+                        <div class="card-glow"></div>
+                        <div class="popular-label whatsapp-popular-label">⭐ Popular</div>
+                        <div class="service-icon whatsapp-icon"><i class="fab fa-whatsapp"></i></div>
+                        <h3>WhatsApp Integration</h3>
+                        <p>From a basic click-to-chat WhatsApp link to advanced automated flows — connect WhatsApp to your website for instant communication and support.</p>
+                        <div class="service-tags">
+                            <span>API</span><span>Automation</span><span>CRM</span>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Card 6 — Portfolio Websites -->
-                <div class="service-card reveal-card" id="portfolio-card">
-                    <div class="card-glow"></div>
-                    <div class="service-icon"><i class="fas fa-briefcase"></i></div>
-                    <h3>Portfolio Websites</h3>
-                    <p>Stunning personal portfolio sites that showcase your unique work and attract the right clients and opportunities.</p>
-                    <div class="service-tags">
-                        <span>Creative</span><span>Animated</span><span>Fast</span>
-                    </div>
-                </div>
+                </div><!-- /.services-grid -->
 
-                <!-- Card 7 — WhatsApp Integration (Popular) ✅ -->
-               <div class="service-card whatsapp-service reveal-card" id="whatsapp-card">
-                    <div class="card-glow"></div>
-                    <div class="popular-label whatsapp-popular-label">⭐ Popular</div>
-                    <div class="service-icon whatsapp-icon"><i class="fab fa-whatsapp"></i></div>
-                    <h3>WhatsApp Integration</h3>
-                    <p>Seamlessly connect WhatsApp to your website for instant communication and automated customer support flows.</p>
-                    <div class="service-tags">
-                        <span>API</span><span>Automation</span><span>CRM</span>
-                    </div>
-                </div>
+                <p class="service-category-footnote">
+                    Already have a website with us? <strong>Website Maintenance</strong> keeps it secure, fast and
+                    up to date after launch.
+                    <a href="pricing.html#maintenance">View maintenance plans <i class="fas fa-arrow-right"></i></a>
+                </p>
+            </div><!-- /#enhance-website -->
 
-                <!-- Card 8 — SEO Optimization -->
-                <div class="service-card reveal-card" id="seo-card">
-                    <div class="card-glow"></div>
-                    <div class="service-icon seo-icon"><i class="fas fa-chart-line"></i></div>
-                    <h3>SEO Optimization</h3>
-                    <p>Boost your online visibility and rank higher on Google with proven SEO strategies and deep technical site optimization.</p>
-                    <div class="service-tags">
-                        <span>Google</span><span>Analytics</span><span>Ranking</span>
-                    </div>
-                </div>
-               
-
-            </div><!-- /.services-grid -->
         </div>
     </section>
 
@@ -341,7 +448,7 @@
 
                         <!-- Main photo — ana.jpg -->
                         <div class="about-photo-placeholder">
-                            <img src="images/ana.jpg" alt="Ramagoma Muthuhadini (Anani)" class="about-main-img" />
+                            <img src="images/ana.webp" alt="Ramagoma Muthuhadini (Anani)" class="about-main-img" width="340" height="420" loading="lazy" />
                         </div>
 
                         <!-- Decorative spinning ring -->
@@ -349,12 +456,12 @@
 
                         <!-- Secondary floating photo — muthu.jpg -->
                         <div class="about-secondary-photo">
-                            <img src="images/muthu.jpg" alt="Anani at work" />
+                            <img src="images/muthu.webp" alt="Anani at work" width="90" height="90" loading="lazy" />
                         </div>
 
                         <!-- Third accent photo — rama.jpg -->
                         <div class="about-accent-photo">
-                            <img src="images/rama.jpg" alt="Anani coding" />
+                            <img src="images/rama.webp" alt="Anani coding" width="80" height="80" loading="lazy" />
                         </div>
 
                         <!-- Experience badge -->
@@ -372,10 +479,10 @@
                     <h2 class="section-title">Passionate About <span class="gradient-text">Technology</span> &amp; Growth</h2>
 
                     <p class="about-text">
-                        I'm Ramagoma Muthuhadini (Anani) — a young, passionate web developer and AI solutions creator based in South Africa. I combine modern technology with creative design to build digital products that make a real difference for businesses and entrepreneurs.
+                        I'm Ramagoma Muthuhadini (Anani) — a web developer in Thohoyandou, Limpopo, and the founder of RMdigitals. I combine modern web development, SEO and AI automation to build digital products that make a real difference for businesses and entrepreneurs.
                     </p>
                     <p class="about-text">
-                        My mission is to help South African businesses grow online through professional websites, AI-powered tools, and smart digital strategies — making premium technology accessible at every level.
+                        My mission is to help South African businesses grow online through professional websites, search engine visibility, and smart AI-powered tools — making premium technology accessible at every level, whether you're in Limpopo or anywhere else in South Africa.
                     </p>
 
                     <!-- Skill bars -->
@@ -446,7 +553,7 @@
             <div class="section-header reveal">
                 <span class="section-tag">My Work</span>
                 <h2 class="section-title">Featured <span class="gradient-text">Projects</span></h2>
-                <p class="section-subtitle">A curated selection of projects that showcase my skills across web development, AI, and digital design.</p>
+                <p class="section-subtitle">Concept builds that show the range of what we design and build — from ecommerce to AI chatbots. See real client feedback in <a href="#testimonials" style="color:var(--cyan);">Testimonials</a> below.</p>
             </div>
 
             <!-- Filter Buttons -->
@@ -463,9 +570,10 @@
                 <!-- Project 1 -->
                 <div class="project-card reveal-card" data-category="web">
                     <div class="project-img" style="background: linear-gradient(135deg,rgba(0,212,255,.15),rgba(123,47,255,.15))">
+                        <span class="concept-badge">Concept Project</span>
                         <i class="fas fa-store project-ico"></i>
                         <div class="project-hover">
-                            <a href="#" class="view-link">View Project <i class="fas fa-external-link-alt"></i></a>
+                            <a href="ecommerce-websites.html" class="view-link">See This Service <i class="fas fa-arrow-right"></i></a>
                         </div>
                     </div>
                     <div class="project-body">
@@ -473,16 +581,17 @@
                             <span>E-Commerce</span><span>React</span>
                         </div>
                         <h3>TrendShop SA</h3>
-                        <p>A full-stack e-commerce platform built for a South African fashion brand with seamless payment integration.</p>
+                        <p>A concept ecommerce build for a South African fashion brand — product catalogue, cart and payment integration.</p>
                     </div>
                 </div>
 
                 <!-- Project 2 -->
                 <div class="project-card reveal-card" data-category="ai">
                     <div class="project-img" style="background: linear-gradient(135deg,rgba(123,47,255,.15),rgba(255,107,53,.15))">
+                        <span class="concept-badge">Concept Project</span>
                         <i class="fas fa-comments project-ico"></i>
                         <div class="project-hover">
-                            <a href="#" class="view-link">View Project <i class="fas fa-external-link-alt"></i></a>
+                            <a href="chatbots.html" class="view-link">See This Service <i class="fas fa-arrow-right"></i></a>
                         </div>
                     </div>
                     <div class="project-body">
@@ -490,16 +599,17 @@
                             <span>AI Chatbot</span><span>Python</span>
                         </div>
                         <h3>SmartBot Assistant</h3>
-                        <p>An AI-powered customer service chatbot that handles 80% of customer queries automatically for a fintech company.</p>
+                        <p>A concept AI customer service chatbot design, built to demonstrate automated query handling for a fintech-style business.</p>
                     </div>
                 </div>
 
                 <!-- Project 3 -->
                 <div class="project-card reveal-card" data-category="design">
                     <div class="project-img" style="background: linear-gradient(135deg,rgba(0,255,136,.12),rgba(0,212,255,.12))">
+                        <span class="concept-badge">Concept Project</span>
                         <i class="fas fa-heartbeat project-ico"></i>
                         <div class="project-hover">
-                            <a href="#" class="view-link">View Project <i class="fas fa-external-link-alt"></i></a>
+                            <a href="website-RedesingAndDesing.html" class="view-link">See This Service <i class="fas fa-arrow-right"></i></a>
                         </div>
                     </div>
                     <div class="project-body">
@@ -507,16 +617,17 @@
                             <span>UI/UX</span><span>Figma</span>
                         </div>
                         <h3>MediCare Portal</h3>
-                        <p>A clean healthcare portal redesign that improved user retention by 45% for a local medical practice.</p>
+                        <p>A concept healthcare portal redesign, exploring a cleaner, faster experience for a local medical practice.</p>
                     </div>
                 </div>
 
                 <!-- Project 4 -->
                 <div class="project-card reveal-card" data-category="web">
                     <div class="project-img" style="background: linear-gradient(135deg,rgba(255,214,10,.12),rgba(255,107,53,.12))">
+                        <span class="concept-badge">Concept Project</span>
                         <i class="fas fa-building project-ico"></i>
                         <div class="project-hover">
-                            <a href="#" class="view-link">View Project <i class="fas fa-external-link-alt"></i></a>
+                            <a href="business-websites.html" class="view-link">See This Service <i class="fas fa-arrow-right"></i></a>
                         </div>
                     </div>
                     <div class="project-body">
@@ -524,16 +635,17 @@
                             <span>Real Estate</span><span>WordPress</span>
                         </div>
                         <h3>Apex Properties</h3>
-                        <p>A premium real estate website with AI-powered property recommendations and virtual tour integration.</p>
+                        <p>A concept real estate website design featuring property listings and virtual tour integration.</p>
                     </div>
                 </div>
 
                 <!-- Project 5 -->
                 <div class="project-card reveal-card" data-category="ai">
                     <div class="project-img" style="background: linear-gradient(135deg,rgba(5, 158, 69, 0.12),rgba(5, 187, 75, 0.12))">
+                        <span class="concept-badge">Concept Project</span>
                         <i class="fab fa-whatsapp project-ico"></i>
                         <div class="project-hover">
-                            <a href="#" class="view-link">View Project <i class="fas fa-external-link-alt"></i></a>
+                            <a href="WhatsAppIntegration.html" class="view-link">See This Service <i class="fas fa-arrow-right"></i></a>
                         </div>
                     </div>
                     <div class="project-body">
@@ -541,24 +653,25 @@
                             <span>WhatsApp API</span><span>Automation</span>
                         </div>
                         <h3>AutoReply System</h3>
-                        <p>WhatsApp business automation handling bookings, queries, and follow-ups for a restaurant chain in Joburg.</p>
+                        <p>A concept WhatsApp automation flow for bookings, queries and follow-ups, designed for a restaurant-style business.</p>
                     </div>
                 </div>
 
                 <!-- Project 6 -->
                 <div class="project-card reveal-card" data-category="web">
                     <div class="project-img" style="background: linear-gradient(135deg,rgba(56, 4, 145, 0.12),rgba(0,212,255,.12))">
-                        <i class="fas fa-graduation-cap project-ico"></i>
+                        <span class="concept-badge">Concept Project</span>
+                        <i class="fas fa-dumbbell project-ico"></i>
                         <div class="project-hover">
-                            <a href="#" class="view-link">View Project <i class="fas fa-external-link-alt"></i></a>
+                            <a href="business-websites.html" class="view-link">See This Service <i class="fas fa-arrow-right"></i></a>
                         </div>
                     </div>
                     <div class="project-body">
                         <div class="project-chips">
-                            <span>EdTech</span><span>React</span>
+                            <span>Fitness</span><span>React</span>
                         </div>
-                        <h3>LearnSA Platform</h3>
-                        <p>An interactive online learning platform serving students across South Africa with AI-driven study tools.</p>
+                        <h3>FitLife Studio</h3>
+                        <p>A concept business website design for a fitness studio — class schedules, membership info and online booking.</p>
                     </div>
                 </div>
 
@@ -605,6 +718,9 @@
                     </div>
                 </div>
 
+                <!-- Genuine testimonial, kept on file but not shown publicly — it's about a
+                     CV service, which is no longer part of the public website-development
+                     business. Not deleted, since it's a real historical review.
                 <div class="testi-card reveal-card">
                     <div class="quote-mark">"</div>
                     <div class="stars">★★★★★</div>
@@ -617,10 +733,68 @@
                         </div>
                     </div>
                 </div>
+                -->
 
             </div><!-- /.testimonials-grid -->
+
+            <!-- Leave a Review — compact, collapsed by default. Writes to
+                 Firestore with status "pending"; only appears publicly once
+                 approved in admin.html. The form handler is always attached
+                 (see reviews-portfolio.js) so this never falls back to a
+                 native page-reload submit, even before Firebase is set up. -->
+            <div class="review-toggle-row reveal">
+                <button type="button" id="reviewToggleBtn" class="btn-secondary" aria-expanded="false" aria-controls="reviewFormWrap">
+                    Leave a Review
+                </button>
+            </div>
+            <div class="review-form-wrap" id="reviewFormWrap">
+                <h3>Worked With Us? Leave a Review</h3>
+                <p class="review-form-sub">Real reviews only — every submission is checked before it goes live.</p>
+                <form id="reviewForm" class="review-form contact-form" novalidate>
+
+                    <div class="star-input" role="radiogroup" aria-label="Your rating">
+                        <input type="radio" id="star5" name="rating" value="5" /><label for="star5" aria-label="5 stars">★</label>
+                        <input type="radio" id="star4" name="rating" value="4" /><label for="star4" aria-label="4 stars">★</label>
+                        <input type="radio" id="star3" name="rating" value="3" /><label for="star3" aria-label="3 stars">★</label>
+                        <input type="radio" id="star2" name="rating" value="2" /><label for="star2" aria-label="2 stars">★</label>
+                        <input type="radio" id="star1" name="rating" value="1" /><label for="star1" aria-label="1 star">★</label>
+                    </div>
+
+                    <div class="field">
+                        <label for="rvName" class="sr-only">Your Name</label>
+                        <input type="text" id="rvName" placeholder="Your Name" required />
+                        <div class="field-line"></div>
+                    </div>
+
+                    <div class="field">
+                        <label for="rvCompany" class="sr-only">Company</label>
+                        <input type="text" id="rvCompany" placeholder="Company (optional)" />
+                        <div class="field-line"></div>
+                    </div>
+
+                    <div class="field">
+                        <label for="rvProject" class="sr-only">Project Name</label>
+                        <input type="text" id="rvProject" placeholder="Project Name (optional)" />
+                        <div class="field-line"></div>
+                    </div>
+
+                    <div class="field">
+                        <label for="rvMessage" class="sr-only">Your Review</label>
+                        <textarea id="rvMessage" rows="4" placeholder="Tell us about your experience…" required></textarea>
+                        <div class="field-line"></div>
+                    </div>
+
+                    <button type="submit" class="btn-primary submit-btn">
+                        <span>Submit Review</span>
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+
+                    <div id="reviewFormMsg" class="form-msg" aria-live="polite"></div>
+                </form>
+            </div>
         </div>
     </section>
+
 
     <!-- ============================================================
          CONTACT SECTION
@@ -630,8 +804,8 @@
 
             <div class="section-header reveal">
                 <span class="section-tag">Get In Touch</span>
-                <h2 class="section-title">Let's Build Something <span class="gradient-text">Amazing</span></h2>
-                <p class="section-subtitle">Ready to elevate your business? Let's talk about your project.</p>
+                <h2 class="section-title">Tell Us About Your <span class="gradient-text">Website Project</span></h2>
+                <p class="section-subtitle">Tell us what you need, your goals and your estimated budget. We'll recommend a realistic website solution based on your requirements.</p>
             </div>
 
             <div class="contact-grid">
@@ -642,7 +816,7 @@
                     <div class="contact-item">
                         <div class="c-icon"><i class="fab fa-whatsapp"></i></div>
                         <div>
-                           <h4>WhatsApp</h4>
+                           <h3>WhatsApp</h3>
                               <a href="https://wa.me/27648412146" target="_blank">
                                  +27 64 841 2146
                               </a>
@@ -652,7 +826,7 @@
                     <div class="contact-item">
                         <div class="c-icon"><i class="fas fa-envelope"></i></div>
                         <div>
-                            <h4>Email</h4>
+                            <h3>Email</h3>
                             <a href="mailto:ramagoma212@gmail.com">Ramagoma212@gmail.com</a>
                         </div>
                     </div>
@@ -660,7 +834,7 @@
                     <div class="contact-item">
                         <div class="c-icon"><i class="fas fa-map-marker-alt"></i></div>
                         <div>
-                            <h4>Location</h4>
+                            <h3>Location</h3>
                             <p>Thohoyandou, Limpopo, South Africa</p>
                         </div>
                     </div>
@@ -709,21 +883,58 @@
                     <form id="contactForm" class="contact-form" novalidate>
 
                         <div class="field">
+                            <label for="fname" class="sr-only">Your Name</label>
                             <input type="text" id="fname" name="from_name" placeholder="Your Name" required />
                             <div class="field-line"></div>
                         </div>
 
                         <div class="field">
+                            <label for="femail" class="sr-only">Your Email</label>
                             <input type="email" id="femail" name="from_email" placeholder="Your Email" required />
                             <div class="field-line"></div>
                         </div>
 
                         <div class="field">
+                            <label for="fservice" class="sr-only">What are you interested in?</label>
+                            <select id="fservice" name="service_interest">
+                                <option value="" selected>What are you interested in? (optional)</option>
+                                <option value="Business Website">Business Website</option>
+                                <option value="Ecommerce Website">Ecommerce Website</option>
+                                <option value="Landing Page">Landing Page</option>
+                                <option value="Website Redesign">Website Redesign</option>
+                                <option value="Portfolio Website">Portfolio Website</option>
+                                <option value="Custom Web System">Custom Web System</option>
+                                <option value="Website Maintenance">Website Maintenance</option>
+                                <option value="SEO for My Website">SEO for My Website</option>
+                                <option value="AI Website Chatbot">AI Website Chatbot</option>
+                                <option value="WhatsApp Integration">WhatsApp Integration</option>
+                                <option value="Other Website Project">Other Website Project</option>
+                            </select>
+                            <div class="field-line"></div>
+                        </div>
+
+                        <div class="field">
+                            <label for="fsubject" class="sr-only">Subject</label>
                             <input type="text" id="fsubject" name="subject" placeholder="Subject" />
                             <div class="field-line"></div>
                         </div>
 
                         <div class="field">
+                            <label for="fbudget" class="sr-only">Estimated budget</label>
+                            <select id="fbudget" name="budget">
+                                <option value="" selected>Estimated budget (optional)</option>
+                                <option value="Below R5,000">Below R5,000</option>
+                                <option value="R5,000 - R10,000">R5,000 – R10,000</option>
+                                <option value="R10,000 - R20,000">R10,000 – R20,000</option>
+                                <option value="R20,000 - R35,000">R20,000 – R35,000</option>
+                                <option value="R35,000+">R35,000+</option>
+                                <option value="Not sure yet">Not sure yet</option>
+                            </select>
+                            <div class="field-line"></div>
+                        </div>
+
+                        <div class="field">
+                            <label for="fmessage" class="sr-only">Your Message</label>
                             <textarea id="fmessage" name="message" rows="5" placeholder="Tell me about your project…" required></textarea>
                             <div class="field-line"></div>
                         </div>
@@ -754,11 +965,10 @@
                 <!-- Brand column -->
                 <div class="footer-brand">
                     <div class="footer-logo">
-                        <img src="images/mylog.jpg" alt="Anani RM" class="footer-logo-img" />
+                        <img src="images/mylog.webp" alt="RMdigitals logo" class="footer-logo-img" width="36" height="36" loading="lazy" />
                         Anani<span class="accent">.</span>
                     </div>
-                    <p>Crafting premium digital experiences and AI solutions from South Africa to the world.</p>
-                    <!-- ✅ Footer social links — real URLs + Facebook -->
+                    <p>Professional website development for South African businesses — based in Thohoyandou, Limpopo, working with clients across South Africa.</p>
                     <div class="social-row">
                         <a href="https://github.com/ramagoma-glitch"
                            target="_blank" class="s-icon" aria-label="GitHub">
@@ -783,42 +993,52 @@
                     </div>
                 </div>
 
-                <!-- Quick links -->
+                <!-- Website Services -->
                 <div class="footer-col">
-                    <h4>Quick Links</h4>
+                    <h4>Website Services</h4>
                     <ul>
-                        <li><a href="#home">Home</a></li>
-                        <li><a href="#services">Services</a></li>
+                        <li><a href="business-websites.html">Business Websites</a></li>
+                        <li><a href="ecommerce-websites.html">Ecommerce Websites</a></li>
+                        <li><a href="website-RedesingAndDesing.html">Website Redesign</a></li>
+                        <li><a href="PortfolioWebsite.html">Portfolio Websites</a></li>
+                    </ul>
+                </div>
+
+                <!-- Website Support -->
+                <div class="footer-col">
+                    <h4>Website Support</h4>
+                    <ul>
+                        <li><a href="SEO-Optimization.html">SEO</a></li>
+                        <li><a href="chatbots.html">AI Website Chatbots</a></li>
+                        <li><a href="WhatsAppIntegration.html">WhatsApp Integration</a></li>
+                        <li><a href="pricing.html#maintenance">Website Maintenance</a></li>
+                    </ul>
+                </div>
+
+                <!-- Company -->
+                <div class="footer-col">
+                    <h4>Company</h4>
+                    <ul>
                         <li><a href="#about">About</a></li>
                         <li><a href="#portfolio">Portfolio</a></li>
+                        <li><a href="pricing.html">Pricing</a></li>
                         <li><a href="#contact">Contact</a></li>
                     </ul>
                 </div>
 
-                <div class="footer-col">
-    <h4>Services</h4>
-    <ul>
-        <li><a href="business-websites.html">Business Websites</a></li>
-        <li><a href="cv-services.html">Curriculum Vitae <b>(CV)</b></a></li>
-        <li><a href="chatbots.html">AI Chatbots</a></li>
-        <li><a href="website-RedesingAndDesing.html">Website Redesign</a></li>
-        <li><a href="WhatsAppIntegration.html">WhatsApp Integration</a></li>
-        <li><a href="SEO-Optimization.html">SEO Optimization</a></li>
-        <li><a href="academic-applications.html">Academic Application</a></li>
-    </ul>
-</div>
                 <!-- Contact -->
                 <div class="footer-col">
                     <h4>Contact</h4>
-                    <p><i class="fab fa-whatsapp"></i>+27 64 841 2146</p>
-                    <p><i class="fas fa-envelope"></i>Ramagoma212@gmail.com</p>
-                    <p><i class="fas fa-map-marker-alt"></i>Thohoyandou, Limpopo, SA</p>
+                    <p><a href="https://wa.me/27648412146" target="_blank"><i class="fab fa-whatsapp"></i> +27 64 841 2146</a></p>
+                    <p><a href="tel:+27648412146"><i class="fas fa-phone"></i> +27 64 841 2146</a></p>
+                    <p><a href="mailto:ramagoma212@gmail.com"><i class="fas fa-envelope"></i> Ramagoma212@gmail.com</a></p>
+                    <p><i class="fas fa-map-marker-alt"></i>Thohoyandou, Limpopo, South Africa</p>
                 </div>
 
             </div><!-- /.footer-grid -->
 
             <div class="footer-bottom">
-                <p>&copy; <span id="currentYear"></span> Ramagoma Muthuhadini <b>Anani</b>. All rights reserved. Built with ❤️ in South Africa.</p>
+                <p>&copy; <span id="currentYear"></span> Ramagoma Muthuhadini <b>Anani</b> · RMdigitals. All rights reserved. Built with ❤️ in South Africa.</p>
                 <div class="footer-legal">
                     <a href="documents/privacy.pdf" target="_blank">Privacy Policy</a>
                     <span>·</span>
@@ -830,7 +1050,7 @@
     </footer>
 
     <!-- Back-to-top floating button -->
-     <a href="https://wa.me/27754738149?text=Hi%20Anani,%20I%27m%20interested%20in%20your%20digital%20services!"
+     <a href="https://wa.me/27648412146?text=Hi%20Anani,%20I%27m%20interested%20in%20your%20digital%20services!"
    target="_blank"
    rel="noopener noreferrer"
    class="wa-autoreply-badge"
@@ -846,9 +1066,9 @@
             images/whatsappbot.png
         If your file is .jpg or .webp, update the src below to match.
     -->
-    <img src="images/whatsappbot.jpg"
+    <img src="images/whatsappbot.webp"
          alt="WhatsApp AI Bot"
-         class="wa-badge-img" />
+         class="wa-badge-img" width="40" height="40" />
 
     <!-- Text: visible on desktop, hidden on mobile FAB -->
     <div class="wa-badge-text">
@@ -864,14 +1084,19 @@
         <i class="fas fa-chevron-up"></i>
     </button>
 
-       <!-- ===== CLIENT LOGIN MODAL ===== -->
+    <!-- ============================================================
+         CLIENT LOGIN — DISABLED (kept for future use, not shown to visitors)
+         This was a UI-only mockup with no real authentication backend.
+         The trigger button was removed from the nav (see nav-right above).
+         To re-enable: build a real auth backend first, then uncomment
+         this block and add back a button with id="client-login-btn".
     <div id="login-modal" class="login-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="login-modal-heading">
         <div class="login-modal-box">
             <button class="login-modal-close" id="login-modal-close" aria-label="Close login modal">
                 <i class="fas fa-times"></i>
             </button>
             <div class="login-modal-header">
-                <img src="images/mylog.jpg" alt="Anani RM" class="login-modal-logo" />
+                <img src="images/mylog.webp" alt="Anani RM" class="login-modal-logo" width="56" height="56" loading="lazy" />
                 <h2 class="login-modal-title" id="login-modal-heading">Client <span class="accent">Login</span></h2>
                 <p class="login-modal-sub">Access your project dashboard</p>
             </div>
@@ -898,12 +1123,16 @@
             </div>
         </div>
     </div>
+    ============================================================ -->
 
     <script src="script.js"></script>
+    <!-- Reviews + real portfolio projects — safe no-op until Firebase is configured, see firebase-config.js -->
+    <script type="module" src="reviews-portfolio.js"></script>
     <script>
     (function(){if(!window.chatbase||window.chatbase("getState")!=="initialized"){window.chatbase=(...args)=>{if(!window.chatbase.q){window.chatbase.q=[]}window.chatbase.q.push(args)};window.chatbase=new Proxy(window.chatbase,{get(target,prop){if(prop==="q"){return target.q}return(...args)=>target(prop,...args)}})}const onLoad=function(){const script=document.createElement("script");script.src="https://www.chatbase.co/embed.min.js";script.id="PaBSfA_sO1HjjLRo1lc3t";script.domain="www.chatbase.co";document.body.appendChild(script)};if(document.readyState==="complete"){onLoad()}else{window.addEventListener("load",onLoad)}})();
     </script>
 
+    <!-- DISABLED with the login modal above — re-enable together if auth is built later.
     <script>
     (function () {
         var overlay  = document.getElementById('login-modal');
@@ -930,8 +1159,6 @@
     })();
     </script>
 
-    
-
     <script>
       // Placeholder layout button popups while backend is paused
       document.getElementById('google-login-btn')?.addEventListener('click', () => {
@@ -950,5 +1177,6 @@
         alert("Email / Phone form entry container layout ready! (Backend connection paused)");
       });
     </script>
+    -->
 </body>
 </html>

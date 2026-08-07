@@ -18,7 +18,7 @@
 
     --text-hi:      #f0f0ff;
     --text-mid:     #8888aa;
-    --text-lo:      #44445a;
+    --text-lo:      #787896;   /* lightened from #44445a — old value failed WCAG AA (2.14:1); this passes at 4.76:1 */
 
     --border:       rgba(255, 255, 255, 0.08);
     --border-glow:  rgba(0, 212, 255, 0.25);
@@ -47,9 +47,29 @@ body {
     line-height: 1.6;
     overflow-x: hidden;
 }
+
+/* Defensive word-wrap for headings — the Syne display font is very wide,
+   so a single long word at large mobile font-sizes could in theory overflow
+   its container instead of wrapping. overflow-wrap only breaks a word when
+   there's truly no other way to fit it (unlike word-break: break-word,
+   which breaks words prematurely even when they'd fit fine on their own
+   line — verified via screenshot that it was doing exactly that here). */
+h1, h2, h3, h4, h5, h6 {
+    overflow-wrap: break-word;
+}
 a { text-decoration: none; color: inherit; }
 img { max-width: 100%; display: block; }
 button { font-family: var(--f-body); }
+
+/* Respect the visitor's reduced-motion preference */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
 
 /* Custom scrollbar */
 ::-webkit-scrollbar { width: 4px; }
@@ -302,6 +322,78 @@ button { font-family: var(--f-body); }
 .nav-links a.active-link  { color: var(--cyan); }
 .nav-links a.active-link::after { width: 55%; }
 
+/* ── Nav dropdowns (Websites / AI & Automation) ── */
+.nav-links li.has-dropdown { position: relative; }
+
+.dropdown-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    font-family: inherit;
+    cursor: pointer;
+}
+.dropdown-toggle .chevron {
+    font-size: .6rem;
+    transition: transform .3s ease;
+}
+.has-dropdown:hover .chevron,
+.has-dropdown.open .chevron { transform: rotate(180deg); }
+
+.dropdown-menu {
+    list-style: none;
+    position: absolute;
+    top: calc(100% + 12px);
+    left: 50%;
+    transform: translateX(-50%) translateY(-8px);
+    min-width: 230px;
+    background: rgba(9, 9, 30, .98);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 8px;
+    opacity: 0;
+    visibility: hidden;
+    box-shadow: 0 20px 50px rgba(0,0,0,.45);
+    transition: var(--t);
+    z-index: 1001;
+}
+.has-dropdown:hover .dropdown-menu,
+.has-dropdown.open .dropdown-menu,
+.has-dropdown:focus-within .dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+.dropdown-menu li a {
+    display: block;
+    padding: 10px 14px;
+    font-size: .82rem;
+    white-space: nowrap;
+    border-radius: 8px;
+}
+.dropdown-menu li a::after { display: none; }
+.dropdown-menu li a:hover { background: var(--bg-glass-hov); color: var(--text-hi); }
+
+/* Mobile slide-out menu: grouped sub-links under Websites / AI & Automation */
+.mobile-group-label {
+    display: block;
+    padding: 14px 12px 6px;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .6px;
+    text-transform: uppercase;
+    color: var(--text-mid);
+}
+.mobile-sublist {
+    list-style: none;
+    border-left: 1px solid var(--border);
+    margin-left: 12px;
+}
+.mobile-sublist a { font-size: .92rem; padding: 10px 16px; }
+
 .nav-right { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
 
 .nav-cta {
@@ -520,7 +612,7 @@ section { padding: var(--section-gap); position: relative; }
 
 .hero-content {
     flex: 1;
-    max-width: 580px;
+    max-width: 660px;   /* widened from 580px so the longer hero headline has room to wrap on word boundaries */
     z-index: 1;
 }
 
@@ -553,9 +645,9 @@ section { padding: var(--section-gap); position: relative; }
 
 .hero-title {
     font-family: var(--f-display);
-    font-size: clamp(2.4rem, 5vw, 4.2rem);
+    font-size: clamp(2.4rem, 4.2vw, 3.6rem);
     font-weight: 800;
-    line-height: 1.1;
+    line-height: 1.15;
     margin-bottom: 18px;
     animation: fadeUp .7s .1s ease both;
 }
@@ -585,9 +677,22 @@ section { padding: var(--section-gap); position: relative; }
     display: flex;
     gap: 14px;
     flex-wrap: wrap;
-    margin-bottom: 48px;
+    margin-bottom: 20px;
     animation: fadeUp .7s .4s ease both;
 }
+
+.hero-view-work-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: .85rem;
+    font-weight: 600;
+    color: var(--text-mid);
+    margin-bottom: 32px;
+    transition: var(--t);
+}
+.hero-view-work-link i { font-size: .75rem; }
+.hero-view-work-link:hover { color: var(--cyan); gap: 11px; }
 
 .hero-stats {
     display: flex;
@@ -709,6 +814,118 @@ section { padding: var(--section-gap); position: relative; }
 .services-grid .service-card:last-child:nth-child(3n + 1) {
     grid-column: 2;
 }
+
+.services-grid--2 {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 760px;
+    margin: 0 auto;
+}
+
+/* ── Service category blocks (Website Dev / SEO / AI & Automation) ── */
+.service-category { margin-bottom: 64px; }
+.service-category:last-child { margin-bottom: 0; }
+
+/* "Enhance Your Website" — deliberately smaller/secondary vs. Website Development */
+.enhance-website {
+    padding-top: 48px;
+    border-top: 1px solid var(--border);
+}
+.section-title-sm {
+    font-family: var(--f-display);
+    font-size: clamp(1.4rem, 2.4vw, 1.8rem);
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.service-category-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+    max-width: 720px;
+    margin: 0 0 28px;
+}
+.service-category-icon {
+    flex-shrink: 0;
+    width: 52px; height: 52px;
+    background: linear-gradient(135deg, rgba(0,212,255,.15), rgba(123,47,255,.15));
+    border: 1px solid rgba(0,212,255,.2);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: var(--cyan);
+}
+.service-category-header h3 {
+    font-family: var(--f-display);
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+.service-category-header p {
+    color: var(--text-mid);
+    font-size: .9rem;
+    line-height: 1.7;
+}
+
+.seo-feature-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+.seo-feature-grid span {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background: var(--bg-glass);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-size: .85rem;
+    color: var(--text-mid);
+}
+.seo-feature-grid span i { color: var(--green); font-size: .75rem; }
+
+.service-category-cta {
+    display: inline-flex;
+}
+
+.service-category-footnote {
+    margin-top: 26px;
+    padding: 18px 22px;
+    background: var(--bg-glass);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    font-size: .85rem;
+    color: var(--text-mid);
+    line-height: 1.7;
+}
+.service-category-footnote strong { color: var(--text-hi); }
+.service-category-footnote a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: 6px;
+    color: var(--cyan);
+    font-weight: 600;
+    white-space: nowrap;
+}
+.service-category-footnote a:hover { gap: 9px; }
+
+/* ── Personal Services (secondary section) ── */
+.personal-services {
+    background: var(--bg-base);
+    border-top: 1px solid var(--border);
+}
+.personal-services .service-card {
+    padding: 26px 22px;
+}
+.personal-services .service-icon {
+    width: 44px; height: 44px;
+    font-size: .95rem;
+}
+.personal-services .service-card h3 { font-size: .95rem; }
 
 .service-card {
     background: var(--bg-glass);
@@ -1048,6 +1265,99 @@ section { padding: var(--section-gap); position: relative; }
 
 .project-ico { font-size: 2.8rem; color: rgba(255,255,255,.25); transition: var(--t); }
 
+.concept-badge {
+    position: absolute;
+    top: 12px; left: 12px;
+    padding: 3px 12px;
+    background: rgba(9,9,30,.85);
+    border: 1px solid var(--border);
+    color: var(--text-mid);
+    font-size: .66rem;
+    font-weight: 700;
+    letter-spacing: .3px;
+    border-radius: 100px;
+    z-index: 2;
+}
+
+.real-badge {
+    position: absolute;
+    top: 12px; left: 12px;
+    padding: 3px 12px;
+    background: rgba(0,255,136,.12);
+    border: 1px solid rgba(0,255,136,.4);
+    color: var(--green);
+    font-size: .66rem;
+    font-weight: 700;
+    letter-spacing: .3px;
+    border-radius: 100px;
+    z-index: 2;
+}
+
+/* ── Leave a Review — compact toggle row ── */
+.review-toggle-row { text-align: center; margin-top: 40px; }
+
+/* ── Leave a Review form — collapsed by default, expands on toggle ── */
+.review-form-wrap {
+    max-width: 620px;
+    margin: 0 auto 0;
+    background: var(--bg-glass);
+    border: 1px solid transparent;
+    border-radius: 22px;
+    padding: 0 36px;
+    text-align: center;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height .4s ease, opacity .3s ease, padding .4s ease, margin .4s ease;
+}
+.review-form-wrap.open {
+    max-height: 900px;
+    opacity: 1;
+    padding: 38px 36px;
+    margin: 20px auto 0;
+    border-color: var(--border);
+}
+.review-form-wrap h3 {
+    font-family: var(--f-display);
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+.review-form-sub {
+    color: var(--text-mid);
+    font-size: .88rem;
+    margin-bottom: 24px;
+}
+.review-form .field { text-align: left; }
+.review-form .submit-btn { align-self: center; margin-top: 6px; }
+
+/* 5-star rating input — pure CSS, radio-driven */
+.star-input {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: center;
+    gap: 6px;
+    font-size: 2rem;
+    margin-bottom: 22px;
+}
+.star-input input { position: absolute; opacity: 0; width: 0; height: 0; }
+.star-input label {
+    color: var(--border);
+    cursor: pointer;
+    transition: color .15s ease;
+    line-height: 1;
+}
+.star-input input:checked ~ label,
+.star-input label:hover,
+.star-input label:hover ~ label {
+    color: var(--gold);
+}
+.star-input input:focus-visible + label {
+    outline: 2px solid var(--cyan);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
 .project-hover {
     position: absolute;
     inset: 0;
@@ -1099,6 +1409,12 @@ section { padding: var(--section-gap); position: relative; }
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 22px;
+}
+/* Center gracefully when there are exactly 2 testimonials instead of 3 */
+.testimonials-grid:has(.testi-card:nth-child(2):last-child) {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 760px;
+    margin: 0 auto;
 }
 
 .testi-card {
@@ -1195,7 +1511,7 @@ section { padding: var(--section-gap); position: relative; }
     flex-shrink: 0;
 }
 
-.contact-item h4 {
+.contact-item h3 {
     font-size: .75rem;
     font-weight: 700;
     color: var(--text-lo);
@@ -1268,6 +1584,18 @@ section { padding: var(--section-gap); position: relative; }
 .map-placeholder i    { font-size: 1.8rem; color: var(--cyan); }
 .map-placeholder span { font-size: .82rem; }
 
+/* Visually hidden but screen-reader accessible — used for form <label>s
+   that would otherwise duplicate the visible placeholder text */
+.sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
 /* Contact form */
 .contact-form-wrap {
     background: var(--bg-glass);
@@ -1282,6 +1610,7 @@ section { padding: var(--section-gap); position: relative; }
 .field { position: relative; }
 
 .field input,
+.field select,
 .field textarea {
     width: 100%;
     padding: 13px 0;
@@ -1308,6 +1637,16 @@ section { padding: var(--section-gap); position: relative; }
 .field:focus-within .field-line    { width: 100%; }
 .field:focus-within input,
 .field:focus-within textarea       { border-bottom-color: transparent; }
+
+/* Keyboard focus indicator — outline only shows for keyboard navigation,
+   not mouse clicks, so it doesn't clash with the underline animation above */
+.field input:focus-visible,
+.field select:focus-visible,
+.field textarea:focus-visible {
+    outline: 2px solid var(--cyan);
+    outline-offset: 4px;
+    border-radius: 4px;
+}
 
 .submit-btn { align-self: flex-start; border: none; }
 
@@ -1371,7 +1710,7 @@ section { padding: var(--section-gap); position: relative; }
     margin-bottom: 20px;
 }
 
-.footer-col h4 {
+.footer-col h3 {
     font-family: var(--f-display);
     font-size: .78rem;
     font-weight: 700;
@@ -1394,6 +1733,7 @@ section { padding: var(--section-gap); position: relative; }
     margin-bottom: 9px;
 }
 .footer-col p i { color: var(--cyan); width: 14px; }
+.footer-col p a:hover { color: var(--cyan); }
 
 .footer-bottom {
     border-top: 1px solid var(--border);
@@ -1502,6 +1842,8 @@ section { padding: var(--section-gap); position: relative; }
 
     .services-grid     { grid-template-columns: 1fr; }
     .services-grid .service-card:last-child:nth-child(3n + 1) { grid-column: auto; }
+    .service-category-header { flex-direction: column; }
+    .seo-feature-grid  { gap: 8px; }
 
     .about-grid        { grid-template-columns: 1fr; gap: 40px; }
     .about-visual      { order: -1; }
@@ -1532,6 +1874,14 @@ section { padding: var(--section-gap); position: relative; }
 
     .btn-primary,
     .btn-secondary { padding: 12px 22px; font-size: .85rem; }
+
+    .budget-callout .btn-secondary {
+        white-space: normal;
+        text-align: left;
+        height: auto;
+    }
+
+    .about-ring { display: none; }
 
     .section-title { font-size: 1.7rem; }
 
@@ -1699,6 +2049,17 @@ section { padding: var(--section-gap); position: relative; }
             0 4px 24px rgba(0,0,0,.55);
 
         animation: waBadgeFloat 3.5s ease-in-out infinite;
+
+        /* Hidden until the visitor scrolls past the hero — on tall hero
+           content this fixed FAB can otherwise sit on top of the hero's
+           own CTA buttons on first paint. Mirrors #backToTop's pattern. */
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+    .wa-autoreply-badge.wa-shown {
+        opacity: 1;
+        pointer-events: all;
     }
 
     .wa-autoreply-badge:hover,

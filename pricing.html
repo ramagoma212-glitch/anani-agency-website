@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pricing | RMdigitals — Website, SEO &amp; Maintenance Packages for South African Businesses</title>
+    <meta name="description" content="Transparent pricing for website development, SEO and website maintenance from RMdigitals (Anani Ramagoma). South African Rand pricing, no hidden fees, request a free quote." />
+
+    
+    <!-- SEO NOTE: rmdigitals.co.za is a placeholder domain (not yet registered).
+         Once a real domain is live, find-and-replace "https://www.rmdigitals.co.za"
+         across every HTML file, sitemap.xml and robots.txt. -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png" />
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+
+    <link rel="canonical" href="https://www.rmdigitals.co.za/pricing.html" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="RMdigitals" />
+    <meta property="og:title" content="Pricing | RMdigitals — Website, SEO &amp; Maintenance Packages for South African Businesses" />
+    <meta property="og:description" content="Transparent pricing for website development, SEO and website maintenance from RMdigitals (Anani Ramagoma). South African Rand pricing, no hidden fees, request a free quote." />
+    <meta property="og:url" content="https://www.rmdigitals.co.za/pricing.html" />
+    <meta property="og:image" content="https://www.rmdigitals.co.za/images/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="en_ZA" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Pricing | RMdigitals — Website, SEO &amp; Maintenance Packages for South African Businesses" />
+    <meta name="twitter:description" content="Transparent pricing for website development, SEO and website maintenance from RMdigitals (Anani Ramagoma). South African Rand pricing, no hidden fees, request a free quote." />
+    <meta name="twitter:image" content="https://www.rmdigitals.co.za/images/og-image.jpg" />
+
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="style.css" />
+
+    <!-- ============================================================
+         PAGE-SPECIFIC STYLES — pricing tiers, mini pricing cards,
+         add-on list, payment terms and policy blocks.
+    ============================================================ -->
+    <style>
+
+        .page-hero {
+            min-height: 52vh;
+            display: flex; align-items: center; justify-content: center; text-align: center;
+            padding: 140px 24px 60px; position: relative; overflow: hidden;
+        }
+        .page-hero-content { max-width: 780px; z-index: 1; }
+        .page-hero-content .hero-badge { justify-content: center; }
+        .page-hero-title {
+            font-family: var(--f-display); font-size: clamp(2.2rem, 5vw, 3.4rem);
+            font-weight: 800; line-height: 1.1; margin-bottom: 22px; animation: fadeUp .7s .1s ease both;
+        }
+        .page-hero-subtitle {
+            color: var(--text-mid); font-size: clamp(.95rem, 2vw, 1.1rem);
+            line-height: 1.85; animation: fadeUp .7s .2s ease both;
+        }
+        .page-hero::before {
+            content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 600px; height: 400px;
+            background: radial-gradient(ellipse, rgba(0,212,255,.07) 0%, transparent 70%);
+            pointer-events: none; z-index: 0;
+        }
+
+        .pricing-section-block { padding: var(--section-gap); }
+        .pricing-section-block:nth-child(even) { background: var(--bg-layer); }
+
+        /* ── Website package tiers ── */
+        .pricing-tier-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+        .pricing-tier-card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 32px 26px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: var(--t);
+        }
+        .pricing-tier-card:hover { transform: translateY(-6px); border-color: var(--border-glow); }
+        .pricing-tier-card.featured {
+            border-color: rgba(0,212,255,.35);
+            background: linear-gradient(135deg, rgba(0,212,255,.06), rgba(123,47,255,.06));
+            box-shadow: 0 0 50px rgba(0,212,255,.1);
+        }
+        .pricing-tier-badge {
+            position: absolute; top: -13px; left: 26px;
+            padding: 4px 14px; background: var(--grad); color: #fff;
+            font-size: .68rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1px; border-radius: 100px;
+        }
+        .pricing-tier-card h3 { font-family: var(--f-display); font-size: 1.15rem; font-weight: 800; margin-bottom: 4px; }
+        .pricing-tier-for { font-size: .8rem; color: var(--text-mid); margin-bottom: 16px; min-height: 34px; }
+        .pricing-tier-amount {
+            font-family: var(--f-display); font-size: 2rem; font-weight: 800; line-height: 1;
+            background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; margin-bottom: 18px;
+        }
+        .pricing-tier-features {
+            list-style: none; display: flex; flex-direction: column; gap: 9px;
+            margin-bottom: 24px; flex: 1;
+        }
+        .pricing-tier-features li {
+            display: flex; align-items: flex-start; gap: 9px;
+            font-size: .82rem; color: var(--text-mid); line-height: 1.5;
+        }
+        .pricing-tier-features li i { color: var(--green); font-size: .7rem; margin-top: 4px; flex-shrink: 0; }
+        .pricing-tier-cta { width: 100%; justify-content: center; }
+
+        /* ── SEO mini pricing cards ── */
+        .mini-pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 20px;
+        }
+        .mini-pricing-card {
+            background: var(--bg-glass); border: 1px solid var(--border); border-radius: 18px;
+            padding: 26px 22px; transition: var(--t);
+        }
+        .mini-pricing-card:hover { border-color: var(--border-glow); transform: translateY(-4px); }
+        .mini-pricing-card h3 { font-family: var(--f-display); font-size: .98rem; font-weight: 700; margin-bottom: 8px; }
+        .mini-pricing-card .mini-price {
+            font-family: var(--f-display); font-size: 1.4rem; font-weight: 800; color: var(--cyan); margin-bottom: 6px;
+        }
+        .mini-pricing-card .mini-period { font-size: .74rem; color: var(--text-lo); margin-bottom: 14px; display: block; }
+        .mini-pricing-card ul { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+        .mini-pricing-card ul li {
+            display: flex; align-items: flex-start; gap: 7px; font-size: .78rem; color: var(--text-mid); line-height: 1.5;
+        }
+        .mini-pricing-card ul li i { color: var(--green); font-size: .65rem; margin-top: 4px; flex-shrink: 0; }
+
+        .disclaimer-box {
+            margin-top: 32px; max-width: 780px; margin-left: auto; margin-right: auto;
+            padding: 18px 24px; background: rgba(255,214,10,.06); border: 1px solid rgba(255,214,10,.25);
+            border-radius: 16px; display: flex; gap: 14px; align-items: flex-start;
+        }
+        .disclaimer-box i { color: var(--gold); font-size: 1.1rem; flex-shrink: 0; margin-top: 2px; }
+        .disclaimer-box p { font-size: .83rem; color: var(--text-mid); line-height: 1.7; }
+
+        /* ── Budget / flexibility callout (below Website Packages) ── */
+        .budget-callout {
+            max-width: 680px; margin: 40px auto 0; text-align: center;
+            padding: 34px 32px; background: var(--bg-glass); border: 1px solid var(--border);
+            border-radius: 20px;
+        }
+        .budget-callout p { font-size: .88rem; color: var(--text-mid); line-height: 1.75; margin-bottom: 18px; }
+        .budget-callout-divider { height: 1px; background: var(--border); margin: 26px 0 20px; }
+        .budget-callout h3 { font-family: var(--f-display); font-size: 1rem; font-weight: 700; margin-bottom: 10px; }
+
+        /* ── Maintenance plans (reuses services-grid / service-card look) ── */
+        .maintenance-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+        .maintenance-card {
+            background: var(--bg-glass); border: 1px solid var(--border); border-radius: 20px;
+            padding: 30px 26px; transition: var(--t);
+        }
+        .maintenance-card:hover { border-color: var(--border-glow); transform: translateY(-6px); }
+        .maintenance-card h3 { font-family: var(--f-display); font-size: 1.05rem; font-weight: 700; margin-bottom: 4px; }
+        .maintenance-price {
+            font-family: var(--f-display); font-size: 1.6rem; font-weight: 800; color: var(--cyan); margin-bottom: 16px;
+        }
+        .maintenance-price span { font-size: .75rem; color: var(--text-lo); font-weight: 500; }
+        .maintenance-card ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+        .maintenance-card ul li {
+            display: flex; align-items: flex-start; gap: 8px; font-size: .82rem; color: var(--text-mid); line-height: 1.55;
+        }
+        .maintenance-card ul li i { color: var(--green); font-size: .68rem; margin-top: 4px; flex-shrink: 0; }
+
+        /* ── Add-ons table ── */
+        .addon-list {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+            background: var(--border); border: 1px solid var(--border); border-radius: 16px; overflow: hidden;
+        }
+        .addon-row {
+            display: flex; justify-content: space-between; align-items: center; gap: 12px;
+            padding: 16px 22px; background: var(--bg-glass);
+        }
+        .addon-row .addon-name { font-size: .88rem; color: var(--text-hi); }
+        .addon-row .addon-price { font-size: .85rem; color: var(--cyan); font-weight: 700; white-space: nowrap; }
+
+        /* ── Payment terms ── */
+        .terms-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+        .terms-card {
+            background: var(--bg-glass); border: 1px solid var(--border); border-radius: 20px; padding: 30px 28px;
+        }
+        .terms-card h3 { font-family: var(--f-display); font-size: 1rem; font-weight: 700; margin-bottom: 16px; }
+        .terms-steps { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+        .terms-steps li { display: flex; gap: 12px; align-items: flex-start; }
+        .terms-step-pct {
+            flex-shrink: 0; width: 44px; height: 44px; border-radius: 50%;
+            background: var(--grad); color: #fff; font-family: var(--f-display); font-weight: 800;
+            font-size: .8rem; display: flex; align-items: center; justify-content: center;
+        }
+        .terms-steps p { font-size: .84rem; color: var(--text-mid); line-height: 1.6; }
+        .terms-notes { list-style: none; margin-top: 26px; display: flex; flex-direction: column; gap: 10px; }
+        .terms-notes li { display: flex; gap: 9px; font-size: .83rem; color: var(--text-mid); line-height: 1.6; }
+        .terms-notes li i { color: var(--cyan); font-size: .7rem; margin-top: 5px; flex-shrink: 0; }
+
+        /* ── Domain & hosting policy ── */
+        .policy-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; max-width: 980px; margin: 0 auto; }
+        .policy-card {
+            background: var(--bg-glass); border: 1px solid var(--border); border-radius: 18px;
+            padding: 26px 24px; text-align: center;
+        }
+        .policy-card i { font-size: 1.5rem; color: var(--cyan); margin-bottom: 14px; }
+        .policy-card h3 { font-family: var(--f-display); font-size: .92rem; font-weight: 700; margin-bottom: 8px; }
+        .policy-card p { font-size: .8rem; color: var(--text-mid); line-height: 1.65; }
+
+        .cta-section { background: linear-gradient(180deg, var(--bg-layer) 0%, var(--bg-base) 100%); padding: 100px 0; }
+        .cta-inner { text-align: center; max-width: 700px; margin: 0 auto; }
+        .cta-inner h2 { font-family: var(--f-display); font-size: clamp(1.8rem, 3.5vw, 2.6rem); font-weight: 800; margin-bottom: 14px; }
+        .cta-inner p { color: var(--text-mid); font-size: .95rem; line-height: 1.8; margin-bottom: 36px; }
+        .cta-buttons { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+        .btn-whatsapp {
+            display: inline-flex; align-items: center; gap: 8px; padding: 13px 30px;
+            background: linear-gradient(135deg, #25D366, #128C7E); color: #fff; font-weight: 700;
+            font-size: .9rem; border-radius: 100px; text-decoration: none; transition: var(--t);
+            box-shadow: 0 0 28px rgba(37,211,102,.3); white-space: nowrap;
+        }
+        .btn-whatsapp:hover { transform: translateY(-3px); box-shadow: 0 0 48px rgba(37,211,102,.5); }
+
+        @media (max-width: 1024px) {
+            .pricing-tier-grid { grid-template-columns: repeat(2, 1fr); }
+            .maintenance-grid  { grid-template-columns: repeat(2, 1fr); }
+            .policy-grid       { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            .pricing-tier-grid { grid-template-columns: 1fr; }
+            .maintenance-grid  { grid-template-columns: 1fr; }
+            .terms-grid        { grid-template-columns: 1fr; }
+            .addon-list        { grid-template-columns: 1fr; }
+            .page-hero         { padding: 120px 22px 50px; }
+        }
+
+    </style>
+
+    <script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+        {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://www.rmdigitals.co.za/"
+        },
+        {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Pricing",
+            "item": "https://www.rmdigitals.co.za/pricing.html"
+        }
+    ]
+}
+    </script>
+</head>
+<body>
+
+    <!-- ===== LOADING SCREEN — identical to index.html ===== -->
+    <div id="loader">
+        <div class="loader-inner">
+            <div class="loader-ring"></div>
+            <div class="loader-logo">
+                <img src="images/mylog.webp" alt="Anani RM" class="loader-logo-img" width="52" height="52" />
+                <span>Loading<span class="loader-dots">...</span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== NAVIGATION — identical to index.html ===== -->
+    <nav id="navbar">
+        <div class="nav-container">
+
+            <a href="index.html" class="nav-logo">
+                <img src="images/mylog.webp" alt="RMdigitals — Anani Ramagoma, web developer in Thohoyandou, Limpopo" class="nav-logo-img" width="40" height="40" />
+                <span class="nav-logo-text">RM<span class="accent"></span></span>
+            </a>
+
+            <ul class="nav-links">
+                <li><a href="index.html#home">Home</a></li>
+                <li class="has-dropdown">
+                    <a href="index.html#services-websites" class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">Websites <i class="fas fa-chevron-down chevron"></i></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="business-websites.html">Business Websites</a></li>
+                        <li><a href="ecommerce-websites.html">Ecommerce Websites</a></li>
+                        <li><a href="website-RedesingAndDesing.html">Website Redesign</a></li>
+                        <li><a href="PortfolioWebsite.html">Portfolio Websites</a></li>
+                    </ul>
+                </li>
+                <li class="has-dropdown">
+                    <a href="index.html#enhance-website" class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">Website Add-Ons <i class="fas fa-chevron-down chevron"></i></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="SEO-Optimization.html">SEO</a></li>
+                        <li><a href="chatbots.html">AI Website Chatbots</a></li>
+                        <li><a href="WhatsAppIntegration.html">WhatsApp Integration</a></li>
+                        <li><a href="pricing.html#maintenance">Website Maintenance</a></li>
+                    </ul>
+                </li>
+                <li><a href="index.html#portfolio">Portfolio</a></li>
+                <li><a href="pricing.html" class="active-link">Pricing</a></li>
+                <li><a href="index.html#about">About</a></li>
+                <li><a href="index.html#contact">Contact</a></li>
+            </ul>
+
+            <div class="nav-right">
+                <a href="https://wa.me/27648412146?text=Hi%20Anani%2C%20I%27m%20interested%20in%20your%20website%20development%2C%20SEO%20or%20AI%20services%21"
+                   target="_blank" rel="noopener noreferrer" class="nav-cta">Chat on WhatsApp</a>
+                <button class="hamburger" id="hamburger" aria-label="Open menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Slide-Out Menu — identical to index.html -->
+    <div class="mobile-menu" id="mobileMenu">
+        <button class="mobile-close" id="mobileClose" aria-label="Close menu">
+            <i class="fas fa-times"></i>
+        </button>
+        <ul>
+            <li><a href="index.html#home" class="mobile-link">Home</a></li>
+
+            <li class="mobile-group">
+                <span class="mobile-group-label">Websites</span>
+                <ul class="mobile-sublist">
+                    <li><a href="business-websites.html" class="mobile-link">Business Websites</a></li>
+                    <li><a href="ecommerce-websites.html" class="mobile-link">Ecommerce Websites</a></li>
+                    <li><a href="website-RedesingAndDesing.html" class="mobile-link">Website Redesign</a></li>
+                    <li><a href="PortfolioWebsite.html" class="mobile-link">Portfolio Websites</a></li>
+                </ul>
+            </li>
+
+            <li class="mobile-group">
+                <span class="mobile-group-label">Website Add-Ons</span>
+                <ul class="mobile-sublist">
+                    <li><a href="SEO-Optimization.html" class="mobile-link">SEO</a></li>
+                    <li><a href="chatbots.html" class="mobile-link">AI Website Chatbots</a></li>
+                    <li><a href="WhatsAppIntegration.html" class="mobile-link">WhatsApp Integration</a></li>
+                    <li><a href="pricing.html#maintenance" class="mobile-link">Website Maintenance</a></li>
+                </ul>
+            </li>
+
+            <li><a href="index.html#portfolio" class="mobile-link">Portfolio</a></li>
+            <li><a href="pricing.html" class="mobile-link">Pricing</a></li>
+            <li><a href="index.html#about" class="mobile-link">About</a></li>
+            <li><a href="index.html#contact" class="mobile-link">Contact</a></li>
+        </ul>
+        <a href="https://wa.me/27648412146" target="_blank" class="mobile-whatsapp">
+            <i class="fab fa-whatsapp"></i> Chat on WhatsApp
+        </a>
+    </div>
+    <div class="menu-overlay" id="menuOverlay"></div>
+
+    <canvas id="particleCanvas"></canvas>
+
+    <!-- ============================================================
+         PAGE HERO
+    ============================================================ -->
+    <section class="page-hero">
+        <div class="page-hero-content">
+            <div class="hero-badge">
+                <span class="badge-dot"></span>
+                Pricing
+            </div>
+            <h1 class="page-hero-title">
+                Clear, <span class="gradient-text">South African Rand</span> Pricing
+            </h1>
+            <p class="page-hero-subtitle">
+                No hidden fees, no confusing quotes. Starting prices shown below are guides —
+                final pricing depends on the scope, functionality and requirements of your project.
+            </p>
+        </div>
+    </section>
+
+
+    <!-- ============================================================
+         WEBSITE PACKAGES
+    ============================================================ -->
+    <section class="pricing-section-block" id="websites">
+        <div class="container">
+
+            <div class="section-header reveal">
+                <span class="section-tag">Website Development</span>
+                <h2 class="section-title">Website <span class="gradient-text">Packages</span></h2>
+                <p class="section-subtitle">Every project is scoped to your business — these packages are starting points, not a fixed menu.</p>
+            </div>
+
+            <div class="pricing-tier-grid">
+
+                <!-- Landing Page -->
+                <div class="pricing-tier-card reveal-card">
+                    <h3>Landing Page</h3>
+                    <p class="pricing-tier-for">Campaigns, individual services, startups and simple lead generation.</p>
+                    <div class="pricing-tier-amount">From R4,500</div>
+                    <ul class="pricing-tier-features">
+                        <li><i class="fas fa-check"></i> Single high-converting page</li>
+                        <li><i class="fas fa-check"></i> Responsive mobile design</li>
+                        <li><i class="fas fa-check"></i> Contact form or WhatsApp CTA</li>
+                        <li><i class="fas fa-check"></i> Basic on-page SEO</li>
+                    </ul>
+                    <a href="index.html?package=Landing+Page#contact" class="btn-secondary pricing-tier-cta"><span>Request a Quote</span></a>
+                </div>
+
+                <!-- Starter Business Website -->
+                <div class="pricing-tier-card reveal-card">
+                    <h3>Starter Business Website</h3>
+                    <p class="pricing-tier-for">Small businesses needing a solid, professional online presence.</p>
+                    <div class="pricing-tier-amount">From R6,500</div>
+                    <ul class="pricing-tier-features">
+                        <li><i class="fas fa-check"></i> Up to 5 pages (Home, About, Services, Contact)</li>
+                        <li><i class="fas fa-check"></i> Responsive mobile design</li>
+                        <li><i class="fas fa-check"></i> WhatsApp integration &amp; contact form</li>
+                        <li><i class="fas fa-check"></i> Image optimisation</li>
+                        <li><i class="fas fa-check"></i> Basic SEO — titles, meta descriptions</li>
+                        <li><i class="fas fa-check"></i> SSL setup assistance</li>
+                        <li><i class="fas fa-check"></i> Sitemap &amp; robots.txt</li>
+                        <li><i class="fas fa-check"></i> Google Search Console submission</li>
+                        <li><i class="fas fa-check"></i> Social sharing metadata &amp; basic structured data</li>
+                        <li><i class="fas fa-check"></i> Google Maps where relevant</li>
+                        <li><i class="fas fa-check"></i> Two revision rounds</li>
+                        <li><i class="fas fa-check"></i> Deployment</li>
+                    </ul>
+                    <a href="index.html?package=Starter+Business+Website#contact" class="btn-secondary pricing-tier-cta"><span>Request a Quote</span></a>
+                </div>
+
+                <!-- Professional Business Website — Most Popular -->
+                <div class="pricing-tier-card featured reveal-card">
+                    <span class="pricing-tier-badge">Most Popular</span>
+                    <h3>Professional Business Website</h3>
+                    <p class="pricing-tier-for">Growing businesses that want a stronger technical SEO foundation.</p>
+                    <div class="pricing-tier-amount">From R9,500</div>
+                    <ul class="pricing-tier-features">
+                        <li><i class="fas fa-check"></i> Up to 7 pages, custom responsive design</li>
+                        <li><i class="fas fa-check"></i> Professional homepage, About &amp; service pages</li>
+                        <li><i class="fas fa-check"></i> Contact &amp; quotation forms</li>
+                        <li><i class="fas fa-check"></i> WhatsApp integration &amp; Google Maps</li>
+                        <li><i class="fas fa-check"></i> Image &amp; performance optimisation</li>
+                        <li><i class="fas fa-check"></i> Technical SEO foundation</li>
+                        <li><i class="fas fa-check"></i> Google Search Console &amp; Analytics</li>
+                        <li><i class="fas fa-check"></i> Sitemap, robots.txt &amp; canonical URLs</li>
+                        <li><i class="fas fa-check"></i> Open Graph &amp; schema markup</li>
+                        <li><i class="fas fa-check"></i> Google Business Profile assistance</li>
+                        <li><i class="fas fa-check"></i> Basic keyword research</li>
+                        <li><i class="fas fa-check"></i> Two to three revision rounds</li>
+                        <li><i class="fas fa-check"></i> Launch support</li>
+                    </ul>
+                    <a href="index.html?package=Professional+Business+Website#contact" class="btn-primary pricing-tier-cta"><span>Request a Quote</span></a>
+                </div>
+
+                <!-- Business Growth Website -->
+                <div class="pricing-tier-card reveal-card">
+                    <h3>Business Growth Website</h3>
+                    <p class="pricing-tier-for">Businesses ready to invest in SEO-led growth and conversion.</p>
+                    <div class="pricing-tier-amount">From R14,500</div>
+                    <ul class="pricing-tier-features">
+                        <li><i class="fas fa-check"></i> Everything from Professional</li>
+                        <li><i class="fas fa-check"></i> More service pages</li>
+                        <li><i class="fas fa-check"></i> Location-targeted pages</li>
+                        <li><i class="fas fa-check"></i> Keyword &amp; competitor research</li>
+                        <li><i class="fas fa-check"></i> Conversion optimisation</li>
+                        <li><i class="fas fa-check"></i> FAQ sections</li>
+                        <li><i class="fas fa-check"></i> Local business schema</li>
+                        <li><i class="fas fa-check"></i> Advanced on-page SEO</li>
+                        <li><i class="fas fa-check"></i> Google Business Profile optimisation</li>
+                        <li><i class="fas fa-check"></i> Call &amp; WhatsApp conversion tracking</li>
+                        <li><i class="fas fa-check"></i> Case studies / project gallery</li>
+                        <li><i class="fas fa-check"></i> Advanced forms</li>
+                        <li><i class="fas fa-check"></i> Performance optimisation</li>
+                    </ul>
+                    <a href="index.html?package=Business+Growth+Website#contact" class="btn-secondary pricing-tier-cta"><span>Request a Quote</span></a>
+                </div>
+
+                <!-- Ecommerce Website -->
+                <div class="pricing-tier-card reveal-card" id="ecommerce">
+                    <h3>Ecommerce Website</h3>
+                    <p class="pricing-tier-for">Businesses that want to sell products online.</p>
+                    <div class="pricing-tier-amount">From R18,000</div>
+                    <ul class="pricing-tier-features">
+                        <li><i class="fas fa-check"></i> Product catalogue &amp; secure checkout</li>
+                        <li><i class="fas fa-check"></i> Payment gateway integration</li>
+                        <li><i class="fas fa-check"></i> Final price depends on: product count, gateway, shipping, categories, checkout requirements, customer accounts, inventory needs, automation, SEO &amp; custom integrations</li>
+                    </ul>
+                    <a href="ecommerce-websites.html" class="btn-secondary pricing-tier-cta"><span>Explore Ecommerce Websites</span></a>
+                </div>
+
+                <!-- Custom Web System / Portal -->
+                <div class="pricing-tier-card reveal-card">
+                    <h3>Custom Web System / Portal</h3>
+                    <p class="pricing-tier-for">Businesses needing more than a website — a real system.</p>
+                    <div class="pricing-tier-amount">From R25,000</div>
+                    <ul class="pricing-tier-features">
+                        <li><i class="fas fa-check"></i> User authentication</li>
+                        <li><i class="fas fa-check"></i> Dashboards &amp; database functionality</li>
+                        <li><i class="fas fa-check"></i> Admin systems</li>
+                        <li><i class="fas fa-check"></i> Custom workflows</li>
+                        <li><i class="fas fa-check"></i> Business automation</li>
+                    </ul>
+                    <a href="index.html?package=Custom+Web+System#contact" class="btn-secondary pricing-tier-cta"><span>Request a Quote</span></a>
+                </div>
+
+            </div>
+
+            <div class="budget-callout reveal">
+                <p>
+                    Starting prices shown are guides. Final pricing depends on the scope,
+                    functionality and requirements of your project. If you have a specific
+                    budget, contact us and we can discuss the most suitable solution within
+                    a realistic scope.
+                </p>
+                <a href="index.html#contact" class="btn-secondary">
+                    <span>Have a specific budget? Let's discuss your project.</span>
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+                <div class="budget-callout-divider"></div>
+                <h3>Need Something Different?</h3>
+                <p>
+                    Every business is different. Tell us what you need and your estimated
+                    budget, and we'll recommend a realistic solution and quotation.
+                </p>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ============================================================
+         SEO PRICING
+    ============================================================ -->
+    <section class="pricing-section-block" id="seo">
+        <div class="container">
+
+            <div class="section-header reveal">
+                <span class="section-tag">SEO &amp; Google Visibility</span>
+                <h2 class="section-title">SEO <span class="gradient-text">Pricing</span></h2>
+                <p class="section-subtitle">Once-off setup services and ongoing monthly SEO plans.</p>
+            </div>
+
+            <div class="mini-pricing-grid reveal-card">
+
+                <div class="mini-pricing-card">
+                    <h3>SEO Health Check</h3>
+                    <span class="mini-price">R1,500</span>
+                    <span class="mini-period">once-off</span>
+                    <ul><li><i class="fas fa-check"></i> Full technical &amp; on-page audit with a prioritised action list</li></ul>
+                </div>
+
+                <div class="mini-pricing-card">
+                    <h3>SEO Setup</h3>
+                    <span class="mini-price">From R3,500</span>
+                    <span class="mini-period">once-off</span>
+                    <ul><li><i class="fas fa-check"></i> Technical &amp; on-page SEO foundation set up correctly from day one</li></ul>
+                </div>
+
+                <div class="mini-pricing-card">
+                    <h3>Google Business Profile Setup</h3>
+                    <span class="mini-price">R1,500</span>
+                    <span class="mini-period">once-off</span>
+                    <ul><li><i class="fas fa-check"></i> Full profile creation and verification support</li></ul>
+                </div>
+
+                <div class="mini-pricing-card">
+                    <h3>Google Business Profile Optimisation</h3>
+                    <span class="mini-price">R2,000</span>
+                    <span class="mini-period">once-off</span>
+                    <ul><li><i class="fas fa-check"></i> Optimising an existing profile for local search visibility</li></ul>
+                </div>
+
+                <div class="mini-pricing-card">
+                    <h3>Local SEO Starter</h3>
+                    <span class="mini-price">R3,500</span>
+                    <span class="mini-period">per month</span>
+                    <ul>
+                        <li><i class="fas fa-check"></i> Search Console monitoring</li>
+                        <li><i class="fas fa-check"></i> Keyword tracking</li>
+                        <li><i class="fas fa-check"></i> Technical SEO checks</li>
+                        <li><i class="fas fa-check"></i> Google Business Profile optimisation</li>
+                        <li><i class="fas fa-check"></i> One SEO content improvement per month</li>
+                        <li><i class="fas fa-check"></i> On-page optimisation &amp; internal linking</li>
+                        <li><i class="fas fa-check"></i> Broken link monitoring</li>
+                        <li><i class="fas fa-check"></i> Basic competitor monitoring</li>
+                        <li><i class="fas fa-check"></i> Monthly performance report</li>
+                    </ul>
+                </div>
+
+                <div class="mini-pricing-card">
+                    <h3>SEO Growth</h3>
+                    <span class="mini-price">R5,500</span>
+                    <span class="mini-period">per month</span>
+                    <ul><li><i class="fas fa-check"></i> Everything in Local SEO Starter, with more content and optimisation work each month</li></ul>
+                </div>
+
+                <div class="mini-pricing-card">
+                    <h3>Advanced SEO</h3>
+                    <span class="mini-price">From R8,500</span>
+                    <span class="mini-period">per month</span>
+                    <ul><li><i class="fas fa-check"></i> Our most hands-on ongoing SEO plan, scoped to your industry and competition</li></ul>
+                </div>
+
+            </div>
+
+            <div class="disclaimer-box reveal">
+                <i class="fas fa-triangle-exclamation"></i>
+                <p>SEO results vary by industry, competition, website history and search behaviour. No ethical SEO provider can guarantee a specific Google ranking.</p>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ============================================================
+         WEBSITE MAINTENANCE
+    ============================================================ -->
+    <section class="pricing-section-block" id="maintenance">
+        <div class="container">
+
+            <div class="section-header reveal">
+                <span class="section-tag">Website Maintenance</span>
+                <h2 class="section-title">Maintenance <span class="gradient-text">Plans</span></h2>
+                <p class="section-subtitle">Keep your website secure, fast and up to date after launch.</p>
+            </div>
+
+            <div class="maintenance-grid">
+
+                <div class="maintenance-card reveal-card">
+                    <h3>Website Care</h3>
+                    <div class="maintenance-price">R499 <span>/ month</span></div>
+                    <ul>
+                        <li><i class="fas fa-check"></i> Monthly website check</li>
+                        <li><i class="fas fa-check"></i> Form testing</li>
+                        <li><i class="fas fa-check"></i> Broken link checks</li>
+                        <li><i class="fas fa-check"></i> Backups where applicable</li>
+                        <li><i class="fas fa-check"></i> Basic security review</li>
+                        <li><i class="fas fa-check"></i> Up to 30 minutes minor website updates</li>
+                    </ul>
+                </div>
+
+                <div class="maintenance-card reveal-card">
+                    <h3>Business Care</h3>
+                    <div class="maintenance-price">R899 <span>/ month</span></div>
+                    <ul>
+                        <li><i class="fas fa-check"></i> Everything in Website Care</li>
+                        <li><i class="fas fa-check"></i> Up to 1 hour website changes</li>
+                        <li><i class="fas fa-check"></i> Performance monitoring</li>
+                        <li><i class="fas fa-check"></i> Search Console monitoring</li>
+                        <li><i class="fas fa-check"></i> Analytics review</li>
+                        <li><i class="fas fa-check"></i> Priority support</li>
+                    </ul>
+                </div>
+
+                <div class="maintenance-card reveal-card">
+                    <h3>Priority Care</h3>
+                    <div class="maintenance-price">R1,499 <span>/ month</span></div>
+                    <ul>
+                        <li><i class="fas fa-check"></i> Up to 2 hours website changes</li>
+                        <li><i class="fas fa-check"></i> Priority support</li>
+                        <li><i class="fas fa-check"></i> SEO health monitoring</li>
+                        <li><i class="fas fa-check"></i> Performance optimisation</li>
+                        <li><i class="fas fa-check"></i> Monthly reporting</li>
+                        <li><i class="fas fa-check"></i> Regular content updates</li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <p style="text-align:center; color:var(--text-lo); font-size:.82rem; margin-top:28px;">
+                Unused support time does not automatically carry over to the next month unless agreed separately.
+            </p>
+        </div>
+    </section>
+
+
+    <!-- ============================================================
+         ADD-ONS
+    ============================================================ -->
+    <section class="pricing-section-block" id="addons">
+        <div class="container">
+
+            <div class="section-header reveal">
+                <span class="section-tag">Optional Add-Ons</span>
+                <h2 class="section-title">Add-<span class="gradient-text">Ons</span></h2>
+                <p class="section-subtitle">Extras you can add to any package.</p>
+            </div>
+
+            <div class="addon-list reveal-card">
+                <div class="addon-row"><span class="addon-name">Additional webpage</span><span class="addon-price">From R750</span></div>
+                <div class="addon-row"><span class="addon-name">SEO copywriting</span><span class="addon-price">From R600 / page</span></div>
+                <div class="addon-row"><span class="addon-name">Google Business Profile setup</span><span class="addon-price">R1,500</span></div>
+                <div class="addon-row"><span class="addon-name">Google Search Console standalone setup</span><span class="addon-price">R750</span></div>
+                <div class="addon-row"><span class="addon-name">Google Analytics setup</span><span class="addon-price">R750</span></div>
+                <div class="addon-row"><span class="addon-name">Basic WhatsApp click-to-chat integration</span><span class="addon-price">R350</span></div>
+                <div class="addon-row"><span class="addon-name">Advanced WhatsApp automation</span><span class="addon-price">From R2,500</span></div>
+                <div class="addon-row"><span class="addon-name">AI website chatbot setup</span><span class="addon-price">From R2,500</span></div>
+                <div class="addon-row"><span class="addon-name">Booking system</span><span class="addon-price">From R2,000</span></div>
+                <div class="addon-row"><span class="addon-name">Newsletter integration</span><span class="addon-price">From R1,500</span></div>
+                <div class="addon-row"><span class="addon-name">Payment gateway integration</span><span class="addon-price">From R2,500</span></div>
+                <div class="addon-row"><span class="addon-name">Blog setup</span><span class="addon-price">From R1,500</span></div>
+                <div class="addon-row"><span class="addon-name">Additional revision round</span><span class="addon-price">From R500</span></div>
+                <div class="addon-row"><span class="addon-name">Urgent project</span><span class="addon-price">+20–30%</span></div>
+            </div>
+
+            <div class="disclaimer-box reveal">
+                <i class="fas fa-circle-info"></i>
+                <p>Third-party software, APIs, hosting, premium plugins, WhatsApp Business API charges, chatbot subscriptions and payment provider fees are not automatically included unless stated in the quotation.</p>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ============================================================
+         PAYMENT TERMS
+    ============================================================ -->
+    <section class="pricing-section-block" id="payment-terms">
+        <div class="container">
+
+            <div class="section-header reveal">
+                <span class="section-tag">Payment &amp; Process</span>
+                <h2 class="section-title">Payment <span class="gradient-text">Terms</span></h2>
+                <p class="section-subtitle">Simple, upfront terms so there are no surprises.</p>
+            </div>
+
+            <div class="terms-grid reveal-card">
+
+                <div class="terms-card">
+                    <h3>Smaller Projects</h3>
+                    <ul class="terms-steps">
+                        <li>
+                            <div class="terms-step-pct">50%</div>
+                            <p>Deposit to begin work</p>
+                        </li>
+                        <li>
+                            <div class="terms-step-pct">50%</div>
+                            <p>Before final launch or hand-over</p>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="terms-card">
+                    <h3>Larger Projects</h3>
+                    <ul class="terms-steps">
+                        <li>
+                            <div class="terms-step-pct">40%</div>
+                            <p>Deposit to begin work</p>
+                        </li>
+                        <li>
+                            <div class="terms-step-pct">30%</div>
+                            <p>After the agreed development milestone</p>
+                        </li>
+                        <li>
+                            <div class="terms-step-pct">30%</div>
+                            <p>Before production launch</p>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <div class="terms-card reveal" style="max-width:900px; margin:24px auto 0;">
+                <h3>Good to Know</h3>
+                <ul class="terms-notes">
+                    <li><i class="fas fa-check"></i> Starting prices shown are guides — final pricing depends on the scope, functionality and requirements of your project.</li>
+                    <li><i class="fas fa-check"></i> Work begins once the deposit is received.</li>
+                    <li><i class="fas fa-check"></i> The scope must specify the number of pages and features before work starts.</li>
+                    <li><i class="fas fa-check"></i> Packages include a limited number of revision rounds.</li>
+                    <li><i class="fas fa-check"></i> Additional revisions beyond the included rounds may be billed separately — we do not offer unlimited revisions.</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ============================================================
+         DOMAIN & HOSTING POLICY
+    ============================================================ -->
+    <section class="pricing-section-block" id="domain-hosting">
+        <div class="container">
+
+            <div class="section-header reveal">
+                <span class="section-tag">Domain &amp; Hosting</span>
+                <h2 class="section-title">Domain &amp; Hosting <span class="gradient-text">Policy</span></h2>
+            </div>
+
+            <div class="policy-grid reveal-card">
+
+                <div class="policy-card">
+                    <i class="fas fa-id-card"></i>
+                    <h3>You Own Your Domain</h3>
+                    <p>Wherever possible, the client should own their own domain, registered in their name.</p>
+                </div>
+
+                <div class="policy-card">
+                    <i class="fas fa-gears"></i>
+                    <h3>We Handle Setup</h3>
+                    <p>We can assist with domain setup, DNS configuration, deployment and hosting configuration.</p>
+                </div>
+
+                <div class="policy-card">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <h3>Ongoing Costs</h3>
+                    <p>Hosting, domain renewals, API usage, premium software and third-party subscriptions may be charged separately unless clearly included in your quotation. We do not offer unlimited free hosting.</p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ============================================================
+         FINAL CTA
+    ============================================================ -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-inner reveal">
+                <span class="section-tag">Not Sure What You Need?</span>
+                <h2>Let's Talk About <span class="gradient-text">Your Project</span></h2>
+                <p>Tell us about your business and goals, and we'll recommend the right package — no obligation.</p>
+                <div class="cta-buttons">
+                    <a href="https://wa.me/27648412146?text=Hi%20Anani%2C%20I%27d%20like%20a%20quote%20please" target="_blank" class="btn-whatsapp">
+                        <i class="fab fa-whatsapp"></i>
+                        <span>Chat on WhatsApp</span>
+                    </a>
+                    <a href="index.html#contact" class="btn-primary">
+                        <span>Get a Free Quote</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ============================================================
+         FOOTER — identical to index.html
+    ============================================================ -->
+    <footer class="footer">
+        <div class="container">
+
+            <div class="footer-grid">
+
+                <!-- Brand column -->
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <img src="images/mylog.webp" alt="RMdigitals logo" class="footer-logo-img" width="36" height="36" loading="lazy" />
+                        Anani<span class="accent">.</span>
+                    </div>
+                    <p>Professional website development for South African businesses — based in Thohoyandou, Limpopo, working with clients across South Africa.</p>
+                    <div class="social-row">
+                        <a href="https://github.com/ramagoma-glitch"
+                           target="_blank" class="s-icon" aria-label="GitHub">
+                            <i class="fab fa-github"></i>
+                        </a>
+                        <a href="https://www.linkedin.com/in/anani-ramagoma"
+                           target="_blank" class="s-icon" aria-label="LinkedIn">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                        <a href="https://twitter.com/AnaniRamagoma"
+                           target="_blank" class="s-icon" aria-label="Twitter/X">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="https://www.instagram.com/anani.rm"
+                           target="_blank" class="s-icon" aria-label="Instagram">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="https://www.facebook.com/AnaniRM"
+                           target="_blank" class="s-icon facebook-icon" aria-label="Facebook">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Website Services -->
+                <div class="footer-col">
+                    <h4>Website Services</h4>
+                    <ul>
+                        <li><a href="business-websites.html">Business Websites</a></li>
+                        <li><a href="ecommerce-websites.html">Ecommerce Websites</a></li>
+                        <li><a href="website-RedesingAndDesing.html">Website Redesign</a></li>
+                        <li><a href="PortfolioWebsite.html">Portfolio Websites</a></li>
+                    </ul>
+                </div>
+
+                <!-- Website Support -->
+                <div class="footer-col">
+                    <h4>Website Support</h4>
+                    <ul>
+                        <li><a href="SEO-Optimization.html">SEO</a></li>
+                        <li><a href="chatbots.html">AI Website Chatbots</a></li>
+                        <li><a href="WhatsAppIntegration.html">WhatsApp Integration</a></li>
+                        <li><a href="pricing.html#maintenance">Website Maintenance</a></li>
+                    </ul>
+                </div>
+
+                <!-- Company -->
+                <div class="footer-col">
+                    <h4>Company</h4>
+                    <ul>
+                        <li><a href="index.html#about">About</a></li>
+                        <li><a href="index.html#portfolio">Portfolio</a></li>
+                        <li><a href="pricing.html">Pricing</a></li>
+                        <li><a href="index.html#contact">Contact</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact -->
+                <div class="footer-col">
+                    <h4>Contact</h4>
+                    <p><a href="https://wa.me/27648412146" target="_blank"><i class="fab fa-whatsapp"></i> +27 64 841 2146</a></p>
+                    <p><a href="tel:+27648412146"><i class="fas fa-phone"></i> +27 64 841 2146</a></p>
+                    <p><a href="mailto:ramagoma212@gmail.com"><i class="fas fa-envelope"></i> Ramagoma212@gmail.com</a></p>
+                    <p><i class="fas fa-map-marker-alt"></i>Thohoyandou, Limpopo, South Africa</p>
+                </div>
+
+            </div><!-- /.footer-grid -->
+
+            <div class="footer-bottom">
+                <p>&copy; <span id="currentYear"></span> Ramagoma Muthuhadini <b>Anani</b> · RMdigitals. All rights reserved. Built with ❤️ in South Africa.</p>
+                <div class="footer-legal">
+                    <a href="documents/privacy.pdf" target="_blank">Privacy Policy</a>
+                    <span>·</span>
+                    <a href="documents/terms.pdf" target="_blank">Terms of Service</a>
+                </div>
+            </div>
+
+        </div>
+    </footer>
+
+    <button id="backToTop" aria-label="Back to top">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+
+    <script src="script.js"></script>
+
+</body>
+</html>

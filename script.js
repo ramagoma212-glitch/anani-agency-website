@@ -94,6 +94,9 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
     const canvas = document.getElementById('particleCanvas');
     if (!canvas) return;
 
+    /* Respect prefers-reduced-motion — skip the animated background entirely */
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
     const ctx = canvas.getContext('2d');
     let W, H, particles;
 
@@ -189,12 +192,10 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
 
     const phrases = [
         'Web Developer',
-        'AI Solutions Creator',
-        'CV Designer That Gets Jobs',
-        'UI/UX Designer',
-        'Business Website Builder',
-        'WhatsApp Integration Expert',
-        'SEO Specialist'
+        'SEO Specialist',
+        'AI & Automation Builder',
+        'Business Website Developer',
+        'WhatsApp Integration Expert'
     ];
 
     let phraseIndex  = 0;
@@ -250,6 +251,51 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
 
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll(); // check immediately on load
+})();
+
+
+/* ─────────────────────────────────────────────────────────────
+   6b. NAV DROPDOWNS (Websites / AI & Automation)
+   Desktop: CSS :hover / :focus-within already reveals the menu,
+   and the toggle is a real link to its homepage section — so a
+   click just navigates normally.
+   Touch (no hover): first tap reveals the submenu instead of
+   navigating; a second tap on the same toggle follows the link.
+───────────────────────────────────────────────────────────── */
+(function initNavDropdowns() {
+    const dropdowns = document.querySelectorAll('.nav-links li.has-dropdown');
+    if (!dropdowns.length) return;
+
+    const isTouch = window.matchMedia('(hover: none)').matches;
+    if (!isTouch) return; // hover + href already handle desktop
+
+    dropdowns.forEach(li => {
+        const toggle = li.querySelector('.dropdown-toggle');
+        if (!toggle) return;
+
+        toggle.addEventListener('click', (e) => {
+            if (li.classList.contains('open')) return; // second tap — let it navigate
+
+            e.preventDefault();
+            dropdowns.forEach(other => {
+                other.classList.remove('open');
+                const t = other.querySelector('.dropdown-toggle');
+                if (t) t.setAttribute('aria-expanded', 'false');
+            });
+            li.classList.add('open');
+            toggle.setAttribute('aria-expanded', 'true');
+        });
+    });
+
+    document.addEventListener('click', (e) => {
+        dropdowns.forEach(li => {
+            if (!li.contains(e.target)) {
+                li.classList.remove('open');
+                const t = li.querySelector('.dropdown-toggle');
+                if (t) t.setAttribute('aria-expanded', 'false');
+            }
+        });
+    });
 })();
 
 
@@ -427,6 +473,41 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
 
 
 /* ─────────────────────────────────────────────────────────────
+   11b. PRICING PACKAGE CONTEXT — carries the selected package from
+   pricing.html into the contact form (e.g. pricing.html links to
+   index.html?package=Starter+Business+Website#contact). Pre-fills
+   the subject line and, where possible, the service dropdown.
+   No checkout, no payment — just pre-filled context.
+───────────────────────────────────────────────────────────── */
+(function prefillPackageFromQuery() {
+    const params = new URLSearchParams(window.location.search);
+    const pkg = params.get('package');
+    if (!pkg) return;
+
+    const subjectField  = document.getElementById('fsubject');
+    const serviceField  = document.getElementById('fservice');
+    if (!subjectField && !serviceField) return;
+
+    if (subjectField && !subjectField.value) {
+        subjectField.value = `Quote Request: ${pkg}`;
+    }
+
+    if (serviceField) {
+        const map = {
+            'Landing Page': 'Landing Page',
+            'Starter Business Website': 'Business Website',
+            'Professional Business Website': 'Business Website',
+            'Business Growth Website': 'Business Website',
+            'Ecommerce Website': 'Ecommerce Website',
+            'Custom Web System': 'Custom Web System'
+        };
+        const match = map[pkg];
+        if (match) serviceField.value = match;
+    }
+})();
+
+
+/* ─────────────────────────────────────────────────────────────
    12. CONTACT FORM  — sends email via EmailJS
    Falls back to a mailto link if EmailJS is not configured.
 ───────────────────────────────────────────────────────────── */
@@ -442,6 +523,8 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
         const emailField   = document.getElementById('femail');
         const subjectField = document.getElementById('fsubject');
         const msgField     = document.getElementById('fmessage');
+        const serviceField = document.getElementById('fservice');
+        const budgetField  = document.getElementById('fbudget');
 
         /* ── Validation ── */
         if (!nameField.value.trim()) {
@@ -473,11 +556,13 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
         ) {
             /* Real send via EmailJS */
             const templateParams = {
-                from_name : nameField.value.trim(),
-                from_email: emailField.value.trim(),
-                subject   : subjectField.value.trim() || 'New message from portfolio',
-                message   : msgField.value.trim(),
-                to_email  : 'ramagoma212@gmail.com'
+                from_name       : nameField.value.trim(),
+                from_email      : emailField.value.trim(),
+                subject         : subjectField.value.trim() || 'New message from portfolio',
+                message         : msgField.value.trim(),
+                service_interest: serviceField ? (serviceField.value || 'Not specified') : 'Not specified',
+                budget          : budgetField  ? (budgetField.value  || 'Not specified') : 'Not specified',
+                to_email        : 'ramagoma212@gmail.com'
             };
 
             emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
@@ -502,7 +587,9 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
             );
             const body = encodeURIComponent(
                 `Name: ${nameField.value.trim()}\n` +
-                `Email: ${emailField.value.trim()}\n\n` +
+                `Email: ${emailField.value.trim()}\n` +
+                `Interested in: ${serviceField && serviceField.value ? serviceField.value : 'Not specified'}\n` +
+                `Budget: ${budgetField && budgetField.value ? budgetField.value : 'Not specified'}\n\n` +
                 `Message:\n${msgField.value.trim()}`
             );
 
@@ -543,6 +630,25 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
     btn.addEventListener('click', () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
+})();
+
+
+/* ─────────────────────────────────────────────────────────────
+   13b. WHATSAPP FLOATING BADGE — hide until scrolled past hero
+   On mobile this badge becomes a fixed bottom-right FAB, which can
+   otherwise overlap the hero's own CTA buttons on first paint since
+   the hero is taller than the viewport on most phones.
+───────────────────────────────────────────────────────────── */
+(function initWaBadgeReveal() {
+    const badge = document.querySelector('.wa-autoreply-badge');
+    if (!badge) return;
+
+    function toggle() {
+        badge.classList.toggle('wa-shown', window.scrollY > 350);
+    }
+
+    window.addEventListener('scroll', toggle, { passive: true });
+    toggle(); // in case the page loads already scrolled
 })();
 
 
@@ -626,73 +732,6 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 })();
 
 /* ─────────────────────────────────────────────────────────────
-   17. ACADEMIC APPLICATIONS CARD — click navigates to service page
-   ─────────────────────────────────────────────────────────────
-   Self-contained DOMContentLoaded block — runs safely alongside
-   every existing feature. The guard  "if (!academicCard) return"
-   means this produces zero errors on any page that does not have
-   this card (e.g. business-websites.html).
-───────────────────────────────────────────────────────────── */
-document.addEventListener('DOMContentLoaded', function () {
-
-    const academicCard = document.getElementById('academic-card');
-
-    /* Guard: silently exit if this card is not on the current page */
-    if (!academicCard) return;
-
-    /* ── Pointer cursor ── */
-    academicCard.style.cursor = 'pointer';
-
-    /* ── "Learn More" arrow hint — fades in on hover ── */
-    const hint = document.createElement('div');
-    hint.innerHTML = 'Learn More <i class="fas fa-arrow-right"></i>';
-    hint.style.cssText = [
-        'margin-top: 14px',
-        'font-size: .8rem',
-        'font-weight: 600',
-        'color: var(--cyan)',
-        'display: flex',
-        'align-items: center',
-        'gap: 6px',
-        'opacity: 0',
-        'transform: translateX(-6px)',
-        'transition: opacity .3s ease, transform .3s ease'
-    ].join(';');
-
-    academicCard.appendChild(hint);
-
-    /* Show arrow when user hovers */
-    academicCard.addEventListener('mouseenter', () => {
-        hint.style.opacity   = '1';
-        hint.style.transform = 'translateX(0)';
-    });
-
-    /* Hide arrow when user stops hovering */
-    academicCard.addEventListener('mouseleave', () => {
-        hint.style.opacity   = '0';
-        hint.style.transform = 'translateX(-6px)';
-    });
-
-    /* ── Click → navigate to the new page ── */
-    academicCard.addEventListener('click', function () {
-        window.location.href = 'academic-applications.html';
-    });
-
-    /* ── Keyboard accessibility (Tab + Enter support) ── */
-    academicCard.setAttribute('tabindex', '0');
-    academicCard.setAttribute('role', 'link');
-    academicCard.setAttribute('aria-label', 'Learn more about Tertiary Applications');
-
-    academicCard.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            window.location.href = 'academic-applications.html';
-        }
-    });
-
-});
-
-/* ─────────────────────────────────────────────────────────────
    18. BUSINESS WEBSITES CARD — click navigates to service page
    ─────────────────────────────────────────────────────────────
    Waits for the DOM to be ready, then wires up the #business-card
@@ -763,72 +802,6 @@ document.addEventListener('DOMContentLoaded', function () {
         if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             window.location.href = 'business-websites.html';
-        }
-    });
-
-});
-
-/* ─────────────────────────────────────────────────────────────
-   19. CV SERVICES CARD — click navigates to cv-services.html
-   ─────────────────────────────────────────────────────────────
-   Identical pattern to sections 17 (academic) and 18 (business).
-   The guard "if (!cvCard) return" means zero errors on any page
-   that does not have this card (e.g. cv-services.html itself).
-───────────────────────────────────────────────────────────── */
-document.addEventListener('DOMContentLoaded', function () {
-
-    const cvCard = document.getElementById('cv-card');
-
-    /* Guard: silently exit if this card is not on the current page */
-    if (!cvCard) return;
-
-    /* ── Pointer cursor ── */
-    cvCard.style.cursor = 'pointer';
-
-    /* ── "Learn More" arrow hint — fades in on hover ── */
-    const hint = document.createElement('div');
-    hint.innerHTML = 'Learn More <i class="fas fa-arrow-right"></i>';
-    hint.style.cssText = [
-        'margin-top: 14px',
-        'font-size: .8rem',
-        'font-weight: 600',
-        'color: var(--cyan)',
-        'display: flex',
-        'align-items: center',
-        'gap: 6px',
-        'opacity: 0',
-        'transform: translateX(-6px)',
-        'transition: opacity .3s ease, transform .3s ease'
-    ].join(';');
-
-    cvCard.appendChild(hint);
-
-    /* Show arrow when user hovers */
-    cvCard.addEventListener('mouseenter', () => {
-        hint.style.opacity   = '1';
-        hint.style.transform = 'translateX(0)';
-    });
-
-    /* Hide arrow when user stops hovering */
-    cvCard.addEventListener('mouseleave', () => {
-        hint.style.opacity   = '0';
-        hint.style.transform = 'translateX(-6px)';
-    });
-
-    /* ── Click → navigate to cv-services.html ── */
-    cvCard.addEventListener('click', function () {
-        window.location.href = 'cv-services.html';
-    });
-
-    /* ── Keyboard accessibility (Tab + Enter support) ── */
-    cvCard.setAttribute('tabindex', '0');
-    cvCard.setAttribute('role', 'link');
-    cvCard.setAttribute('aria-label', 'Learn more about CV Services');
-
-    cvCard.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            window.location.href = 'cv-services.html';
         }
     });
 
@@ -1020,72 +993,6 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 /* ─────────────────────────────────────────────────────────────
-   23 GRADE 12 ACADEMIC SUCCESS CARD → Excel-in-Grade12.html
-   ─────────────────────────────────────────────────────────────
-   Requires  id="matric-excellence-card"  on the service card
-   in index.html (added in Change 1 above).
-   The guard "if (!matricCard) return" means zero errors on
-   any other page that does not have this card.
-───────────────────────────────────────────────────────────── */
-document.addEventListener('DOMContentLoaded', function () {
-
-    const matricCard = document.getElementById('matric-excellence-card');
-
-    /* Exit silently on pages that don't have this card */
-    if (!matricCard) return;
-
-    /* Pointer cursor on hover */
-    matricCard.style.cursor = 'pointer';
-
-    /* "Learn More" arrow that fades in on hover */
-    const hint = document.createElement('div');
-    hint.innerHTML = 'Learn More <i class="fas fa-arrow-right"></i>';
-    hint.style.cssText = [
-        'margin-top: 14px',
-        'font-size: .8rem',
-        'font-weight: 600',
-        'color: var(--cyan)',
-        'display: flex',
-        'align-items: center',
-        'gap: 6px',
-        'opacity: 0',
-        'transform: translateX(-6px)',
-        'transition: opacity .3s ease, transform .3s ease'
-    ].join(';');
-    matricCard.appendChild(hint);
-
-    /* Show arrow on hover */
-    matricCard.addEventListener('mouseenter', () => {
-        hint.style.opacity   = '1';
-        hint.style.transform = 'translateX(0)';
-    });
-
-    /* Hide arrow when hover ends */
-    matricCard.addEventListener('mouseleave', () => {
-        hint.style.opacity   = '0';
-        hint.style.transform = 'translateX(-6px)';
-    });
-
-    /* Click navigates to the destination page */
-    matricCard.addEventListener('click', function () {
-        window.location.href = 'Excel-in-Grade12.html';
-    });
-
-    /* Keyboard support — Tab + Enter works too */
-    matricCard.setAttribute('tabindex', '0');
-    matricCard.setAttribute('role', 'link');
-    matricCard.setAttribute('aria-label', 'Learn more about Grade 12 Academic Success');
-
-    matricCard.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            window.location.href = 'Excel-in-Grade12.html';
-        }
-    });
-
-});
-
-/* ─────────────────────────────────────────────────────────────
    24 REDESIGN CARD  →  website-RedesingAndDesing.html
    ─────────────────────────────────────────────────────────────
    Requires  id="redesign-card"  on the Website Redesign
@@ -1145,6 +1052,71 @@ document.addEventListener('DOMContentLoaded', function () {
         if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             window.location.href = 'website-RedesingAndDesing.html';
+        }
+    });
+
+});
+
+/* ─────────────────────────────────────────────────────────────
+   25 ECOMMERCE CARD  →  ecommerce-websites.html
+   ─────────────────────────────────────────────────────────────
+   Requires  id="ecommerce-card"  on the Ecommerce Websites
+   service card in index.html. Guard prevents errors on all
+   other pages.
+───────────────────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', function () {
+
+    const ecommerceCard = document.getElementById('ecommerce-card');
+
+    /* Exit silently on any page that has no #ecommerce-card */
+    if (!ecommerceCard) return;
+
+    /* Pointer cursor on hover */
+    ecommerceCard.style.cursor = 'pointer';
+
+    /* "Learn More" arrow — fades in on hover */
+    const ecommerceHint = document.createElement('div');
+    ecommerceHint.innerHTML = 'Learn More <i class="fas fa-arrow-right"></i>';
+    ecommerceHint.style.cssText = [
+        'margin-top: 14px',
+        'font-size: .8rem',
+        'font-weight: 600',
+        'color: var(--cyan)',
+        'display: flex',
+        'align-items: center',
+        'gap: 6px',
+        'opacity: 0',
+        'transform: translateX(-6px)',
+        'transition: opacity .3s ease, transform .3s ease'
+    ].join(';');
+    ecommerceCard.appendChild(ecommerceHint);
+
+    /* Show arrow on hover */
+    ecommerceCard.addEventListener('mouseenter', () => {
+        ecommerceHint.style.opacity   = '1';
+        ecommerceHint.style.transform = 'translateX(0)';
+    });
+
+    /* Hide arrow when hover ends */
+    ecommerceCard.addEventListener('mouseleave', () => {
+        ecommerceHint.style.opacity   = '0';
+        ecommerceHint.style.transform = 'translateX(-6px)';
+    });
+
+    /* Click → navigate to the ecommerce page */
+    ecommerceCard.addEventListener('click', function () {
+        window.location.href = 'ecommerce-websites.html';
+    });
+
+    /* Keyboard support (Tab + Enter) */
+    ecommerceCard.setAttribute('tabindex', '0');
+    ecommerceCard.setAttribute('role', 'link');
+    ecommerceCard.setAttribute('aria-label', 'Learn more about Ecommerce Websites');
+
+    ecommerceCard.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            window.location.href = 'ecommerce-websites.html';
         }
     });
 

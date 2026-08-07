@@ -3,9 +3,37 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Portfolio Websites | Anani RM — Stunning Personal Portfolios</title>
+    <title>Portfolio Websites | RMdigitals — Stunning Personal Portfolios</title>
     <meta name="description"
           content="Stand out online with a unique, responsive personal portfolio website by Anani RM. Built for freelancers, photographers, artists, graduates and job seekers in South Africa." />
+
+    
+    <!-- SEO NOTE: rmdigitals.co.za is a placeholder domain (not yet registered).
+         Once a real domain is live, find-and-replace "https://www.rmdigitals.co.za"
+         across every HTML file, sitemap.xml and robots.txt. -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png" />
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+
+    <link rel="canonical" href="https://www.rmdigitals.co.za/PortfolioWebsite.html" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="RMdigitals" />
+    <meta property="og:title" content="Portfolio Websites | RMdigitals — Stunning Personal Portfolios" />
+    <meta property="og:description" content="Stand out online with a unique, responsive personal portfolio website by Anani RM. Built for freelancers, photographers, artists, graduates and job seekers in South Africa." />
+    <meta property="og:url" content="https://www.rmdigitals.co.za/PortfolioWebsite.html" />
+    <meta property="og:image" content="https://www.rmdigitals.co.za/images/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="en_ZA" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Portfolio Websites | RMdigitals — Stunning Personal Portfolios" />
+    <meta name="twitter:description" content="Stand out online with a unique, responsive personal portfolio website by Anani RM. Built for freelancers, photographers, artists, graduates and job seekers in South Africa." />
+    <meta name="twitter:image" content="https://www.rmdigitals.co.za/images/og-image.jpg" />
+
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -20,7 +48,7 @@
     <!-- ============================================================
          PAGE-SPECIFIC STYLES
          Creative orange / warm coral theme for Portfolio page.
-         Distinct from: Academic (gold), CV (emerald), Chatbots (purple),
+         Distinct from the other service page palettes,
          WhatsApp (green), Business (cyan).
     ============================================================ -->
     <style>
@@ -445,7 +473,7 @@
             display: block;
         }
 
-        .audience-card h4 {
+        .audience-card h3 {
             font-family: var(--f-display);
             font-size: .92rem;
             font-weight: 700;
@@ -640,7 +668,7 @@
             box-shadow: 0 0 24px rgba(249,115,22,.3);
         }
 
-        .negotiation-note h4 {
+        .negotiation-note h3 {
             font-family: var(--f-display);
             font-size: 1rem;
             font-weight: 700;
@@ -916,6 +944,51 @@
         }
 
     </style>
+
+    <script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@graph": [
+        {
+            "@type": "Service",
+            "serviceType": "Portfolio Website Development",
+            "name": "Portfolio Websites",
+            "description": "Stand out online with a unique, responsive personal portfolio website by Anani RM. Built for freelancers, photographers, artists, graduates and job seekers in South Africa.",
+            "url": "https://www.rmdigitals.co.za/PortfolioWebsite.html",
+            "provider": {
+                "@id": "https://www.rmdigitals.co.za/#organization"
+            },
+            "areaServed": {
+                "@type": "Country",
+                "name": "South Africa"
+            }
+        },
+        {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": "Home",
+                    "item": "https://www.rmdigitals.co.za/"
+                },
+                {
+                    "@type": "ListItem",
+                    "position": 2,
+                    "name": "Websites",
+                    "item": "https://www.rmdigitals.co.za/#services-websites"
+                },
+                {
+                    "@type": "ListItem",
+                    "position": 3,
+                    "name": "Portfolio Websites",
+                    "item": "https://www.rmdigitals.co.za/PortfolioWebsite.html"
+                }
+            ]
+        }
+    ]
+}
+    </script>
 </head>
 <body>
 
@@ -924,7 +997,7 @@
         <div class="loader-inner">
             <div class="loader-ring"></div>
             <div class="loader-logo">
-                <img src="images/mylog.jpg" alt="Anani RM" class="loader-logo-img" />
+                <img src="images/mylog.webp" alt="Anani RM" class="loader-logo-img" width="52" height="52" />
                 <span>Loading<span class="loader-dots">...</span></span>
             </div>
         </div>
@@ -933,22 +1006,45 @@
     <!-- ===== NAVIGATION ===== -->
     <nav id="navbar">
         <div class="nav-container">
+
             <a href="index.html" class="nav-logo">
-                <img src="images/mylog.jpg" alt="Anani RM Logo" class="nav-logo-img" />
-                <span class="nav-logo-text">Anani<span class="accent">.</span></span>
+                <img src="images/mylog.webp" alt="RMdigitals — Anani Ramagoma, web developer in Thohoyandou, Limpopo" class="nav-logo-img" width="40" height="40" />
+                <span class="nav-logo-text">RM<span class="accent"></span></span>
             </a>
+
             <ul class="nav-links">
                 <li><a href="index.html#home">Home</a></li>
-                <li><a href="index.html#services" class="active-link">Services</a></li>
-                <li><a href="index.html#about">About</a></li>
+                <li class="has-dropdown">
+                    <a href="index.html#services-websites" class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">Websites <i class="fas fa-chevron-down chevron"></i></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="business-websites.html">Business Websites</a></li>
+                        <li><a href="ecommerce-websites.html">Ecommerce Websites</a></li>
+                        <li><a href="website-RedesingAndDesing.html">Website Redesign</a></li>
+                        <li><a href="PortfolioWebsite.html" class="active-link">Portfolio Websites</a></li>
+                    </ul>
+                </li>
+                <li class="has-dropdown">
+                    <a href="index.html#enhance-website" class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">Website Add-Ons <i class="fas fa-chevron-down chevron"></i></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="SEO-Optimization.html">SEO</a></li>
+                        <li><a href="chatbots.html">AI Website Chatbots</a></li>
+                        <li><a href="WhatsAppIntegration.html">WhatsApp Integration</a></li>
+                        <li><a href="pricing.html#maintenance">Website Maintenance</a></li>
+                    </ul>
+                </li>
                 <li><a href="index.html#portfolio">Portfolio</a></li>
-                <li><a href="index.html#testimonials">Reviews</a></li>
+                <li><a href="pricing.html">Pricing</a></li>
+                <li><a href="index.html#about">About</a></li>
                 <li><a href="index.html#contact">Contact</a></li>
             </ul>
+
             <div class="nav-right">
-                <a href="https://wa.me/27648422146" target="_blank" class="nav-cta">Let's Talk</a>
+                <a href="https://wa.me/27648412146?text=Hi%20Anani%2C%20I%27m%20interested%20in%20your%20website%20development%2C%20SEO%20or%20AI%20services%21"
+                   target="_blank" rel="noopener noreferrer" class="nav-cta">Chat on WhatsApp</a>
                 <button class="hamburger" id="hamburger" aria-label="Open menu">
-                    <span></span><span></span><span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
                 </button>
             </div>
         </div>
@@ -960,14 +1056,34 @@
             <i class="fas fa-times"></i>
         </button>
         <ul>
-            <li><a href="index.html#home"         class="mobile-link">Home</a></li>
-            <li><a href="index.html#services"     class="mobile-link">Services</a></li>
-            <li><a href="index.html#about"        class="mobile-link">About</a></li>
-            <li><a href="index.html#portfolio"    class="mobile-link">Portfolio</a></li>
-            <li><a href="index.html#testimonials" class="mobile-link">Reviews</a></li>
-            <li><a href="index.html#contact"      class="mobile-link">Contact</a></li>
+            <li><a href="index.html#home" class="mobile-link">Home</a></li>
+
+            <li class="mobile-group">
+                <span class="mobile-group-label">Websites</span>
+                <ul class="mobile-sublist">
+                    <li><a href="business-websites.html" class="mobile-link">Business Websites</a></li>
+                    <li><a href="ecommerce-websites.html" class="mobile-link">Ecommerce Websites</a></li>
+                    <li><a href="website-RedesingAndDesing.html" class="mobile-link">Website Redesign</a></li>
+                    <li><a href="PortfolioWebsite.html" class="mobile-link">Portfolio Websites</a></li>
+                </ul>
+            </li>
+
+            <li class="mobile-group">
+                <span class="mobile-group-label">Website Add-Ons</span>
+                <ul class="mobile-sublist">
+                    <li><a href="SEO-Optimization.html" class="mobile-link">SEO</a></li>
+                    <li><a href="chatbots.html" class="mobile-link">AI Website Chatbots</a></li>
+                    <li><a href="WhatsAppIntegration.html" class="mobile-link">WhatsApp Integration</a></li>
+                    <li><a href="pricing.html#maintenance" class="mobile-link">Website Maintenance</a></li>
+                </ul>
+            </li>
+
+            <li><a href="index.html#portfolio" class="mobile-link">Portfolio</a></li>
+            <li><a href="pricing.html" class="mobile-link">Pricing</a></li>
+            <li><a href="index.html#about" class="mobile-link">About</a></li>
+            <li><a href="index.html#contact" class="mobile-link">Contact</a></li>
         </ul>
-        <a href="https://wa.me/27648422146" target="_blank" class="mobile-whatsapp">
+        <a href="https://wa.me/27648412146" target="_blank" class="mobile-whatsapp">
             <i class="fab fa-whatsapp"></i> Chat on WhatsApp
         </a>
     </div>
@@ -1006,7 +1122,7 @@
             </div>
 
             <div class="page-hero-buttons">
-                <a href="https://wa.me/27648422146?text=Hi!%20I%20want%20to%20build%20a%20personal%20portfolio%20website.%20Let%27s%20chat%20about%20my%20vision%20and%20a%20budget%20that%20works%20for%20me."
+                <a href="https://wa.me/27648412146?text=Hi!%20I%20want%20to%20build%20a%20personal%20portfolio%20website.%20Let%27s%20chat%20about%20my%20vision%20and%20a%20budget%20that%20works%20for%20me."
                    target="_blank"
                    class="btn-whatsapp-hero">
                     <i class="fab fa-whatsapp"></i>
@@ -1031,8 +1147,8 @@
                 </div>
                 <div class="trust-divider"></div>
                 <div class="trust-item">
-                    <span class="trust-num">Flex</span>
-                    <span class="trust-label">Negotiable Price</span>
+                    <span class="trust-num">Custom</span>
+                    <span class="trust-label">Quoted Pricing</span>
                 </div>
                 <div class="trust-divider"></div>
                 <div class="trust-item">
@@ -1118,28 +1234,28 @@
                 <div class="audience-card reveal-card">
                     <div class="card-glow"></div>
                     <span class="audience-emoji">👨‍💻</span>
-                    <h4>Developers &amp; Tech Grads</h4>
+                    <h3>Developers &amp; Tech Grads</h3>
                     <p>Showcase GitHub projects, skills stacks, and internship work to land your first role.</p>
                 </div>
 
                 <div class="audience-card reveal-card">
                     <div class="card-glow"></div>
                     <span class="audience-emoji">📸</span>
-                    <h4>Photographers &amp; Artists</h4>
+                    <h3>Photographers &amp; Artists</h3>
                     <p>Display your best work in a clean gallery format that clients can browse and book from.</p>
                 </div>
 
                 <div class="audience-card reveal-card">
                     <div class="card-glow"></div>
                     <span class="audience-emoji">🎓</span>
-                    <h4>Job Seekers &amp; Graduates</h4>
+                    <h3>Job Seekers &amp; Graduates</h3>
                     <p>Stand out from the crowd with a professional online profile that goes beyond a paper CV.</p>
                 </div>
 
                 <div class="audience-card reveal-card">
                     <div class="card-glow"></div>
                     <span class="audience-emoji">💼</span>
-                    <h4>Freelancers &amp; Consultants</h4>
+                    <h3>Freelancers &amp; Consultants</h3>
                     <p>Build credibility, attract clients, and let your past work do the selling for you.</p>
                 </div>
 
@@ -1225,116 +1341,42 @@
 
 
     <!-- ============================================================
-         5. PRICING — Negotiable Starter Packages
+         5. PRICING
     ============================================================ -->
     <section class="pricing-section" id="packages">
         <div class="container">
 
             <div class="section-header reveal">
-                <span class="section-tag">Starter Packages</span>
-                <h2 class="section-title">Highly Negotiable <span class="gradient-text-port">Rates for Every Budget</span></h2>
+                <span class="section-tag">Pricing</span>
+                <h2 class="section-title">Portfolio Website <span class="gradient-text-port">Pricing</span></h2>
                 <p class="section-subtitle">
-                    These are starting guides only. Every portfolio is different —
-                    if you have a specific vision or a tight budget, just message me
-                    and we will make it work.
+                    Portfolio website pricing depends on the number of pages, portfolio items and
+                    features required. Website projects start from R4,500.
                 </p>
             </div>
 
-            <div class="packages-grid">
-
-                <!-- Package 1: Simple Portfolio -->
-                <div class="package-card reveal-card">
-                    <div class="package-name">Simple Portfolio</div>
-                    <div class="package-tagline">
-                        One clean page. Perfect for job seekers, students, and those starting out.
-                    </div>
-                    <div class="package-price">
-                        <span class="price-from">Starting from</span>
-                        <span class="price-amount-pkg">R200</span>
-                        <span class="price-period">once-off · negotiable</span>
-                    </div>
-                    <ul class="package-includes">
-                        <li><i class="fas fa-check-circle"></i> Single-page responsive layout</li>
-                        <li><i class="fas fa-check-circle"></i> Hero, About, Skills &amp; Contact sections</li>
-                        <li><i class="fas fa-check-circle"></i> Basic project showcase (up to 4 items)</li>
-                        <li><i class="fas fa-check-circle"></i> Social media links integrated</li>
-                        <li><i class="fas fa-check-circle"></i> Mobile-friendly on all devices</li>
-                        <li><i class="fas fa-check-circle"></i> Delivered in 3–5 working days</li>
-                    </ul>
-                    <a href="https://wa.me/27648422146?text=Hi%20Anani!%20I'm%20interested%20in%20the%20Simple%20Portfolio%20package.%20Can%20we%20discuss%20pricing%3F"
-                       target="_blank" class="btn-package">
-                        <i class="fab fa-whatsapp"></i> Get This Package
-                    </a>
-                </div>
-
-                <!-- Package 2: Multi-Page Portfolio — RECOMMENDED -->
-                <div class="package-card recommended reveal-card">
-                    <div class="package-badge">⭐ Most Popular</div>
-                    <div class="package-name">Multi-Page Portfolio</div>
-                    <div class="package-tagline">
-                        A full personal website with separate pages for a polished, professional feel.
-                    </div>
-                    <div class="package-price">
-                        <span class="price-from">Starting from</span>
-                        <span class="price-amount-pkg">R350</span>
-                        <span class="price-period">once-off · negotiable</span>
-                    </div>
-                    <ul class="package-includes">
-                        <li><i class="fas fa-check-circle"></i> Everything in Simple Portfolio</li>
-                        <li><i class="fas fa-check-circle"></i> Separate Home, About, Projects &amp; Contact pages</li>
-                        <li><i class="fas fa-check-circle"></i> Animated page transitions &amp; scroll effects</li>
-                        <li><i class="fas fa-check-circle"></i> Filterable project gallery (up to 10 items)</li>
-                        <li><i class="fas fa-check-circle"></i> Working contact form (emails you directly)</li>
-                        <li><i class="fas fa-check-circle"></i> Custom colour scheme matching your brand</li>
-                        <li><i class="fas fa-check-circle"></i> Two revision rounds included</li>
-                    </ul>
-                    <a href="https://wa.me/27648422146?text=Hi%20Anani!%20I'm%20interested%20in%20the%20Multi-Page%20Portfolio%20package.%20Let%27s%20chat%20about%20a%20flexible%20price."
-                       target="_blank" class="btn-package btn-package-featured">
-                        <i class="fab fa-whatsapp"></i> Get This Package
-                    </a>
-                </div>
-
-                <!-- Package 3: Premium Creative -->
-                <div class="package-card reveal-card">
-                    <div class="package-name">Premium Creative Portfolio</div>
-                    <div class="package-tagline">
-                        For creatives who want animations, galleries, and a truly unique online presence.
-                    </div>
-                    <div class="package-price">
-                        <span class="price-from">Starting from</span>
-                        <span class="price-amount-pkg">R550</span>
-                        <span class="price-period">once-off · negotiable</span>
-                    </div>
-                    <ul class="package-includes">
-                        <li><i class="fas fa-check-circle"></i> Everything in Multi-Page Portfolio</li>
-                        <li><i class="fas fa-check-circle"></i> Advanced scroll animations &amp; parallax effects</li>
-                        <li><i class="fas fa-check-circle"></i> Lightbox image/video gallery for photographers</li>
-                        <li><i class="fas fa-check-circle"></i> Optional blog or updates section</li>
-                        <li><i class="fas fa-check-circle"></i> SEO meta tags &amp; Google-ready structure</li>
-                        <li><i class="fas fa-check-circle"></i> Unlimited revisions during the build phase</li>
-                        <li><i class="fas fa-check-circle"></i> 14-day post-launch support</li>
-                    </ul>
-                    <a href="https://wa.me/27648422146?text=Hi%20Anani!%20I'm%20interested%20in%20the%20Premium%20Creative%20Portfolio%20package.%20Can%20we%20discuss%20a%20flexible%20price%3F"
-                       target="_blank" class="btn-package">
-                        <i class="fab fa-whatsapp"></i> Get This Package
-                    </a>
-                </div>
-
-            </div><!-- /.packages-grid -->
-
-            <!-- Negotiation note -->
             <div class="negotiation-note reveal">
                 <div class="note-icon-wrap">💬</div>
                 <div>
-                    <h4>Honest Note on Pricing</h4>
+                    <h3>How Portfolio Pricing Works</h3>
                     <p>
-                        I am <strong>still building my portfolio</strong> as a developer, which means
-                        my rates are <strong>highly flexible and open to negotiation</strong>. Whether
-                        you are a student with R100 or a freelancer with a bigger budget —
-                        reach out and we will have an honest conversation about what is possible.
-                        <strong>Your budget is not a barrier. Your vision is the priority.</strong>
+                        A single-page portfolio costs less than a multi-page site with a filterable
+                        gallery, animations and a contact form — tell us what you're going for and
+                        your estimated budget, and we'll recommend the right scope and package.
                     </p>
                 </div>
+            </div>
+
+            <div style="text-align:center; margin-top:28px; display:flex; gap:14px; justify-content:center; flex-wrap:wrap;">
+                <a href="https://wa.me/27648412146?text=Hi%20Anani%2C%20I%27d%20like%20a%20quote%20for%20a%20portfolio%20website."
+                   target="_blank" rel="noopener noreferrer" class="btn-primary">
+                    <span>Request a Portfolio Website Quote</span>
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+                <a href="pricing.html#websites" class="btn-secondary">
+                    <i class="fas fa-tag"></i>
+                    <span>View Website Packages</span>
+                </a>
             </div>
 
         </div>
@@ -1447,7 +1489,7 @@
                     about my vision and a budget that works for me."
                 </div>
 
-                <a href="https://wa.me/27648422146?text=Hi!%20I%20want%20to%20build%20a%20personal%20portfolio%20website.%20Let%27s%20chat%20about%20my%20vision%20and%20a%20budget%20that%20works%20for%20me."
+                <a href="https://wa.me/27648412146?text=Hi!%20I%20want%20to%20build%20a%20personal%20portfolio%20website.%20Let%27s%20chat%20about%20my%20vision%20and%20a%20budget%20that%20works%20for%20me."
                    target="_blank"
                    class="btn-wa-large">
                     <i class="fab fa-whatsapp"></i>
@@ -1473,61 +1515,84 @@
 
             <div class="footer-grid">
 
+                <!-- Brand column -->
                 <div class="footer-brand">
                     <div class="footer-logo">
-                        <img src="images/mylog.jpg" alt="Anani RM" class="footer-logo-img" />
+                        <img src="images/mylog.webp" alt="RMdigitals logo" class="footer-logo-img" width="36" height="36" loading="lazy" />
                         Anani<span class="accent">.</span>
                     </div>
-                    <p>Crafting premium digital experiences and AI solutions from South Africa to the world.</p>
+                    <p>Professional website development for South African businesses — based in Thohoyandou, Limpopo, working with clients across South Africa.</p>
                     <div class="social-row">
-                        <a href="https://github.com/ramagoma-glitch"        target="_blank" class="s-icon"><i class="fab fa-github"></i></a>
-                        <a href="https://www.linkedin.com/in/anani-ramagoma" target="_blank" class="s-icon"><i class="fab fa-linkedin-in"></i></a>
-                        <a href="https://twitter.com/AnaniRamagoma"          target="_blank" class="s-icon"><i class="fab fa-twitter"></i></a>
-                        <a href="https://www.instagram.com/anani.rm"         target="_blank" class="s-icon"><i class="fab fa-instagram"></i></a>
-                        <a href="https://www.facebook.com/AnaniRM"           target="_blank" class="s-icon facebook-icon"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://github.com/ramagoma-glitch"
+                           target="_blank" class="s-icon" aria-label="GitHub">
+                            <i class="fab fa-github"></i>
+                        </a>
+                        <a href="https://www.linkedin.com/in/anani-ramagoma"
+                           target="_blank" class="s-icon" aria-label="LinkedIn">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                        <a href="https://twitter.com/AnaniRamagoma"
+                           target="_blank" class="s-icon" aria-label="Twitter/X">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="https://www.instagram.com/anani.rm"
+                           target="_blank" class="s-icon" aria-label="Instagram">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="https://www.facebook.com/AnaniRM"
+                           target="_blank" class="s-icon facebook-icon" aria-label="Facebook">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
                     </div>
                 </div>
 
+                <!-- Website Services -->
                 <div class="footer-col">
-                    <h4>Quick Links</h4>
+                    <h4>Website Services</h4>
                     <ul>
-                        <li><a href="index.html#home">Home</a></li>
-                        <li><a href="index.html#services">Services</a></li>
+                        <li><a href="business-websites.html">Business Websites</a></li>
+                        <li><a href="ecommerce-websites.html">Ecommerce Websites</a></li>
+                        <li><a href="website-RedesingAndDesing.html">Website Redesign</a></li>
+                        <li><a href="PortfolioWebsite.html">Portfolio Websites</a></li>
+                    </ul>
+                </div>
+
+                <!-- Website Support -->
+                <div class="footer-col">
+                    <h4>Website Support</h4>
+                    <ul>
+                        <li><a href="SEO-Optimization.html">SEO</a></li>
+                        <li><a href="chatbots.html">AI Website Chatbots</a></li>
+                        <li><a href="WhatsAppIntegration.html">WhatsApp Integration</a></li>
+                        <li><a href="pricing.html#maintenance">Website Maintenance</a></li>
+                    </ul>
+                </div>
+
+                <!-- Company -->
+                <div class="footer-col">
+                    <h4>Company</h4>
+                    <ul>
                         <li><a href="index.html#about">About</a></li>
                         <li><a href="index.html#portfolio">Portfolio</a></li>
+                        <li><a href="pricing.html">Pricing</a></li>
                         <li><a href="index.html#contact">Contact</a></li>
                     </ul>
                 </div>
 
-                <div class="footer-col">
-    <h4>Services</h4>
-    <ul>
-        <li><a href="business-websites.html">Business Websites</a></li>
-        <li><a href="cv-services.html">Curriculum Vitae <b>(CV)</b></a></li>
-        <li><a href="chatbots.html">AI Chatbots</a></li>
-        <li><a href="website-RedesingAndDesing.html">Website Redesign</a></li>
-        <li><a href="WhatsAppIntegration.html">WhatsApp Integration</a></li>
-        <li><a href="SEO-Optimization.html">SEO Optimization</a></li>
-        <li><a href="academic-applications.html">Academic Application</a></li>
-    </ul>
-</div>
-
+                <!-- Contact -->
                 <div class="footer-col">
                     <h4>Contact</h4>
-                    <p><i class="fab fa-whatsapp"></i>+27 64 841 2146</p>
-                    <p><i class="fas fa-envelope"></i>Ramagoma212@gmail.com</p>
-                    <p><i class="fas fa-map-marker-alt"></i>Thohoyandou, Limpopo, SA</p>
+                    <p><a href="https://wa.me/27648412146" target="_blank"><i class="fab fa-whatsapp"></i> +27 64 841 2146</a></p>
+                    <p><a href="tel:+27648412146"><i class="fas fa-phone"></i> +27 64 841 2146</a></p>
+                    <p><a href="mailto:ramagoma212@gmail.com"><i class="fas fa-envelope"></i> Ramagoma212@gmail.com</a></p>
+                    <p><i class="fas fa-map-marker-alt"></i>Thohoyandou, Limpopo, South Africa</p>
                 </div>
 
-            </div>
+            </div><!-- /.footer-grid -->
 
             <div class="footer-bottom">
-                <p>
-                    &copy; <span id="currentYear"></span>
-                    Ramagoma Muthuhadini <b>Anani</b>. All rights reserved.
-                    Built with ❤️ in South Africa.
-                </p>
-                 <div class="footer-legal">
+                <p>&copy; <span id="currentYear"></span> Ramagoma Muthuhadini <b>Anani</b> · RMdigitals. All rights reserved. Built with ❤️ in South Africa.</p>
+                <div class="footer-legal">
                     <a href="documents/privacy.pdf" target="_blank">Privacy Policy</a>
                     <span>·</span>
                     <a href="documents/terms.pdf" target="_blank">Terms of Service</a>

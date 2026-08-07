@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin | RMdigitals</title>
+    <meta name="robots" content="noindex, nofollow" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+
+    <style>
+        body { overflow-x: hidden; }
+        .admin-header {
+            display: flex; align-items: center; justify-content: space-between;
+            max-width: 960px; margin: 0 auto; padding: 32px 24px 0;
+        }
+        .admin-header .brand { display: flex; align-items: center; gap: 10px; font-family: var(--f-display); font-weight: 800; }
+        .admin-header img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
+        .admin-wrap { max-width: 960px; margin: 0 auto; padding: 40px 24px 100px; }
+
+        .admin-card {
+            background: var(--bg-glass); border: 1px solid var(--border); border-radius: 20px;
+            padding: 32px; margin-bottom: 28px;
+        }
+        .admin-card h2 { font-family: var(--f-display); font-size: 1.15rem; margin-bottom: 18px; }
+
+        #loginPanel { max-width: 400px; margin: 80px auto; text-align: center; }
+        #loginPanel input {
+            width: 100%; padding: 13px 16px; margin-bottom: 14px; border-radius: 10px;
+            background: var(--bg-glass); border: 1px solid var(--border); color: var(--text-hi); font-size: .9rem;
+        }
+        #loginMsg { min-height: 20px; font-size: .85rem; margin-top: 10px; }
+        #loginMsg.error { color: #ff5050; }
+
+        #appPanel { display: none; }
+        .admin-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .admin-toolbar .who { font-size: .82rem; color: var(--text-mid); }
+        .btn-logout {
+            background: none; border: 1px solid var(--border); color: var(--text-mid);
+            padding: 8px 18px; border-radius: 100px; font-size: .82rem; cursor: pointer;
+        }
+        .btn-logout:hover { color: var(--text-hi); border-color: var(--border-glow); }
+
+        .pending-list { display: flex; flex-direction: column; gap: 14px; }
+        .pending-item {
+            border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px;
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        .pending-item .stars { color: var(--gold); }
+        .pending-item .meta { font-size: .78rem; color: var(--text-mid); }
+        .pending-actions { display: flex; gap: 10px; margin-top: 8px; }
+        .pending-actions button {
+            flex: 1; padding: 9px; border-radius: 8px; border: none; cursor: pointer;
+            font-size: .82rem; font-weight: 700;
+        }
+        .btn-approve { background: rgba(0,255,136,.15); color: var(--green); border: 1px solid rgba(0,255,136,.3) !important; }
+        .btn-reject  { background: rgba(255,80,80,.12); color: #ff7070; border: 1px solid rgba(255,80,80,.3) !important; }
+        .empty-note { color: var(--text-mid); font-size: .85rem; text-align: center; padding: 20px 0; }
+
+        .admin-form .field { margin-bottom: 16px; }
+        .admin-form label { display: block; font-size: .78rem; color: var(--text-mid); margin-bottom: 6px; }
+        .admin-form input[type="text"],
+        .admin-form input[type="url"],
+        .admin-form select,
+        .admin-form textarea {
+            width: 100%; padding: 12px 14px; border-radius: 10px;
+            background: rgba(255,255,255,.03); border: 1px solid var(--border); color: var(--text-hi); font-size: .88rem;
+        }
+        .admin-form input[type="file"] { font-size: .82rem; color: var(--text-mid); }
+
+        .project-row {
+            display: flex; align-items: center; gap: 14px; padding: 12px 16px;
+            border: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px;
+        }
+        .project-row img { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; background: var(--bg-glass); flex-shrink: 0; }
+        .project-row .info { flex: 1; }
+        .project-row .info strong { display: block; font-size: .9rem; }
+        .project-row .info span { font-size: .76rem; color: var(--text-mid); }
+        .btn-delete { background: none; border: 1px solid var(--border); color: #ff7070; padding: 7px 12px; border-radius: 8px; cursor: pointer; font-size: .78rem; }
+
+        .config-warning {
+            max-width: 600px; margin: 100px auto; text-align: center; padding: 40px 30px;
+            background: rgba(255,214,10,.06); border: 1px solid rgba(255,214,10,.25); border-radius: 20px;
+        }
+        .config-warning i { font-size: 2rem; color: var(--gold); margin-bottom: 16px; }
+    </style>
+</head>
+<body>
+
+    <div class="admin-header">
+        <div class="brand">
+            <img src="images/mylog.webp" alt="RMdigitals" />
+            <span>RM<span class="accent">.</span> Admin</span>
+        </div>
+        <a href="index.html" style="font-size:.82rem;color:var(--text-mid);"><i class="fas fa-arrow-left"></i> Back to site</a>
+    </div>
+
+    <div id="configWarning" class="config-warning" style="display:none;">
+        <i class="fas fa-triangle-exclamation"></i>
+        <h2>Firebase Not Connected Yet</h2>
+        <p style="color:var(--text-mid);font-size:.9rem;margin-top:10px;">
+            This admin panel needs a Firebase project connected first.
+            See the setup steps at the top of <code>firebase-config.js</code>.
+        </p>
+    </div>
+
+    <div id="loginPanel" class="admin-card" style="display:none;">
+        <h2 style="text-align:center;">Admin Login</h2>
+        <input type="email" id="loginEmail" placeholder="Email" autocomplete="username" />
+        <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password" />
+        <button class="btn-primary" id="loginBtn" style="width:100%;justify-content:center;">Log In</button>
+        <div id="loginMsg"></div>
+    </div>
+
+    <div id="appPanel" class="admin-wrap">
+        <div class="admin-toolbar">
+            <span class="who">Logged in as <strong id="whoEmail"></strong></span>
+            <button class="btn-logout" id="logoutBtn">Log Out</button>
+        </div>
+
+        <div class="admin-card">
+            <h2>Pending Reviews</h2>
+            <div id="pendingList" class="pending-list">
+                <p class="empty-note">Loading…</p>
+            </div>
+        </div>
+
+        <div class="admin-card">
+            <h2>Add a Real Project</h2>
+            <form id="projectForm" class="admin-form">
+                <div class="field">
+                    <label for="pBusiness">Business / Client Name</label>
+                    <input type="text" id="pBusiness" required />
+                </div>
+                <div class="field">
+                    <label for="pCategory">Category</label>
+                    <select id="pCategory">
+                        <option value="web">Web</option>
+                        <option value="ai">AI</option>
+                        <option value="design">Design</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="pDescription">Short Description</label>
+                    <textarea id="pDescription" rows="3" required></textarea>
+                </div>
+                <div class="field">
+                    <label for="pServices">Services Delivered (comma-separated)</label>
+                    <input type="text" id="pServices" placeholder="e.g. Website, SEO, WhatsApp Integration" />
+                </div>
+                <div class="field">
+                    <label for="pImage">Project Image (optional)</label>
+                    <input type="file" id="pImage" accept="image/*" />
+                </div>
+                <div class="field">
+                    <label for="pLiveUrl">Live Website URL (optional)</label>
+                    <input type="url" id="pLiveUrl" placeholder="https://…" />
+                </div>
+                <div class="field">
+                    <label for="pCaseStudyUrl">Case Study URL (optional)</label>
+                    <input type="url" id="pCaseStudyUrl" placeholder="https://…" />
+                </div>
+                <button type="submit" class="btn-primary" style="width:100%;justify-content:center;">Add Project</button>
+                <div id="projectFormMsg" class="form-msg" aria-live="polite"></div>
+            </form>
+        </div>
+
+        <div class="admin-card">
+            <h2>Existing Real Projects</h2>
+            <div id="projectList"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { firebaseConfig, ADMIN_EMAIL, isFirebaseConfigured } from './firebase-config.js';
+
+        if (!isFirebaseConfigured()) {
+            document.getElementById('configWarning').style.display = 'block';
+        } else {
+            runAdmin();
+        }
+
+        async function runAdmin() {
+            const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js');
+            const authMod = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js');
+            const fsMod = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js');
+            const storageMod = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js');
+
+            const app = initializeApp(firebaseConfig);
+            const auth = authMod.getAuth(app);
+            const db = fsMod.getFirestore(app);
+            const storage = storageMod.getStorage(app);
+
+            const loginPanel = document.getElementById('loginPanel');
+            const appPanel = document.getElementById('appPanel');
+            const loginMsg = document.getElementById('loginMsg');
+
+            authMod.onAuthStateChanged(auth, (user) => {
+                if (user && user.email === ADMIN_EMAIL) {
+                    loginPanel.style.display = 'none';
+                    appPanel.style.display = 'block';
+                    document.getElementById('whoEmail').textContent = user.email;
+                    loadPendingReviews();
+                    loadProjects();
+                } else if (user) {
+                    // Signed in but not the admin account — sign out immediately.
+                    authMod.signOut(auth);
+                    loginMsg.textContent = 'This account is not authorised as admin.';
+                    loginMsg.className = 'error';
+                    loginPanel.style.display = 'block';
+                    appPanel.style.display = 'none';
+                } else {
+                    loginPanel.style.display = 'block';
+                    appPanel.style.display = 'none';
+                }
+            });
+
+            document.getElementById('loginBtn').addEventListener('click', async () => {
+                const email = document.getElementById('loginEmail').value.trim();
+                const password = document.getElementById('loginPassword').value;
+                loginMsg.textContent = '';
+                try {
+                    await authMod.signInWithEmailAndPassword(auth, email, password);
+                } catch (err) {
+                    loginMsg.textContent = 'Login failed — check email and password.';
+                    loginMsg.className = 'error';
+                }
+            });
+
+            document.getElementById('logoutBtn').addEventListener('click', () => authMod.signOut(auth));
+
+            /* ── Pending reviews ── */
+            async function loadPendingReviews() {
+                const list = document.getElementById('pendingList');
+                list.innerHTML = '<p class="empty-note">Loading…</p>';
+                const q = fsMod.query(
+                    fsMod.collection(db, 'reviews'),
+                    fsMod.where('status', '==', 'pending'),
+                    fsMod.orderBy('createdAt', 'desc')
+                );
+                const snap = await fsMod.getDocs(q);
+                if (snap.empty) {
+                    list.innerHTML = '<p class="empty-note">No pending reviews right now.</p>';
+                    return;
+                }
+                list.innerHTML = '';
+                snap.forEach(docSnap => {
+                    const r = docSnap.data();
+                    const stars = '★'.repeat(r.rating || 0) + '☆'.repeat(5 - (r.rating || 0));
+                    const item = document.createElement('div');
+                    item.className = 'pending-item';
+                    item.innerHTML = `
+                        <div class="stars">${stars}</div>
+                        <div><strong>${escapeHtml(r.name)}</strong> ${r.company ? '· ' + escapeHtml(r.company) : ''}</div>
+                        <div class="meta">${escapeHtml(r.projectName || '')}</div>
+                        <p>${escapeHtml(r.message)}</p>
+                        <div class="pending-actions">
+                            <button class="btn-approve" data-id="${docSnap.id}" data-action="approved">Approve</button>
+                            <button class="btn-reject" data-id="${docSnap.id}" data-action="rejected">Reject</button>
+                        </div>
+                    `;
+                    list.appendChild(item);
+                });
+                list.querySelectorAll('button[data-action]').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        btn.disabled = true;
+                        await fsMod.updateDoc(fsMod.doc(db, 'reviews', btn.dataset.id), { status: btn.dataset.action });
+                        loadPendingReviews();
+                    });
+                });
+            }
+
+            /* ── Add project ── */
+            document.getElementById('projectForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const msg = document.getElementById('projectFormMsg');
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                submitBtn.disabled = true;
+
+                try {
+                    let imageUrl = '';
+                    const file = document.getElementById('pImage').files[0];
+                    if (file) {
+                        const path = `projects/${Date.now()}_${file.name}`;
+                        const storageRef = storageMod.ref(storage, path);
+                        await storageMod.uploadBytes(storageRef, file);
+                        imageUrl = await storageMod.getDownloadURL(storageRef);
+                    }
+
+                    await fsMod.addDoc(fsMod.collection(db, 'projects'), {
+                        businessName: document.getElementById('pBusiness').value.trim(),
+                        category: document.getElementById('pCategory').value,
+                        description: document.getElementById('pDescription').value.trim(),
+                        servicesDelivered: document.getElementById('pServices').value.trim(),
+                        imageUrl,
+                        liveUrl: document.getElementById('pLiveUrl').value.trim(),
+                        caseStudyUrl: document.getElementById('pCaseStudyUrl').value.trim(),
+                        createdAt: fsMod.serverTimestamp()
+                    });
+
+                    e.target.reset();
+                    msg.textContent = '✅ Project added — it now appears on the live site.';
+                    msg.className = 'form-msg success';
+                    loadProjects();
+                } catch (err) {
+                    console.error(err);
+                    msg.textContent = '❌ Could not add project: ' + err.message;
+                    msg.className = 'form-msg error';
+                } finally {
+                    submitBtn.disabled = false;
+                }
+            });
+
+            async function loadProjects() {
+                const list = document.getElementById('projectList');
+                const q = fsMod.query(fsMod.collection(db, 'projects'), fsMod.orderBy('createdAt', 'desc'));
+                const snap = await fsMod.getDocs(q);
+                if (snap.empty) {
+                    list.innerHTML = '<p class="empty-note">No real projects added yet.</p>';
+                    return;
+                }
+                list.innerHTML = '';
+                snap.forEach(docSnap => {
+                    const p = docSnap.data();
+                    const row = document.createElement('div');
+                    row.className = 'project-row';
+                    row.innerHTML = `
+                        <img src="${p.imageUrl || 'images/mylog.webp'}" alt="" />
+                        <div class="info">
+                            <strong>${escapeHtml(p.businessName)}</strong>
+                            <span>${escapeHtml(p.category)} · ${escapeHtml(p.servicesDelivered || '')}</span>
+                        </div>
+                        <button class="btn-delete" data-id="${docSnap.id}">Delete</button>
+                    `;
+                    list.appendChild(row);
+                });
+                list.querySelectorAll('.btn-delete').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        if (!confirm('Delete this project from the live site?')) return;
+                        await fsMod.deleteDoc(fsMod.doc(db, 'projects', btn.dataset.id));
+                        loadProjects();
+                    });
+                });
+            }
+
+            function escapeHtml(str) {
+                const div = document.createElement('div');
+                div.textContent = str == null ? '' : String(str);
+                return div.innerHTML;
+            }
+        }
+    </script>
+</body>
+</html>

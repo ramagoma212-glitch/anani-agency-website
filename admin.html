@@ -120,6 +120,72 @@
             background: rgba(255,214,10,.06); border: 1px solid rgba(255,214,10,.25); border-radius: 20px;
         }
         .config-warning i { font-size: 2rem; color: var(--gold); margin-bottom: 16px; }
+
+        /* ── Leads CRM ── */
+        .lead-summary { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 20px; }
+        @media (max-width: 700px) { .lead-summary { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 420px) { .lead-summary { grid-template-columns: repeat(2, 1fr); } }
+        .lead-stat { border: 1px solid var(--border); border-radius: 12px; padding: 12px 10px; text-align: center; }
+        .lead-stat .num { font-family: var(--f-display); font-size: 1.3rem; font-weight: 800; display: block; }
+        .lead-stat .lbl { font-size: .68rem; color: var(--text-mid); text-transform: uppercase; letter-spacing: .5px; }
+
+        .lead-toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+        .lead-toolbar input[type="search"] {
+            flex: 1; min-width: 160px; padding: 10px 14px; border-radius: 10px;
+            background: rgba(255,255,255,.03); border: 1px solid var(--border); color: var(--text-hi); font-size: .85rem;
+        }
+        .lead-toolbar select {
+            padding: 10px 12px; border-radius: 10px; background: rgba(255,255,255,.03);
+            border: 1px solid var(--border); color: var(--text-hi); font-size: .82rem;
+        }
+
+        .lead-row {
+            display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+            border: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px; flex-wrap: wrap; cursor: pointer;
+        }
+        .lead-row:hover, .lead-row:focus-visible { border-color: var(--border-glow); }
+        .lead-row .info { flex: 1; min-width: 180px; }
+        .lead-row .info strong { display: block; font-size: .92rem; }
+        .lead-row .info span { font-size: .76rem; color: var(--text-mid); }
+        .lead-row .meta-col { font-size: .76rem; color: var(--text-mid); min-width: 110px; }
+        .status-badge {
+            font-size: .68rem; padding: 4px 11px; border-radius: 100px; border: 1px solid var(--border);
+            color: var(--text-mid); white-space: nowrap; font-weight: 700;
+        }
+        .status-badge.status-new       { color: var(--cyan); border-color: rgba(0,212,255,.3); }
+        .status-badge.status-contacted { color: var(--gold); border-color: rgba(255,214,10,.3); }
+        .status-badge.status-quote_sent{ color: #b98cff; border-color: rgba(185,140,255,.35); }
+        .status-badge.status-won       { color: var(--green); border-color: rgba(0,255,136,.3); }
+        .status-badge.status-lost      { color: #ff7070; border-color: rgba(255,80,80,.3); }
+
+        .lead-modal-overlay {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,.65);
+            z-index: 2000; align-items: center; justify-content: center; padding: 20px;
+        }
+        .lead-modal-overlay.active { display: flex; }
+        .lead-modal-box {
+            background: #0d0d1a; border: 1px solid var(--border); border-radius: 20px;
+            max-width: 560px; width: 100%; max-height: 88vh; overflow-y: auto; padding: 28px;
+        }
+        .lead-modal-box h3 { font-family: var(--f-display); font-size: 1.1rem; margin-bottom: 4px; }
+        .lead-modal-close {
+            float: right; background: none; border: none; color: var(--text-mid); font-size: 1.2rem; cursor: pointer;
+        }
+        .lead-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; margin: 18px 0; }
+        @media (max-width: 480px) { .lead-detail-grid { grid-template-columns: 1fr; } }
+        .lead-detail-field .lbl { font-size: .68rem; color: var(--text-lo); text-transform: uppercase; letter-spacing: .5px; }
+        .lead-detail-field .val { font-size: .88rem; word-break: break-word; }
+        .lead-detail-actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0; }
+        .lead-detail-actions a, .lead-detail-actions button {
+            padding: 8px 16px; border-radius: 100px; border: 1px solid var(--border); background: none;
+            color: var(--text-hi); font-size: .8rem; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+        }
+        .lead-detail-actions a:hover, .lead-detail-actions button:hover { border-color: var(--border-glow); }
+        .lead-status-row { display: flex; gap: 8px; align-items: center; margin: 14px 0; flex-wrap: wrap; }
+        .lead-status-row select {
+            padding: 8px 12px; border-radius: 10px; background: rgba(255,255,255,.03);
+            border: 1px solid var(--border); color: var(--text-hi); font-size: .85rem;
+        }
     </style>
 </head>
 <body>
@@ -242,375 +308,161 @@
             <h2>Existing Projects</h2>
             <div id="projectList"></div>
         </div>
+
+        <div class="admin-card">
+            <h2>Leads</h2>
+
+            <div class="lead-summary" id="leadSummary">
+                <div class="lead-stat"><span class="num" id="lsTotal">0</span><span class="lbl">Total</span></div>
+                <div class="lead-stat"><span class="num" id="lsNew">0</span><span class="lbl">New</span></div>
+                <div class="lead-stat"><span class="num" id="lsContacted">0</span><span class="lbl">Contacted</span></div>
+                <div class="lead-stat"><span class="num" id="lsQuoteSent">0</span><span class="lbl">Quote Sent</span></div>
+                <div class="lead-stat"><span class="num" id="lsWon">0</span><span class="lbl">Won</span></div>
+                <div class="lead-stat"><span class="num" id="lsLost">0</span><span class="lbl">Lost</span></div>
+            </div>
+
+            <div class="lead-toolbar">
+                <input type="search" id="leadSearch" placeholder="Search name, email, phone, service…" />
+                <select id="leadFilterStatus">
+                    <option value="all">All statuses</option>
+                    <option value="new">New</option>
+                    <option value="contacted">Contacted</option>
+                    <option value="quote_sent">Quote Sent</option>
+                    <option value="won">Won</option>
+                    <option value="lost">Lost</option>
+                </select>
+                <select id="leadSort">
+                    <option value="newest">Newest first</option>
+                    <option value="oldest">Oldest first</option>
+                    <option value="status">By status</option>
+                </select>
+                <button type="button" class="btn-primary" id="leadAddToggleBtn">Add Lead Manually</button>
+            </div>
+
+            <form id="leadForm" class="admin-form" style="display:none; border:1px solid var(--border); border-radius:14px; padding:20px; margin-bottom:20px;">
+                <div class="form-row-2">
+                    <div class="field">
+                        <label for="lName">Name</label>
+                        <input type="text" id="lName" required maxlength="150" />
+                    </div>
+                    <div class="field">
+                        <label for="lSource">Source</label>
+                        <select id="lSource">
+                            <option value="manual">Manual</option>
+                            <option value="website_email">Website / Email</option>
+                            <option value="whatsapp">WhatsApp</option>
+                            <option value="referral">Referral</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row-2">
+                    <div class="field">
+                        <label for="lEmail">Email (optional)</label>
+                        <input type="text" id="lEmail" maxlength="200" />
+                    </div>
+                    <div class="field">
+                        <label for="lPhone">Phone (optional)</label>
+                        <input type="text" id="lPhone" maxlength="40" />
+                    </div>
+                </div>
+                <span class="field-hint" style="margin:-10px 0 14px;">At least one of email or phone is required.</span>
+                <div class="form-row-2">
+                    <div class="field">
+                        <label for="lService">Service Interest</label>
+                        <select id="lService">
+                            <option value="">— Not specified —</option>
+                            <option value="Business Website">Business Website</option>
+                            <option value="Ecommerce Website">Ecommerce Website</option>
+                            <option value="Landing Page">Landing Page</option>
+                            <option value="Website Redesign">Website Redesign</option>
+                            <option value="Portfolio Website">Portfolio Website</option>
+                            <option value="Custom Web System">Custom Web System</option>
+                            <option value="Website Maintenance">Website Maintenance</option>
+                            <option value="SEO for My Website">SEO for My Website</option>
+                            <option value="AI Website Chatbot">AI Website Chatbot</option>
+                            <option value="WhatsApp Integration">WhatsApp Integration</option>
+                            <option value="Other Website Project">Other Website Project</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="lPackage">Package Interest</label>
+                        <select id="lPackage">
+                            <option value="">— Not sure —</option>
+                            <option value="Landing Page">Landing Page</option>
+                            <option value="Starter Business Website">Starter Business Website</option>
+                            <option value="Professional Business Website">Professional Business Website</option>
+                            <option value="Business Growth Website">Business Growth Website</option>
+                            <option value="Ecommerce Website">Ecommerce Website</option>
+                            <option value="Custom Web System / Portal">Custom Web System / Portal</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="lBudget">Budget (optional)</label>
+                    <input type="text" id="lBudget" maxlength="60" placeholder="e.g. R10,000 - R20,000" />
+                </div>
+                <div class="field">
+                    <label for="lSubject">Subject (optional)</label>
+                    <input type="text" id="lSubject" maxlength="200" />
+                </div>
+                <div class="field">
+                    <label for="lMessage">Message (optional)</label>
+                    <textarea id="lMessage" rows="3" maxlength="5000"></textarea>
+                </div>
+                <button type="submit" class="btn-primary" style="width:100%;justify-content:center;">Add Lead</button>
+                <button type="button" class="btn-logout" id="leadCancelBtn" style="width:100%;justify-content:center;margin-top:10px;">Cancel</button>
+                <div id="leadFormMsg" class="form-msg" role="status" aria-live="polite"></div>
+            </form>
+
+            <div id="leadList">
+                <p class="empty-note">Loading…</p>
+            </div>
+        </div>
     </div>
 
-    <script type="module">
-        import { isFirebaseConfigured } from './firebase-config.js';
+    <div class="lead-modal-overlay" id="leadModalOverlay">
+        <div class="lead-modal-box">
+            <button class="lead-modal-close" id="leadModalClose" aria-label="Close">&times;</button>
+            <h3 id="lmName"></h3>
+            <div class="lead-status-row">
+                <span class="status-badge" id="lmStatusBadge"></span>
+                <select id="lmStatusSelect">
+                    <option value="new">New</option>
+                    <option value="contacted">Contacted</option>
+                    <option value="quote_sent">Quote Sent</option>
+                    <option value="won">Won</option>
+                    <option value="lost">Lost</option>
+                </select>
+            </div>
+            <div class="lead-detail-grid">
+                <div class="lead-detail-field"><div class="lbl">Email</div><div class="val" id="lmEmail">—</div></div>
+                <div class="lead-detail-field"><div class="lbl">Phone</div><div class="val" id="lmPhone">—</div></div>
+                <div class="lead-detail-field"><div class="lbl">Service Interest</div><div class="val" id="lmService">—</div></div>
+                <div class="lead-detail-field"><div class="lbl">Package Interest</div><div class="val" id="lmPackage">—</div></div>
+                <div class="lead-detail-field"><div class="lbl">Budget</div><div class="val" id="lmBudget">—</div></div>
+                <div class="lead-detail-field"><div class="lbl">Source</div><div class="val" id="lmSource">—</div></div>
+                <div class="lead-detail-field"><div class="lbl">Created</div><div class="val" id="lmCreated">—</div></div>
+                <div class="lead-detail-field"><div class="lbl">Updated</div><div class="val" id="lmUpdated">—</div></div>
+            </div>
+            <div class="lead-detail-field"><div class="lbl">Subject</div><div class="val" id="lmSubject">—</div></div>
+            <div class="lead-detail-field" style="margin-top:10px;"><div class="lbl">Message</div><div class="val" id="lmMessage">—</div></div>
 
-        if (!isFirebaseConfigured()) {
-            document.getElementById('configWarning').style.display = 'block';
-        } else {
-            runAdmin();
-        }
+            <div class="lead-detail-actions" id="lmContactActions"></div>
 
-        function escapeHtml(str) {
-            const div = document.createElement('div');
-            div.textContent = str == null ? '' : String(str);
-            return div.innerHTML;
-        }
+            <div class="field" style="margin-top:10px;">
+                <label for="lmNotes">Internal Notes (never shown publicly)</label>
+                <textarea id="lmNotes" rows="4" maxlength="4000"></textarea>
+                <button type="button" class="btn-primary" id="lmSaveNotesBtn" style="margin-top:8px;">Save Notes</button>
+            </div>
 
-        function isSafeHttpUrl(url) {
-            if (!url) return true; // empty is allowed (optional field)
-            try {
-                const parsed = new URL(url);
-                return parsed.protocol === 'https:' || parsed.protocol === 'http:';
-            } catch {
-                return false;
-            }
-        }
+            <div style="margin-top:20px; text-align:right;">
+                <button type="button" class="btn-logout" id="lmDeleteBtn" style="color:#ff7070;border-color:rgba(255,80,80,.3);">Delete Lead</button>
+            </div>
+            <div id="leadDetailMsg" class="form-msg" role="status" aria-live="polite"></div>
+        </div>
+    </div>
 
-        async function runAdmin() {
-            const { firebaseConfig } = await import('./firebase-config.js');
-            const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js');
-            const authMod = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js');
-            const fsMod = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js');
-            let storageMod = null;
-
-            const app = initializeApp(firebaseConfig);
-            const auth = authMod.getAuth(app);
-            const db = fsMod.getFirestore(app);
-
-            const loginPanel = document.getElementById('loginPanel');
-            const appPanel = document.getElementById('appPanel');
-            const loginMsg = document.getElementById('loginMsg');
-
-            /* A signed-in Firebase user is NOT enough — they must also
-               have a document at admins/{uid}. This is a UX convenience
-               only; the real security boundary is firestore.rules. */
-            async function checkAdminAndEnter(user) {
-                let adminDoc;
-                try {
-                    adminDoc = await fsMod.getDoc(fsMod.doc(db, 'admins', user.uid));
-                } catch (err) {
-                    adminDoc = { exists: () => false };
-                }
-
-                if (!adminDoc.exists()) {
-                    await authMod.signOut(auth);
-                    loginMsg.textContent = 'This account is not authorised as admin.';
-                    loginMsg.className = 'error';
-                    loginPanel.style.display = 'block';
-                    appPanel.style.display = 'none';
-                    return;
-                }
-
-                loginPanel.style.display = 'none';
-                appPanel.style.display = 'block';
-                document.getElementById('whoEmail').textContent = user.email;
-                loadReviews('pending');
-                loadProjects();
-            }
-
-            authMod.onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    checkAdminAndEnter(user);
-                } else {
-                    loginPanel.style.display = 'block';
-                    appPanel.style.display = 'none';
-                }
-            });
-
-            document.getElementById('loginBtn').addEventListener('click', async () => {
-                const email = document.getElementById('loginEmail').value.trim();
-                const password = document.getElementById('loginPassword').value;
-                loginMsg.textContent = '';
-                loginMsg.className = 'info';
-                if (!email || !password) {
-                    loginMsg.textContent = 'Please enter your email and password.';
-                    loginMsg.className = 'error';
-                    return;
-                }
-                try {
-                    await authMod.signInWithEmailAndPassword(auth, email, password);
-                } catch (err) {
-                    loginMsg.textContent = 'Login failed — check email and password.';
-                    loginMsg.className = 'error';
-                }
-            });
-
-            document.getElementById('logoutBtn').addEventListener('click', () => authMod.signOut(auth));
-
-            /* ── Reviews (pending / approved / rejected tabs) ── */
-            let currentTab = 'pending';
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
-                    btn.classList.add('active');
-                    btn.setAttribute('aria-selected', 'true');
-                    currentTab = btn.dataset.status;
-                    loadReviews(currentTab);
-                });
-            });
-
-            async function loadReviews(status) {
-                const list = document.getElementById('reviewList');
-                list.innerHTML = '<p class="empty-note">Loading…</p>';
-
-                let snap;
-                try {
-                    const q = fsMod.query(
-                        fsMod.collection(db, 'reviews'),
-                        fsMod.where('status', '==', status),
-                        fsMod.orderBy('createdAt', 'desc')
-                    );
-                    snap = await fsMod.getDocs(q);
-                } catch (err) {
-                    list.innerHTML = `<p class="empty-note">Could not load reviews: ${escapeHtml(err.message)}</p>`;
-                    return;
-                }
-                if (snap.empty) {
-                    list.innerHTML = `<p class="empty-note">No ${escapeHtml(status)} reviews.</p>`;
-                    return;
-                }
-
-                list.innerHTML = '';
-                snap.forEach(docSnap => {
-                    const r = docSnap.data();
-                    const stars = '★'.repeat(r.rating || 0) + '☆'.repeat(5 - (r.rating || 0));
-                    const item = document.createElement('div');
-                    item.className = 'pending-item';
-                    item.innerHTML = `
-                        <div class="stars">${stars}</div>
-                        <div><strong>${escapeHtml(r.name)}</strong> ${r.company ? '· ' + escapeHtml(r.company) : ''} ${r.featured ? '<span class="badge on-featured" style="font-size:.68rem;padding:2px 8px;border-radius:100px;border:1px solid rgba(255,214,10,.3);color:var(--gold);">Featured</span>' : ''}</div>
-                        <div class="meta">${escapeHtml(r.projectName || '')}</div>
-                        <p>${escapeHtml(r.message)}</p>
-                        <div class="pending-actions">
-                            ${status !== 'approved' ? `<button class="btn-approve" data-act="approve">Approve</button>` : ''}
-                            ${status !== 'rejected' ? `<button class="btn-reject" data-act="reject">Reject</button>` : ''}
-                            ${status === 'approved' ? `<button class="btn-feature" data-act="toggle-feature" data-value="${!r.featured}">${r.featured ? 'Unfeature' : 'Feature'}</button>` : ''}
-                            <button class="btn-del-review" data-act="delete">Delete</button>
-                        </div>
-                    `;
-                    list.appendChild(item);
-
-                    const approveBtn = item.querySelector('[data-act="approve"]');
-                    if (approveBtn) approveBtn.addEventListener('click', async () => {
-                        approveBtn.disabled = true;
-                        await fsMod.updateDoc(fsMod.doc(db, 'reviews', docSnap.id), { status: 'approved', approvedAt: fsMod.serverTimestamp() });
-                        loadReviews(currentTab);
-                    });
-                    const rejectBtn = item.querySelector('[data-act="reject"]');
-                    if (rejectBtn) rejectBtn.addEventListener('click', async () => {
-                        rejectBtn.disabled = true;
-                        await fsMod.updateDoc(fsMod.doc(db, 'reviews', docSnap.id), { status: 'rejected' });
-                        loadReviews(currentTab);
-                    });
-                    const featureBtn = item.querySelector('[data-act="toggle-feature"]');
-                    if (featureBtn) featureBtn.addEventListener('click', async () => {
-                        await fsMod.updateDoc(fsMod.doc(db, 'reviews', docSnap.id), { featured: featureBtn.dataset.value === 'true' });
-                        loadReviews(currentTab);
-                    });
-                    const delBtn = item.querySelector('[data-act="delete"]');
-                    delBtn.addEventListener('click', async () => {
-                        if (!confirm('Delete this review permanently?')) return;
-                        await fsMod.deleteDoc(fsMod.doc(db, 'reviews', docSnap.id));
-                        loadReviews(currentTab);
-                    });
-                });
-            }
-
-            /* ── Add / edit project ── */
-            const form = document.getElementById('projectForm');
-            const formTitle = document.getElementById('projectFormTitle');
-            const submitBtn = document.getElementById('projectSubmitBtn');
-            const cancelEditBtn = document.getElementById('projectCancelEditBtn');
-
-            function resetForm() {
-                form.reset();
-                document.getElementById('pId').value = '';
-                formTitle.textContent = 'Add a Project';
-                submitBtn.textContent = 'Add Project';
-                cancelEditBtn.style.display = 'none';
-            }
-            cancelEditBtn.addEventListener('click', resetForm);
-
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const msg = document.getElementById('projectFormMsg');
-                submitBtn.disabled = true;
-
-                const liveUrl = document.getElementById('pLiveUrl').value.trim();
-                const caseStudyUrl = document.getElementById('pCaseStudyUrl').value.trim();
-                if (!isSafeHttpUrl(liveUrl) || !isSafeHttpUrl(caseStudyUrl)) {
-                    msg.textContent = '⚠️ URLs must start with http:// or https://';
-                    msg.className = 'form-msg error';
-                    submitBtn.disabled = false;
-                    return;
-                }
-
-                const slug = document.getElementById('pSlug').value.trim().toLowerCase();
-                if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) {
-                    msg.textContent = '⚠️ Slug must be lowercase letters, numbers and hyphens only.';
-                    msg.className = 'form-msg error';
-                    submitBtn.disabled = false;
-                    return;
-                }
-
-                const editingId = document.getElementById('pId').value;
-
-                try {
-                    // Application-enforced slug uniqueness: query before saving.
-                    const dupeQuery = fsMod.query(fsMod.collection(db, 'projects'), fsMod.where('slug', '==', slug));
-                    const dupeSnap = await fsMod.getDocs(dupeQuery);
-                    const dupeConflict = dupeSnap.docs.some(d => d.id !== editingId);
-                    if (dupeConflict) {
-                        throw new Error('That slug is already used by another project — choose a different one.');
-                    }
-
-                    const docRef = editingId
-                        ? fsMod.doc(db, 'projects', editingId)
-                        : fsMod.doc(fsMod.collection(db, 'projects'));
-
-                    let imageUrl, imagePath;
-                    const file = document.getElementById('pImage').files[0];
-                    if (file) {
-                        if (file.size > 5 * 1024 * 1024) throw new Error('Image must be under 5MB.');
-                        if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) throw new Error('Image must be JPG, PNG or WebP.');
-                        if (!storageMod) storageMod = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js');
-                        const storage = storageMod.getStorage(app);
-                        // imagePath is the raw Storage path (needed later to delete
-                        // the file); imageUrl is the public download URL (a signed
-                        // https link with a token — NOT usable with ref() directly).
-                        imagePath = `projects/${docRef.id}/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
-                        const storageRef = storageMod.ref(storage, imagePath);
-                        await storageMod.uploadBytes(storageRef, file);
-                        imageUrl = await storageMod.getDownloadURL(storageRef);
-                    }
-
-                    const services = document.getElementById('pServices').value
-                        .split(',').map(s => s.trim()).filter(Boolean);
-
-                    const record = {
-                        slug,
-                        businessName: document.getElementById('pBusiness').value.trim(),
-                        category: document.getElementById('pCategory').value,
-                        description: document.getElementById('pDescription').value.trim(),
-                        services,
-                        liveUrl: liveUrl || null,
-                        caseStudyUrl: caseStudyUrl || null,
-                        published: document.getElementById('pPublished').checked,
-                        featured: document.getElementById('pFeatured').checked,
-                        sortOrder: Number(document.getElementById('pSortOrder').value) || 0,
-                        updatedAt: fsMod.serverTimestamp()
-                    };
-                    if (imageUrl) { record.imageUrl = imageUrl; record.imagePath = imagePath; }
-
-                    if (editingId) {
-                        await fsMod.updateDoc(docRef, record);
-                    } else {
-                        record.createdAt = fsMod.serverTimestamp();
-                        await fsMod.setDoc(docRef, record);
-                    }
-
-                    resetForm();
-                    msg.textContent = '✅ Saved.';
-                    msg.className = 'form-msg success';
-                    loadProjects();
-                } catch (err) {
-                    console.error(err);
-                    msg.textContent = '❌ Could not save project: ' + err.message;
-                    msg.className = 'form-msg error';
-                } finally {
-                    submitBtn.disabled = false;
-                }
-            });
-
-            async function loadProjects() {
-                const list = document.getElementById('projectList');
-                let snap;
-                try {
-                    const q = fsMod.query(fsMod.collection(db, 'projects'), fsMod.orderBy('sortOrder', 'asc'));
-                    snap = await fsMod.getDocs(q);
-                } catch (err) {
-                    list.innerHTML = `<p class="empty-note">Could not load projects: ${escapeHtml(err.message)}</p>`;
-                    return;
-                }
-                if (snap.empty) {
-                    list.innerHTML = '<p class="empty-note">No projects added yet.</p>';
-                    return;
-                }
-
-                list.innerHTML = '';
-                snap.forEach(docSnap => {
-                    const p = docSnap.data();
-                    const row = document.createElement('div');
-                    row.className = 'project-row';
-                    row.innerHTML = `
-                        <img src="${p.imageUrl ? escapeHtml(p.imageUrl) : 'images/mylog.webp'}" alt="" />
-                        <div class="info">
-                            <strong>${escapeHtml(p.businessName)}</strong>
-                            <span>${escapeHtml(p.category)} · ${escapeHtml((p.services || []).join(', '))}</span>
-                            <div class="badges">
-                                <span class="badge ${p.published ? 'on-published' : ''}">${p.published ? 'Published' : 'Draft'}</span>
-                                ${p.featured ? '<span class="badge on-featured">Featured</span>' : ''}
-                            </div>
-                        </div>
-                        <div class="row-actions">
-                            <button data-act="toggle-published" data-value="${!p.published}">${p.published ? 'Unpublish' : 'Publish'}</button>
-                            <button data-act="toggle-featured" data-value="${!p.featured}">${p.featured ? 'Unfeature' : 'Feature'}</button>
-                            <button data-act="edit">Edit</button>
-                            <button data-act="delete" class="btn-delete">Delete</button>
-                        </div>
-                    `;
-                    list.appendChild(row);
-
-                    row.querySelector('[data-act="toggle-published"]').addEventListener('click', async (ev) => {
-                        await fsMod.updateDoc(fsMod.doc(db, 'projects', docSnap.id), { published: ev.currentTarget.dataset.value === 'true', updatedAt: fsMod.serverTimestamp() });
-                        loadProjects();
-                    });
-                    row.querySelector('[data-act="toggle-featured"]').addEventListener('click', async (ev) => {
-                        await fsMod.updateDoc(fsMod.doc(db, 'projects', docSnap.id), { featured: ev.currentTarget.dataset.value === 'true', updatedAt: fsMod.serverTimestamp() });
-                        loadProjects();
-                    });
-                    row.querySelector('[data-act="edit"]').addEventListener('click', () => {
-                        document.getElementById('pId').value = docSnap.id;
-                        document.getElementById('pBusiness').value = p.businessName || '';
-                        document.getElementById('pSlug').value = p.slug || '';
-                        document.getElementById('pCategory').value = p.category || 'Business Website';
-                        document.getElementById('pSortOrder').value = p.sortOrder ?? 0;
-                        document.getElementById('pDescription').value = p.description || '';
-                        document.getElementById('pServices').value = (p.services || []).join(', ');
-                        document.getElementById('pLiveUrl').value = p.liveUrl || '';
-                        document.getElementById('pCaseStudyUrl').value = p.caseStudyUrl || '';
-                        document.getElementById('pPublished').checked = !!p.published;
-                        document.getElementById('pFeatured').checked = !!p.featured;
-                        formTitle.textContent = 'Edit Project';
-                        submitBtn.textContent = 'Save Changes';
-                        cancelEditBtn.style.display = 'block';
-                        form.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    });
-                    row.querySelector('[data-act="delete"]').addEventListener('click', async () => {
-                        if (!confirm('Delete this project from the live site?')) return;
-                        try {
-                            await fsMod.deleteDoc(fsMod.doc(db, 'projects', docSnap.id));
-                            if (p.imagePath) {
-                                try {
-                                    if (!storageMod) storageMod = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js');
-                                    const storage = storageMod.getStorage(app);
-                                    await storageMod.deleteObject(storageMod.ref(storage, p.imagePath));
-                                } catch (imgErr) {
-                                    console.warn('Project deleted, but its image could not be removed from Storage:', imgErr.message);
-                                }
-                            }
-                        } catch (err) {
-                            alert('Could not delete: ' + err.message);
-                            return;
-                        }
-                        loadProjects();
-                    });
-                });
-            }
-        }
-    </script>
+    <script type="module" src="admin.js"></script>
 </body>
 </html>

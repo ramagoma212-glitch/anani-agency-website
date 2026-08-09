@@ -1,0 +1,29 @@
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Firebase / Google Cloud service-account credentials
+# (NOT the public Web App config in firebase-config.js — that stays tracked)
+service-account*.json
+*serviceAccount*.json
+*service-account*.json
+*adminsdk*.json
+
+# Private keys / certificates
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Firebase CLI local state / logs
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+
+# Dependencies (not currently used, ignored for safety if ever introduced)
+node_modules/
+
+# OS artifacts
+.DS_Store
+Thumbs.db

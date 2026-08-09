@@ -48,6 +48,13 @@
         }
         .btn-logout:hover, .btn-logout:focus-visible { color: var(--text-hi); border-color: var(--border-glow); }
 
+        .tab-row { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+        .tab-btn {
+            background: none; border: 1px solid var(--border); color: var(--text-mid);
+            padding: 8px 16px; border-radius: 100px; font-size: .8rem; cursor: pointer;
+        }
+        .tab-btn.active { color: var(--text-hi); border-color: var(--border-glow); background: rgba(255,255,255,.03); }
+
         .pending-list { display: flex; flex-direction: column; gap: 14px; }
         .pending-item {
             border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px;
@@ -55,13 +62,15 @@
         }
         .pending-item .stars { color: var(--gold); }
         .pending-item .meta { font-size: .78rem; color: var(--text-mid); }
-        .pending-actions { display: flex; gap: 10px; margin-top: 8px; }
+        .pending-actions { display: flex; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
         .pending-actions button {
-            flex: 1; padding: 9px; border-radius: 8px; border: none; cursor: pointer;
+            flex: 1; min-width: 90px; padding: 9px; border-radius: 8px; border: none; cursor: pointer;
             font-size: .82rem; font-weight: 700;
         }
         .btn-approve { background: rgba(0,255,136,.15); color: var(--green); border: 1px solid rgba(0,255,136,.3) !important; }
         .btn-reject  { background: rgba(255,80,80,.12); color: #ff7070; border: 1px solid rgba(255,80,80,.3) !important; }
+        .btn-feature { background: rgba(255,214,10,.12); color: var(--gold); border: 1px solid rgba(255,214,10,.3) !important; }
+        .btn-del-review { background: rgba(255,80,80,.08); color: #ff7070; border: 1px solid rgba(255,80,80,.25) !important; }
         .empty-note { color: var(--text-mid); font-size: .85rem; text-align: center; padding: 20px 0; }
 
         .admin-form .field { margin-bottom: 16px; }
@@ -75,9 +84,7 @@
             width: 100%; padding: 12px 14px; border-radius: 10px;
             background: rgba(255,255,255,.03); border: 1px solid var(--border); color: var(--text-hi); font-size: .88rem;
         }
-        .admin-form input[type="text"]:focus-visible,
-        .admin-form input[type="url"]:focus-visible,
-        .admin-form input[type="number"]:focus-visible,
+        .admin-form input:focus-visible,
         .admin-form select:focus-visible,
         .admin-form textarea:focus-visible {
             outline: 2px solid var(--cyan); outline-offset: 2px;
@@ -127,11 +134,11 @@
 
     <div id="configWarning" class="config-warning" style="display:none;">
         <i class="fas fa-triangle-exclamation"></i>
-        <h2>Supabase Not Connected Yet</h2>
+        <h2>Firebase Not Connected Yet</h2>
         <p style="color:var(--text-mid);font-size:.9rem;margin-top:10px;">
-            This admin panel needs a Supabase project connected first.
-            See the setup steps at the top of <code>supabase-config.js</code>
-            and in <code>supabase/README.md</code>.
+            This admin panel needs a Firebase project connected first.
+            See the setup steps at the top of <code>firebase-config.js</code>
+            and in <code>firebase/README.md</code>.
         </p>
     </div>
 
@@ -152,8 +159,13 @@
         </div>
 
         <div class="admin-card">
-            <h2>Pending Reviews</h2>
-            <div id="pendingList" class="pending-list">
+            <h2>Reviews</h2>
+            <div class="tab-row" role="tablist">
+                <button class="tab-btn active" data-status="pending" role="tab" aria-selected="true">Pending</button>
+                <button class="tab-btn" data-status="approved" role="tab" aria-selected="false">Approved</button>
+                <button class="tab-btn" data-status="rejected" role="tab" aria-selected="false">Rejected</button>
+            </div>
+            <div id="reviewList" class="pending-list">
                 <p class="empty-note">Loading…</p>
             </div>
         </div>
@@ -170,7 +182,7 @@
                 <div class="field">
                     <label for="pSlug">URL Slug</label>
                     <input type="text" id="pSlug" required pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="e.g. green-leaf-cafe" />
-                    <span class="field-hint">Lowercase letters, numbers and hyphens only. Must be unique.</span>
+                    <span class="field-hint">Lowercase letters, numbers and hyphens only. Must be unique — checked before saving.</span>
                 </div>
                 <div class="form-row-2">
                     <div class="field">
@@ -200,6 +212,7 @@
                 <div class="field">
                     <label for="pImage">Project Image (optional, JPG/PNG/WebP, max 5MB)</label>
                     <input type="file" id="pImage" accept="image/jpeg,image/png,image/webp" />
+                    <span class="field-hint">Requires Cloud Storage to be activated on the Firebase project (see firebase/README.md).</span>
                 </div>
                 <div class="field">
                     <label for="pLiveUrl">Live Website URL (optional)</label>
@@ -232,9 +245,9 @@
     </div>
 
     <script type="module">
-        import { isSupabaseConfigured } from './supabase-config.js';
+        import { isFirebaseConfigured } from './firebase-config.js';
 
-        if (!isSupabaseConfigured()) {
+        if (!isFirebaseConfigured()) {
             document.getElementById('configWarning').style.display = 'block';
         } else {
             runAdmin();
@@ -246,27 +259,44 @@
             return div.innerHTML;
         }
 
+        function isSafeHttpUrl(url) {
+            if (!url) return true; // empty is allowed (optional field)
+            try {
+                const parsed = new URL(url);
+                return parsed.protocol === 'https:' || parsed.protocol === 'http:';
+            } catch {
+                return false;
+            }
+        }
+
         async function runAdmin() {
-            const { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } = await import('./supabase-config.js');
-            const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
-            const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+            const { firebaseConfig } = await import('./firebase-config.js');
+            const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js');
+            const authMod = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js');
+            const fsMod = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js');
+            let storageMod = null;
+
+            const app = initializeApp(firebaseConfig);
+            const auth = authMod.getAuth(app);
+            const db = fsMod.getFirestore(app);
 
             const loginPanel = document.getElementById('loginPanel');
             const appPanel = document.getElementById('appPanel');
             const loginMsg = document.getElementById('loginMsg');
 
-            /* A signed-in Supabase user is NOT enough — they must also
-               have profiles.role = 'admin'. This is a UX convenience
-               only; the real security boundary is Postgres RLS. */
+            /* A signed-in Firebase user is NOT enough — they must also
+               have a document at admins/{uid}. This is a UX convenience
+               only; the real security boundary is firestore.rules. */
             async function checkAdminAndEnter(user) {
-                const { data, error } = await supabase
-                    .from('profiles')
-                    .select('role')
-                    .eq('id', user.id)
-                    .maybeSingle();
+                let adminDoc;
+                try {
+                    adminDoc = await fsMod.getDoc(fsMod.doc(db, 'admins', user.uid));
+                } catch (err) {
+                    adminDoc = { exists: () => false };
+                }
 
-                if (error || !data || data.role !== 'admin') {
-                    await supabase.auth.signOut();
+                if (!adminDoc.exists()) {
+                    await authMod.signOut(auth);
                     loginMsg.textContent = 'This account is not authorised as admin.';
                     loginMsg.className = 'error';
                     loginPanel.style.display = 'block';
@@ -277,20 +307,14 @@
                 loginPanel.style.display = 'none';
                 appPanel.style.display = 'block';
                 document.getElementById('whoEmail').textContent = user.email;
-                loadPendingReviews();
+                loadReviews('pending');
                 loadProjects();
             }
 
-            /* Restore an existing session on page load. */
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session?.user) {
-                await checkAdminAndEnter(session.user);
-            } else {
-                loginPanel.style.display = 'block';
-            }
-
-            supabase.auth.onAuthStateChange((event, newSession) => {
-                if (event === 'SIGNED_OUT') {
+            authMod.onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    checkAdminAndEnter(user);
+                } else {
                     loginPanel.style.display = 'block';
                     appPanel.style.display = 'none';
                 }
@@ -306,68 +330,91 @@
                     loginMsg.className = 'error';
                     return;
                 }
-                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-                if (error) {
+                try {
+                    await authMod.signInWithEmailAndPassword(auth, email, password);
+                } catch (err) {
                     loginMsg.textContent = 'Login failed — check email and password.';
                     loginMsg.className = 'error';
-                    return;
                 }
-                await checkAdminAndEnter(data.user);
             });
 
-            document.getElementById('logoutBtn').addEventListener('click', () => supabase.auth.signOut());
+            document.getElementById('logoutBtn').addEventListener('click', () => authMod.signOut(auth));
 
-            /* ── Pending reviews ── */
-            async function loadPendingReviews() {
-                const list = document.getElementById('pendingList');
+            /* ── Reviews (pending / approved / rejected tabs) ── */
+            let currentTab = 'pending';
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
+                    btn.classList.add('active');
+                    btn.setAttribute('aria-selected', 'true');
+                    currentTab = btn.dataset.status;
+                    loadReviews(currentTab);
+                });
+            });
+
+            async function loadReviews(status) {
+                const list = document.getElementById('reviewList');
                 list.innerHTML = '<p class="empty-note">Loading…</p>';
 
-                const { data, error } = await supabase
-                    .from('reviews')
-                    .select('id, name, company, project_name, rating, message')
-                    .eq('status', 'pending')
-                    .order('created_at', { ascending: false });
-
-                if (error) {
-                    list.innerHTML = `<p class="empty-note">Could not load reviews: ${escapeHtml(error.message)}</p>`;
+                let snap;
+                try {
+                    const q = fsMod.query(
+                        fsMod.collection(db, 'reviews'),
+                        fsMod.where('status', '==', status),
+                        fsMod.orderBy('createdAt', 'desc')
+                    );
+                    snap = await fsMod.getDocs(q);
+                } catch (err) {
+                    list.innerHTML = `<p class="empty-note">Could not load reviews: ${escapeHtml(err.message)}</p>`;
                     return;
                 }
-                if (!data || data.length === 0) {
-                    list.innerHTML = '<p class="empty-note">No pending reviews right now.</p>';
+                if (snap.empty) {
+                    list.innerHTML = `<p class="empty-note">No ${escapeHtml(status)} reviews.</p>`;
                     return;
                 }
 
                 list.innerHTML = '';
-                data.forEach(r => {
+                snap.forEach(docSnap => {
+                    const r = docSnap.data();
                     const stars = '★'.repeat(r.rating || 0) + '☆'.repeat(5 - (r.rating || 0));
                     const item = document.createElement('div');
                     item.className = 'pending-item';
                     item.innerHTML = `
                         <div class="stars">${stars}</div>
-                        <div><strong>${escapeHtml(r.name)}</strong> ${r.company ? '· ' + escapeHtml(r.company) : ''}</div>
-                        <div class="meta">${escapeHtml(r.project_name || '')}</div>
+                        <div><strong>${escapeHtml(r.name)}</strong> ${r.company ? '· ' + escapeHtml(r.company) : ''} ${r.featured ? '<span class="badge on-featured" style="font-size:.68rem;padding:2px 8px;border-radius:100px;border:1px solid rgba(255,214,10,.3);color:var(--gold);">Featured</span>' : ''}</div>
+                        <div class="meta">${escapeHtml(r.projectName || '')}</div>
                         <p>${escapeHtml(r.message)}</p>
                         <div class="pending-actions">
-                            <button class="btn-approve" data-id="${r.id}" data-action="approved">Approve</button>
-                            <button class="btn-reject" data-id="${r.id}" data-action="rejected">Reject</button>
+                            ${status !== 'approved' ? `<button class="btn-approve" data-act="approve">Approve</button>` : ''}
+                            ${status !== 'rejected' ? `<button class="btn-reject" data-act="reject">Reject</button>` : ''}
+                            ${status === 'approved' ? `<button class="btn-feature" data-act="toggle-feature" data-value="${!r.featured}">${r.featured ? 'Unfeature' : 'Feature'}</button>` : ''}
+                            <button class="btn-del-review" data-act="delete">Delete</button>
                         </div>
                     `;
                     list.appendChild(item);
-                });
 
-                list.querySelectorAll('button[data-action]').forEach(btn => {
-                    btn.addEventListener('click', async () => {
-                        btn.disabled = true;
-                        const status = btn.dataset.action;
-                        const patch = { status };
-                        if (status === 'approved') patch.approved_at = new Date().toISOString();
-                        const { error } = await supabase.from('reviews').update(patch).eq('id', btn.dataset.id);
-                        if (error) {
-                            alert('Could not update review: ' + error.message);
-                            btn.disabled = false;
-                            return;
-                        }
-                        loadPendingReviews();
+                    const approveBtn = item.querySelector('[data-act="approve"]');
+                    if (approveBtn) approveBtn.addEventListener('click', async () => {
+                        approveBtn.disabled = true;
+                        await fsMod.updateDoc(fsMod.doc(db, 'reviews', docSnap.id), { status: 'approved', approvedAt: fsMod.serverTimestamp() });
+                        loadReviews(currentTab);
+                    });
+                    const rejectBtn = item.querySelector('[data-act="reject"]');
+                    if (rejectBtn) rejectBtn.addEventListener('click', async () => {
+                        rejectBtn.disabled = true;
+                        await fsMod.updateDoc(fsMod.doc(db, 'reviews', docSnap.id), { status: 'rejected' });
+                        loadReviews(currentTab);
+                    });
+                    const featureBtn = item.querySelector('[data-act="toggle-feature"]');
+                    if (featureBtn) featureBtn.addEventListener('click', async () => {
+                        await fsMod.updateDoc(fsMod.doc(db, 'reviews', docSnap.id), { featured: featureBtn.dataset.value === 'true' });
+                        loadReviews(currentTab);
+                    });
+                    const delBtn = item.querySelector('[data-act="delete"]');
+                    delBtn.addEventListener('click', async () => {
+                        if (!confirm('Delete this review permanently?')) return;
+                        await fsMod.deleteDoc(fsMod.doc(db, 'reviews', docSnap.id));
+                        loadReviews(currentTab);
                     });
                 });
             }
@@ -385,18 +432,7 @@
                 submitBtn.textContent = 'Add Project';
                 cancelEditBtn.style.display = 'none';
             }
-
             cancelEditBtn.addEventListener('click', resetForm);
-
-            function isSafeHttpUrl(url) {
-                if (!url) return true; // empty is allowed (optional field)
-                try {
-                    const parsed = new URL(url);
-                    return parsed.protocol === 'https:' || parsed.protocol === 'http:';
-                } catch {
-                    return false;
-                }
-            }
 
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
@@ -412,44 +448,68 @@
                     return;
                 }
 
+                const slug = document.getElementById('pSlug').value.trim().toLowerCase();
+                if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) {
+                    msg.textContent = '⚠️ Slug must be lowercase letters, numbers and hyphens only.';
+                    msg.className = 'form-msg error';
+                    submitBtn.disabled = false;
+                    return;
+                }
+
+                const editingId = document.getElementById('pId').value;
+
                 try {
-                    let imagePath = null;
+                    // Application-enforced slug uniqueness: query before saving.
+                    const dupeQuery = fsMod.query(fsMod.collection(db, 'projects'), fsMod.where('slug', '==', slug));
+                    const dupeSnap = await fsMod.getDocs(dupeQuery);
+                    const dupeConflict = dupeSnap.docs.some(d => d.id !== editingId);
+                    if (dupeConflict) {
+                        throw new Error('That slug is already used by another project — choose a different one.');
+                    }
+
+                    const docRef = editingId
+                        ? fsMod.doc(db, 'projects', editingId)
+                        : fsMod.doc(fsMod.collection(db, 'projects'));
+
+                    let imageUrl, imagePath;
                     const file = document.getElementById('pImage').files[0];
                     if (file) {
                         if (file.size > 5 * 1024 * 1024) throw new Error('Image must be under 5MB.');
                         if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) throw new Error('Image must be JPG, PNG or WebP.');
-                        const path = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
-                        const { error: uploadError } = await supabase.storage.from('portfolio-images').upload(path, file);
-                        if (uploadError) throw uploadError;
-                        const { data: pub } = supabase.storage.from('portfolio-images').getPublicUrl(path);
-                        imagePath = pub.publicUrl;
+                        if (!storageMod) storageMod = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js');
+                        const storage = storageMod.getStorage(app);
+                        // imagePath is the raw Storage path (needed later to delete
+                        // the file); imageUrl is the public download URL (a signed
+                        // https link with a token — NOT usable with ref() directly).
+                        imagePath = `projects/${docRef.id}/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+                        const storageRef = storageMod.ref(storage, imagePath);
+                        await storageMod.uploadBytes(storageRef, file);
+                        imageUrl = await storageMod.getDownloadURL(storageRef);
                     }
 
                     const services = document.getElementById('pServices').value
                         .split(',').map(s => s.trim()).filter(Boolean);
 
                     const record = {
-                        business_name: document.getElementById('pBusiness').value.trim(),
-                        slug: document.getElementById('pSlug').value.trim().toLowerCase(),
+                        slug,
+                        businessName: document.getElementById('pBusiness').value.trim(),
                         category: document.getElementById('pCategory').value,
                         description: document.getElementById('pDescription').value.trim(),
                         services,
-                        live_url: liveUrl || null,
-                        case_study_url: caseStudyUrl || null,
+                        liveUrl: liveUrl || null,
+                        caseStudyUrl: caseStudyUrl || null,
                         published: document.getElementById('pPublished').checked,
                         featured: document.getElementById('pFeatured').checked,
-                        sort_order: Number(document.getElementById('pSortOrder').value) || 0
+                        sortOrder: Number(document.getElementById('pSortOrder').value) || 0,
+                        updatedAt: fsMod.serverTimestamp()
                     };
-                    if (imagePath) record.image_path = imagePath;
+                    if (imageUrl) { record.imageUrl = imageUrl; record.imagePath = imagePath; }
 
-                    const editingId = document.getElementById('pId').value;
-                    const { error } = editingId
-                        ? await supabase.from('projects').update(record).eq('id', editingId)
-                        : await supabase.from('projects').insert(record);
-
-                    if (error) {
-                        if (error.code === '23505') throw new Error('That slug is already used by another project — choose a different one.');
-                        throw error;
+                    if (editingId) {
+                        await fsMod.updateDoc(docRef, record);
+                    } else {
+                        record.createdAt = fsMod.serverTimestamp();
+                        await fsMod.setDoc(docRef, record);
                     }
 
                     resetForm();
@@ -467,29 +527,28 @@
 
             async function loadProjects() {
                 const list = document.getElementById('projectList');
-                const { data, error } = await supabase
-                    .from('projects')
-                    .select('*')
-                    .order('sort_order', { ascending: true })
-                    .order('created_at', { ascending: false });
-
-                if (error) {
-                    list.innerHTML = `<p class="empty-note">Could not load projects: ${escapeHtml(error.message)}</p>`;
+                let snap;
+                try {
+                    const q = fsMod.query(fsMod.collection(db, 'projects'), fsMod.orderBy('sortOrder', 'asc'));
+                    snap = await fsMod.getDocs(q);
+                } catch (err) {
+                    list.innerHTML = `<p class="empty-note">Could not load projects: ${escapeHtml(err.message)}</p>`;
                     return;
                 }
-                if (!data || data.length === 0) {
+                if (snap.empty) {
                     list.innerHTML = '<p class="empty-note">No projects added yet.</p>';
                     return;
                 }
 
                 list.innerHTML = '';
-                data.forEach(p => {
+                snap.forEach(docSnap => {
+                    const p = docSnap.data();
                     const row = document.createElement('div');
                     row.className = 'project-row';
                     row.innerHTML = `
-                        <img src="${p.image_path ? escapeHtml(p.image_path) : 'images/mylog.webp'}" alt="" />
+                        <img src="${p.imageUrl ? escapeHtml(p.imageUrl) : 'images/mylog.webp'}" alt="" />
                         <div class="info">
-                            <strong>${escapeHtml(p.business_name)}</strong>
+                            <strong>${escapeHtml(p.businessName)}</strong>
                             <span>${escapeHtml(p.category)} · ${escapeHtml((p.services || []).join(', '))}</span>
                             <div class="badges">
                                 <span class="badge ${p.published ? 'on-published' : ''}">${p.published ? 'Published' : 'Draft'}</span>
@@ -497,45 +556,56 @@
                             </div>
                         </div>
                         <div class="row-actions">
-                            <button data-act="toggle-published" data-id="${p.id}" data-value="${!p.published}">${p.published ? 'Unpublish' : 'Publish'}</button>
-                            <button data-act="toggle-featured" data-id="${p.id}" data-value="${!p.featured}">${p.featured ? 'Unfeature' : 'Feature'}</button>
-                            <button data-act="edit" data-id="${p.id}">Edit</button>
-                            <button data-act="delete" data-id="${p.id}" class="btn-delete">Delete</button>
+                            <button data-act="toggle-published" data-value="${!p.published}">${p.published ? 'Unpublish' : 'Publish'}</button>
+                            <button data-act="toggle-featured" data-value="${!p.featured}">${p.featured ? 'Unfeature' : 'Feature'}</button>
+                            <button data-act="edit">Edit</button>
+                            <button data-act="delete" class="btn-delete">Delete</button>
                         </div>
                     `;
                     list.appendChild(row);
 
                     row.querySelector('[data-act="toggle-published"]').addEventListener('click', async (ev) => {
-                        const btn = ev.currentTarget;
-                        await supabase.from('projects').update({ published: btn.dataset.value === 'true' }).eq('id', p.id);
+                        await fsMod.updateDoc(fsMod.doc(db, 'projects', docSnap.id), { published: ev.currentTarget.dataset.value === 'true', updatedAt: fsMod.serverTimestamp() });
                         loadProjects();
                     });
                     row.querySelector('[data-act="toggle-featured"]').addEventListener('click', async (ev) => {
-                        const btn = ev.currentTarget;
-                        await supabase.from('projects').update({ featured: btn.dataset.value === 'true' }).eq('id', p.id);
+                        await fsMod.updateDoc(fsMod.doc(db, 'projects', docSnap.id), { featured: ev.currentTarget.dataset.value === 'true', updatedAt: fsMod.serverTimestamp() });
                         loadProjects();
                     });
                     row.querySelector('[data-act="edit"]').addEventListener('click', () => {
-                        document.getElementById('pId').value = p.id;
-                        document.getElementById('pBusiness').value = p.business_name || '';
+                        document.getElementById('pId').value = docSnap.id;
+                        document.getElementById('pBusiness').value = p.businessName || '';
                         document.getElementById('pSlug').value = p.slug || '';
                         document.getElementById('pCategory').value = p.category || 'Business Website';
-                        document.getElementById('pSortOrder').value = p.sort_order ?? 0;
+                        document.getElementById('pSortOrder').value = p.sortOrder ?? 0;
                         document.getElementById('pDescription').value = p.description || '';
                         document.getElementById('pServices').value = (p.services || []).join(', ');
-                        document.getElementById('pLiveUrl').value = p.live_url || '';
-                        document.getElementById('pCaseStudyUrl').value = p.case_study_url || '';
+                        document.getElementById('pLiveUrl').value = p.liveUrl || '';
+                        document.getElementById('pCaseStudyUrl').value = p.caseStudyUrl || '';
                         document.getElementById('pPublished').checked = !!p.published;
                         document.getElementById('pFeatured').checked = !!p.featured;
                         formTitle.textContent = 'Edit Project';
                         submitBtn.textContent = 'Save Changes';
                         cancelEditBtn.style.display = 'block';
-                        document.getElementById('projectForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        form.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     });
                     row.querySelector('[data-act="delete"]').addEventListener('click', async () => {
                         if (!confirm('Delete this project from the live site?')) return;
-                        const { error: delErr } = await supabase.from('projects').delete().eq('id', p.id);
-                        if (delErr) { alert('Could not delete: ' + delErr.message); return; }
+                        try {
+                            await fsMod.deleteDoc(fsMod.doc(db, 'projects', docSnap.id));
+                            if (p.imagePath) {
+                                try {
+                                    if (!storageMod) storageMod = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js');
+                                    const storage = storageMod.getStorage(app);
+                                    await storageMod.deleteObject(storageMod.ref(storage, p.imagePath));
+                                } catch (imgErr) {
+                                    console.warn('Project deleted, but its image could not be removed from Storage:', imgErr.message);
+                                }
+                            }
+                        } catch (err) {
+                            alert('Could not delete: ' + err.message);
+                            return;
+                        }
                         loadProjects();
                     });
                 });

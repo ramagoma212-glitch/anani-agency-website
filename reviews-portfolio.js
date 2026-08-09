@@ -1,5 +1,5 @@
 /* ============================================================
-   REVIEWS & PORTFOLIO — Supabase-backed
+   REVIEWS & PORTFOLIO — Firebase-backed
    ============================================================
    Public site behaviour (index.html):
      - Renders approved reviews into #testimonials, after the
@@ -10,13 +10,13 @@
        with status "pending" — it will not appear publicly until
        approved in admin.html.
 
-   Safe no-op: if Supabase hasn't been configured yet
-   (see supabase-config.js), every function here exits quietly.
-   No console errors, no external Supabase SDK request, no broken
+   Safe no-op: if Firebase hasn't been configured yet
+   (see firebase-config.js), every function here exits quietly.
+   No console errors, no external Firebase SDK request, no broken
    UI — the site works exactly as before, on static content alone.
    ============================================================ */
 
-import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, isSupabaseConfigured } from './supabase-config.js';
+import { firebaseConfig, isFirebaseConfigured } from './firebase-config.js';
 
 const STAR_FULL = '★';
 const STAR_EMPTY = '☆';
@@ -47,35 +47,46 @@ function initials(name) {
     return name.trim().split(/\s+/).slice(0, 2).map(w => w[0].toUpperCase()).join('');
 }
 
-let clientPromise = null;
-async function loadSupabase() {
-    if (!clientPromise) {
-        clientPromise = (async () => {
-            const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
-            return createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+let firebasePromise = null;
+async function loadFirebase() {
+    if (!firebasePromise) {
+        firebasePromise = (async () => {
+            const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js');
+            const firestore = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js');
+            const app = initializeApp(firebaseConfig);
+            const db = firestore.getFirestore(app);
+            return { app, db, firestore };
         })();
     }
-    return clientPromise;
+    return firebasePromise;
 }
 
-/* ── Render approved reviews into the testimonials grid ── */
-async function renderApprovedReviews(supabase) {
+/* ── Render approved reviews into the testimonials grid ──
+   Queries WHERE status == 'approved' explicitly: Firestore Security
+   Rules are not filters, so a public client reading "all reviews"
+   would simply be denied by firestore.rules rather than silently
+   filtered — the query itself must match what the rules allow. */
+async function renderApprovedReviews(db, firestore) {
     const grid = document.querySelector('.testimonials-grid');
     if (!grid) return;
 
-    const { data, error } = await supabase
-        .from('reviews')
-        .select('name, company, project_name, rating, message')
-        .eq('status', 'approved')
-        .order('created_at', { ascending: false })
-        .limit(12);
-
-    if (error) {
-        console.warn('Could not load reviews (Supabase not set up yet?):', error.message);
+    const { collection, query, where, orderBy, limit, getDocs } = firestore;
+    let snap;
+    try {
+        const q = query(
+            collection(db, 'reviews'),
+            where('status', '==', 'approved'),
+            orderBy('createdAt', 'desc'),
+            limit(12)
+        );
+        snap = await getDocs(q);
+    } catch (err) {
+        console.warn('Could not load reviews (Firestore not set up yet?):', err.message);
         return;
     }
 
-    (data || []).forEach(r => {
+    snap.forEach(doc => {
+        const r = doc.data();
         const rating = Math.min(5, Math.max(1, Number(r.rating) || 5));
         const stars = STAR_FULL.repeat(rating) + STAR_EMPTY.repeat(5 - rating);
 
@@ -89,7 +100,7 @@ async function renderApprovedReviews(supabase) {
                 <div class="client-avatar">${escapeHtml(initials(r.name))}</div>
                 <div>
                     <strong>${escapeHtml(r.name)}</strong>
-                    <span>${escapeHtml([r.project_name, r.company].filter(Boolean).join(' · '))}</span>
+                    <span>${escapeHtml([r.projectName, r.company].filter(Boolean).join(' · '))}</span>
                 </div>
             </div>
         `;
@@ -97,38 +108,44 @@ async function renderApprovedReviews(supabase) {
     });
 }
 
-/* ── Render real (admin-added) projects into the portfolio grid ── */
-async function renderRealProjects(supabase) {
+/* ── Render real (admin-added) projects into the portfolio grid ──
+   Queries WHERE published == true explicitly — same reasoning as
+   above. */
+async function renderRealProjects(db, firestore) {
     const grid = document.querySelector('.portfolio-grid');
     if (!grid) return;
 
-    const { data, error } = await supabase
-        .from('projects')
-        .select('business_name, category, description, services, image_path, live_url, case_study_url')
-        .eq('published', true)
-        .order('featured', { ascending: false })
-        .order('sort_order', { ascending: true })
-        .order('created_at', { ascending: false })
-        .limit(24);
-
-    if (error) {
-        console.warn('Could not load projects (Supabase not set up yet?):', error.message);
+    const { collection, query, where, orderBy, limit, getDocs } = firestore;
+    let snap;
+    try {
+        const q = query(
+            collection(db, 'projects'),
+            where('published', '==', true),
+            orderBy('featured', 'desc'),
+            orderBy('sortOrder', 'asc'),
+            orderBy('createdAt', 'desc'),
+            limit(24)
+        );
+        snap = await getDocs(q);
+    } catch (err) {
+        console.warn('Could not load projects (Firestore not set up yet?):', err.message);
         return;
     }
-    if (!data || data.length === 0) return;
+    if (snap.empty) return;
 
     const cards = [];
-    data.forEach(p => {
+    snap.forEach(doc => {
+        const p = doc.data();
         const category = ['web', 'ai', 'design'].includes(p.category) ? p.category : 'web';
-        const bg = p.image_path
-            ? `background-image:url('${escapeHtml(p.image_path)}');background-size:cover;background-position:center;`
+        const bg = p.imageUrl
+            ? `background-image:url('${escapeHtml(p.imageUrl)}');background-size:cover;background-position:center;`
             : `background: linear-gradient(135deg,rgba(0,212,255,.15),rgba(123,47,255,.15))`;
 
         let actionLink = '';
-        if (isSafeHttpUrl(p.live_url)) {
-            actionLink = `<a href="${escapeHtml(p.live_url)}" target="_blank" rel="noopener noreferrer" class="view-link">View Live Website <i class="fas fa-external-link-alt"></i></a>`;
-        } else if (isSafeHttpUrl(p.case_study_url)) {
-            actionLink = `<a href="${escapeHtml(p.case_study_url)}" target="_blank" rel="noopener noreferrer" class="view-link">View Case Study <i class="fas fa-external-link-alt"></i></a>`;
+        if (isSafeHttpUrl(p.liveUrl)) {
+            actionLink = `<a href="${escapeHtml(p.liveUrl)}" target="_blank" rel="noopener noreferrer" class="view-link">View Live Website <i class="fas fa-external-link-alt"></i></a>`;
+        } else if (isSafeHttpUrl(p.caseStudyUrl)) {
+            actionLink = `<a href="${escapeHtml(p.caseStudyUrl)}" target="_blank" rel="noopener noreferrer" class="view-link">View Case Study <i class="fas fa-external-link-alt"></i></a>`;
         }
 
         const services = Array.isArray(p.services) ? p.services : [];
@@ -139,12 +156,12 @@ async function renderRealProjects(supabase) {
         card.innerHTML = `
             <div class="project-img" style="${bg}">
                 <span class="real-badge">Real Project</span>
-                ${p.image_path ? '' : '<i class="fas fa-briefcase project-ico"></i>'}
+                ${p.imageUrl ? '' : '<i class="fas fa-briefcase project-ico"></i>'}
                 <div class="project-hover">${actionLink}</div>
             </div>
             <div class="project-body">
                 <div class="project-chips">${services.map(s => `<span>${escapeHtml(s)}</span>`).join('')}</div>
-                <h3>${escapeHtml(p.business_name)}</h3>
+                <h3>${escapeHtml(p.businessName)}</h3>
                 <p>${escapeHtml(p.description)}</p>
             </div>
         `;
@@ -168,21 +185,36 @@ function initReviewToggle() {
 }
 
 /* ── "Leave a Review" form submission ──
-   Attached unconditionally on page load (not inside the Supabase
+   Attached unconditionally on page load (not inside the Firebase
    init path) so the form NEVER falls back to a native browser
-   submit — even if Supabase is unconfigured, offline, or fails to
-   load. Supabase itself is only loaded lazily, on first submit. */
+   submit — even if Firebase is unconfigured, offline, or fails to
+   load. Firebase itself is only loaded lazily, on first submit.
+
+   Includes a basic honeypot field (#rvWebsite) — real visitors never
+   see or fill it (CSS-hidden, aria-hidden, tabindex="-1"); a filled
+   value almost always means an automated bot. This is BASIC spam
+   protection only, not a complete anti-abuse system — see
+   firebase/README.md for what's still missing. */
 function initReviewForm() {
     const form = document.getElementById('reviewForm');
     if (!form) return;
 
     const msgEl = document.getElementById('reviewFormMsg');
     const starInputs = form.querySelectorAll('.star-input input[type="radio"]');
+    const honeypot = form.querySelector('#rvWebsite');
 
     form.addEventListener('submit', async (e) => {
-        e.preventDefault(); // always — regardless of Supabase state
+        e.preventDefault(); // always — regardless of Firebase state
 
-        if (!isSupabaseConfigured()) {
+        // Silent bot trap: pretend success, submit nothing.
+        if (honeypot && honeypot.value.trim() !== '') {
+            form.reset();
+            msgEl.textContent = '✅ Thank you! Your review will appear once it\'s been approved.';
+            msgEl.className = 'form-msg success';
+            return;
+        }
+
+        if (!isFirebaseConfigured()) {
             msgEl.textContent = 'Online review submission is not available yet — please reach out on WhatsApp or the contact form instead.';
             msgEl.className = 'form-msg error';
             return;
@@ -211,19 +243,18 @@ function initReviewForm() {
         btn.textContent = 'Sending…';
 
         try {
-            const supabase = await loadSupabase();
-            // status is never sent by this form — the database itself
-            // rejects anything but 'pending' for anonymous inserts.
-            const { error } = await supabase.from('reviews').insert({
-                name,
-                company: company || null,
-                project_name: projectName || null,
-                message,
-                rating,
-                status: 'pending'
-            });
-            if (error) throw error;
+            const { db, firestore } = await loadFirebase();
+            const { collection, addDoc, serverTimestamp } = firestore;
 
+            // status/featured are never taken from user input — the
+            // database rules also reject anything but status:'pending'
+            // on a public create, this is not the only line of defense.
+            await addDoc(collection(db, 'reviews'), {
+                name, company, projectName, message, rating,
+                status: 'pending',
+                featured: false,
+                createdAt: serverTimestamp()
+            });
             form.reset();
             msgEl.textContent = '✅ Thank you! Your review will appear once it\'s been approved.';
             msgEl.className = 'form-msg success';
@@ -239,23 +270,23 @@ function initReviewForm() {
 }
 
 /* Always attach the form handler + toggle, immediately, regardless
-   of Supabase configuration state — this is what prevents any
+   of Firebase configuration state — this is what prevents any
    "broken form" scenario. */
 initReviewToggle();
 initReviewForm();
 
 /* Reading data (testimonials / portfolio) still only happens once
-   Supabase is actually configured — this is also what avoids ever
-   loading the Supabase SDK at all when it's unconfigured. */
+   Firebase is actually configured — this is also what avoids ever
+   loading the Firebase SDK at all when it's unconfigured. */
 (async function init() {
-    if (!isSupabaseConfigured()) return; // safe no-op until Supabase is set up
+    if (!isFirebaseConfigured()) return; // safe no-op until Firebase is set up
     try {
-        const supabase = await loadSupabase();
+        const { db, firestore } = await loadFirebase();
         await Promise.all([
-            renderApprovedReviews(supabase),
-            renderRealProjects(supabase)
+            renderApprovedReviews(db, firestore),
+            renderRealProjects(db, firestore)
         ]);
     } catch (err) {
-        console.warn('Supabase features unavailable:', err.message);
+        console.warn('Firebase features unavailable:', err.message);
     }
 })();

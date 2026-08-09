@@ -738,10 +738,10 @@
             </div><!-- /.testimonials-grid -->
 
             <!-- Leave a Review — compact, collapsed by default. Writes to
-                 Supabase with status "pending"; only appears publicly once
+                 Firestore with status "pending"; only appears publicly once
                  approved in admin.html. The form handler is always attached
                  (see reviews-portfolio.js) so this never falls back to a
-                 native page-reload submit, even before Supabase is set up. -->
+                 native page-reload submit, even before Firebase is set up. -->
             <div class="review-toggle-row reveal">
                 <button type="button" id="reviewToggleBtn" class="btn-secondary" aria-expanded="false" aria-controls="reviewFormWrap">
                     Leave a Review
@@ -751,6 +751,16 @@
                 <h3>Worked With Us? Leave a Review</h3>
                 <p class="review-form-sub">Real reviews only — every submission is checked before it goes live.</p>
                 <form id="reviewForm" class="review-form contact-form" novalidate>
+
+                    <!-- Honeypot — invisible to real visitors, real users never fill it.
+                         Left out of the tab order and hidden from screen readers so it
+                         never confuses keyboard/AT users. A bot that fills every field
+                         will fill this one too; a filled value silently drops the
+                         submission. See reviews-portfolio.js. -->
+                    <div class="field" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">
+                        <label for="rvWebsite">Website</label>
+                        <input type="text" id="rvWebsite" name="rvWebsite" tabindex="-1" autocomplete="off" />
+                    </div>
 
                     <div class="star-input" role="radiogroup" aria-label="Your rating">
                         <input type="radio" id="star5" name="rating" value="5" /><label for="star5" aria-label="5 stars">★</label>
@@ -1126,7 +1136,7 @@
     ============================================================ -->
 
     <script src="script.js"></script>
-    <!-- Reviews + real portfolio projects — safe no-op until Supabase is configured, see supabase-config.js -->
+    <!-- Reviews + real portfolio projects — safe no-op until Firebase is configured, see firebase-config.js -->
     <script type="module" src="reviews-portfolio.js"></script>
     <script>
     (function(){if(!window.chatbase||window.chatbase("getState")!=="initialized"){window.chatbase=(...args)=>{if(!window.chatbase.q){window.chatbase.q=[]}window.chatbase.q.push(args)};window.chatbase=new Proxy(window.chatbase,{get(target,prop){if(prop==="q"){return target.q}return(...args)=>target(prop,...args)}})}const onLoad=function(){const script=document.createElement("script");script.src="https://www.chatbase.co/embed.min.js";script.id="PaBSfA_sO1HjjLRo1lc3t";script.domain="www.chatbase.co";document.body.appendChild(script)};if(document.readyState==="complete"){onLoad()}else{window.addEventListener("load",onLoad)}})();

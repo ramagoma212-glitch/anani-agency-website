@@ -1,0 +1,117 @@
+/* ============================================================
+   FIRESTORE SECURITY RULES
+   ============================================================
+   HOW TO USE:
+   In the Firebase Console → Firestore Database → Rules tab,
+   paste this entire file's contents and click "Publish". (Or
+   deploy via the Firebase CLI using firebase.json — see
+   firebase/README.md.)
+
+   This is the real security boundary — not admin.html's UI, not
+   the Firebase Web config in firebase-config.js. Anyone can read
+   firebase-config.js from the browser; that is expected and safe.
+   These rules are what actually decide who can read/write what.
+
+   ADMIN MODEL: there is no hardcoded admin email anywhere. The
+   trusted allow-list is the existence of a document at
+   admins/{uid} — created manually in the Firebase Console after
+   the admin's Auth account exists (see firebase/README.md). There
+   is no client-side or rules-side way to create your own admin
+   document.
+   ============================================================ */
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn()
+          && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    /* ── Admins allow-list ──
+       Nobody can create, update or delete an admin document through
+       these rules — that only happens via the Firebase Console (or
+       other trusted, privileged administration), never through the
+       app. A signed-in user may GET only their own admin document
+       (so the UI can check "am I admin"); listing the collection is
+       never allowed, even for admins, since it's not needed. */
+    match /admins/{uid} {
+      allow get: if isSignedIn() && request.auth.uid == uid;
+      allow list: if false;
+      allow create, update, delete: if false;
+    }
+
+    /* ── Portfolio projects ──
+       Public may read ONLY published projects, and only via a query
+       that itself filters on published == true (rules are not
+       filters — see firebase/README.md for why this matters and how
+       reviews-portfolio.js queries accordingly). Only admin may
+       write. */
+    match /projects/{projectId} {
+      allow read: if (resource.data.published == true) || isAdmin();
+
+      allow create: if isAdmin() && isValidProject(request.resource.data);
+      allow update: if isAdmin() && isValidProject(request.resource.data);
+      allow delete: if isAdmin();
+
+      function isValidProject(p) {
+        return p.keys().hasAll(['slug', 'businessName', 'category', 'description', 'services', 'published', 'featured', 'sortOrder', 'createdAt', 'updatedAt'])
+            && p.keys().hasOnly(['slug', 'businessName', 'category', 'description', 'services', 'imagePath', 'imageUrl', 'liveUrl', 'caseStudyUrl', 'published', 'featured', 'sortOrder', 'createdAt', 'updatedAt'])
+            && p.slug is string && p.slug.matches('^[a-z0-9]+(-[a-z0-9]+)*$')
+            && p.businessName is string && p.businessName.size() > 0 && p.businessName.size() <= 150
+            && p.category is string && p.category.size() > 0 && p.category.size() <= 60
+            && p.description is string && p.description.size() > 0 && p.description.size() <= 2000
+            && p.services is list
+            && p.published is bool
+            && p.featured is bool
+            && p.sortOrder is int
+            && (!('liveUrl' in p) || p.liveUrl == null || (p.liveUrl is string && p.liveUrl.matches('^https?://.*')))
+            && (!('caseStudyUrl' in p) || p.caseStudyUrl == null || (p.caseStudyUrl is string && p.caseStudyUrl.matches('^https?://.*')));
+      }
+    }
+
+    /* ── Reviews ──
+       Anyone may submit a review, but only as status == "pending",
+       with sane, bounded fields. Only approved reviews are publicly
+       readable (again, via a query constrained to status ==
+       "approved" — see the note above). Only admin may
+       approve/reject/delete/feature. */
+    match /reviews/{reviewId} {
+      allow read: if (resource.data.status == 'approved') || isAdmin();
+
+      allow create: if isValidPendingReview(request.resource.data);
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+
+      function isValidPendingReview(r) {
+        return r.keys().hasAll(['name', 'rating', 'message', 'status', 'featured', 'createdAt'])
+            && r.keys().hasOnly(['name', 'company', 'projectName', 'rating', 'message', 'status', 'featured', 'createdAt'])
+            && r.status == 'pending'
+            && r.featured == false
+            && r.name is string && r.name.size() > 0 && r.name.size() <= 100
+            && (!('company' in r) || r.company == null || (r.company is string && r.company.size() <= 150))
+            && (!('projectName' in r) || r.projectName == null || (r.projectName is string && r.projectName.size() <= 150))
+            && r.message is string && r.message.size() > 0 && r.message.size() <= 2000
+            && r.rating is int && r.rating >= 1 && r.rating <= 5;
+      }
+    }
+
+    /* ── Leads (foundation only — not yet wired to the public form) ──
+       Private customer data. No anonymous access of any kind, not
+       even create, this milestone. Admin only. */
+    match /leads/{leadId} {
+      allow read, write: if isAdmin();
+    }
+
+    /* Deny everything else by default. */
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

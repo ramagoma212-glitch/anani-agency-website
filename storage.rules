@@ -1,0 +1,48 @@
+/* ============================================================
+   FIREBASE STORAGE SECURITY RULES
+   ============================================================
+   HOW TO USE:
+   In the Firebase Console → Storage → Rules tab, paste this
+   entire file's contents and click "Publish".
+
+   Only needed if Storage is actually activated (see the billing
+   note in firebase/README.md — Storage may require the Blaze
+   pay-as-you-go plan). If you'd rather skip Storage entirely, the
+   "Project Image" field in admin.html is optional either way —
+   you can paste an image URL you already host elsewhere instead.
+
+   ADMIN CHECK: this uses firestore.exists() to consult the SAME
+   admins/{uid} allow-list that firestore.rules uses, so there is
+   only one admin source of truth, not two. Firebase may require
+   the "Security Rules" Firestore service-agent permission to be
+   enabled for this cross-service check to work — see the README.
+   ============================================================ */
+
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isAdmin() {
+      return request.auth != null
+          && firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid));
+    }
+
+    function isAllowedImage() {
+      return request.resource.size <= 5 * 1024 * 1024
+          && request.resource.contentType in ['image/jpeg', 'image/png', 'image/webp'];
+    }
+
+    /* Portfolio project images — publicly readable (shown on the
+       homepage), admin-only write, restricted to this one path. */
+    match /projects/{projectId}/{fileName} {
+      allow read: if true;
+      allow write: if isAdmin() && isAllowedImage();
+    }
+
+    /* Deny everything else — no arbitrary root-bucket uploads. */
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

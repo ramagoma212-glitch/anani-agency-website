@@ -738,10 +738,10 @@
             </div><!-- /.testimonials-grid -->
 
             <!-- Leave a Review — compact, collapsed by default. Writes to
-                 Firestore with status "pending"; only appears publicly once
+                 Supabase with status "pending"; only appears publicly once
                  approved in admin.html. The form handler is always attached
                  (see reviews-portfolio.js) so this never falls back to a
-                 native page-reload submit, even before Firebase is set up. -->
+                 native page-reload submit, even before Supabase is set up. -->
             <div class="review-toggle-row reveal">
                 <button type="button" id="reviewToggleBtn" class="btn-secondary" aria-expanded="false" aria-controls="reviewFormWrap">
                     Leave a Review
@@ -1126,7 +1126,7 @@
     ============================================================ -->
 
     <script src="script.js"></script>
-    <!-- Reviews + real portfolio projects — safe no-op until Firebase is configured, see firebase-config.js -->
+    <!-- Reviews + real portfolio projects — safe no-op until Supabase is configured, see supabase-config.js -->
     <script type="module" src="reviews-portfolio.js"></script>
     <script>
     (function(){if(!window.chatbase||window.chatbase("getState")!=="initialized"){window.chatbase=(...args)=>{if(!window.chatbase.q){window.chatbase.q=[]}window.chatbase.q.push(args)};window.chatbase=new Proxy(window.chatbase,{get(target,prop){if(prop==="q"){return target.q}return(...args)=>target(prop,...args)}})}const onLoad=function(){const script=document.createElement("script");script.src="https://www.chatbase.co/embed.min.js";script.id="PaBSfA_sO1HjjLRo1lc3t";script.domain="www.chatbase.co";document.body.appendChild(script)};if(document.readyState==="complete"){onLoad()}else{window.addEventListener("load",onLoad)}})();

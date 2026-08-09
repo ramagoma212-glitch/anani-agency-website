@@ -34,17 +34,19 @@
             width: 100%; padding: 13px 16px; margin-bottom: 14px; border-radius: 10px;
             background: var(--bg-glass); border: 1px solid var(--border); color: var(--text-hi); font-size: .9rem;
         }
+        #loginPanel label { display: block; text-align: left; font-size: .78rem; color: var(--text-mid); margin-bottom: 6px; }
         #loginMsg { min-height: 20px; font-size: .85rem; margin-top: 10px; }
         #loginMsg.error { color: #ff5050; }
+        #loginMsg.info { color: var(--text-mid); }
 
         #appPanel { display: none; }
-        .admin-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .admin-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 10px; }
         .admin-toolbar .who { font-size: .82rem; color: var(--text-mid); }
         .btn-logout {
             background: none; border: 1px solid var(--border); color: var(--text-mid);
             padding: 8px 18px; border-radius: 100px; font-size: .82rem; cursor: pointer;
         }
-        .btn-logout:hover { color: var(--text-hi); border-color: var(--border-glow); }
+        .btn-logout:hover, .btn-logout:focus-visible { color: var(--text-hi); border-color: var(--border-glow); }
 
         .pending-list { display: flex; flex-direction: column; gap: 14px; }
         .pending-item {
@@ -64,24 +66,47 @@
 
         .admin-form .field { margin-bottom: 16px; }
         .admin-form label { display: block; font-size: .78rem; color: var(--text-mid); margin-bottom: 6px; }
+        .admin-form .field-hint { display: block; font-size: .72rem; color: var(--text-lo); margin-top: 4px; }
         .admin-form input[type="text"],
         .admin-form input[type="url"],
+        .admin-form input[type="number"],
         .admin-form select,
         .admin-form textarea {
             width: 100%; padding: 12px 14px; border-radius: 10px;
             background: rgba(255,255,255,.03); border: 1px solid var(--border); color: var(--text-hi); font-size: .88rem;
         }
+        .admin-form input[type="text"]:focus-visible,
+        .admin-form input[type="url"]:focus-visible,
+        .admin-form input[type="number"]:focus-visible,
+        .admin-form select:focus-visible,
+        .admin-form textarea:focus-visible {
+            outline: 2px solid var(--cyan); outline-offset: 2px;
+        }
         .admin-form input[type="file"] { font-size: .82rem; color: var(--text-mid); }
+        .checkbox-row { display: flex; align-items: center; gap: 8px; }
+        .checkbox-row label { margin-bottom: 0; }
+        .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        @media (max-width: 560px) { .form-row-2 { grid-template-columns: 1fr; } }
 
         .project-row {
             display: flex; align-items: center; gap: 14px; padding: 12px 16px;
-            border: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px;
+            border: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px; flex-wrap: wrap;
         }
         .project-row img { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; background: var(--bg-glass); flex-shrink: 0; }
-        .project-row .info { flex: 1; }
+        .project-row .info { flex: 1; min-width: 160px; }
         .project-row .info strong { display: block; font-size: .9rem; }
         .project-row .info span { font-size: .76rem; color: var(--text-mid); }
-        .btn-delete { background: none; border: 1px solid var(--border); color: #ff7070; padding: 7px 12px; border-radius: 8px; cursor: pointer; font-size: .78rem; }
+        .project-row .badges { display: flex; gap: 6px; flex-wrap: wrap; }
+        .project-row .badge { font-size: .68rem; padding: 3px 9px; border-radius: 100px; border: 1px solid var(--border); color: var(--text-mid); }
+        .project-row .badge.on-published { color: var(--green); border-color: rgba(0,255,136,.3); }
+        .project-row .badge.on-featured { color: var(--gold); border-color: rgba(255,214,10,.3); }
+        .project-row .row-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .project-row .row-actions button {
+            background: none; border: 1px solid var(--border); color: var(--text-mid);
+            padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: .76rem;
+        }
+        .project-row .row-actions button:hover, .project-row .row-actions button:focus-visible { color: var(--text-hi); border-color: var(--border-glow); }
+        .btn-delete { color: #ff7070 !important; }
 
         .config-warning {
             max-width: 600px; margin: 100px auto; text-align: center; padding: 40px 30px;
@@ -102,19 +127,22 @@
 
     <div id="configWarning" class="config-warning" style="display:none;">
         <i class="fas fa-triangle-exclamation"></i>
-        <h2>Firebase Not Connected Yet</h2>
+        <h2>Supabase Not Connected Yet</h2>
         <p style="color:var(--text-mid);font-size:.9rem;margin-top:10px;">
-            This admin panel needs a Firebase project connected first.
-            See the setup steps at the top of <code>firebase-config.js</code>.
+            This admin panel needs a Supabase project connected first.
+            See the setup steps at the top of <code>supabase-config.js</code>
+            and in <code>supabase/README.md</code>.
         </p>
     </div>
 
     <div id="loginPanel" class="admin-card" style="display:none;">
         <h2 style="text-align:center;">Admin Login</h2>
-        <input type="email" id="loginEmail" placeholder="Email" autocomplete="username" />
-        <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password" />
+        <label for="loginEmail">Email</label>
+        <input type="email" id="loginEmail" autocomplete="username" />
+        <label for="loginPassword">Password</label>
+        <input type="password" id="loginPassword" autocomplete="current-password" />
         <button class="btn-primary" id="loginBtn" style="width:100%;justify-content:center;">Log In</button>
-        <div id="loginMsg"></div>
+        <div id="loginMsg" role="status" aria-live="polite"></div>
     </div>
 
     <div id="appPanel" class="admin-wrap">
@@ -131,31 +159,47 @@
         </div>
 
         <div class="admin-card">
-            <h2>Add a Real Project</h2>
+            <h2 id="projectFormTitle">Add a Project</h2>
             <form id="projectForm" class="admin-form">
+                <input type="hidden" id="pId" value="" />
+
                 <div class="field">
                     <label for="pBusiness">Business / Client Name</label>
-                    <input type="text" id="pBusiness" required />
+                    <input type="text" id="pBusiness" required maxlength="150" />
                 </div>
                 <div class="field">
-                    <label for="pCategory">Category</label>
-                    <select id="pCategory">
-                        <option value="web">Web</option>
-                        <option value="ai">AI</option>
-                        <option value="design">Design</option>
-                    </select>
+                    <label for="pSlug">URL Slug</label>
+                    <input type="text" id="pSlug" required pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="e.g. green-leaf-cafe" />
+                    <span class="field-hint">Lowercase letters, numbers and hyphens only. Must be unique.</span>
+                </div>
+                <div class="form-row-2">
+                    <div class="field">
+                        <label for="pCategory">Category</label>
+                        <select id="pCategory">
+                            <option value="Business Website">Business Website</option>
+                            <option value="Ecommerce Website">Ecommerce Website</option>
+                            <option value="Landing Page">Landing Page</option>
+                            <option value="Website Redesign">Website Redesign</option>
+                            <option value="Portfolio Website">Portfolio Website</option>
+                            <option value="Custom Web Solution">Custom Web Solution</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="pSortOrder">Sort Order</label>
+                        <input type="number" id="pSortOrder" value="0" step="1" />
+                    </div>
                 </div>
                 <div class="field">
                     <label for="pDescription">Short Description</label>
-                    <textarea id="pDescription" rows="3" required></textarea>
+                    <textarea id="pDescription" rows="3" required maxlength="2000"></textarea>
                 </div>
                 <div class="field">
                     <label for="pServices">Services Delivered (comma-separated)</label>
                     <input type="text" id="pServices" placeholder="e.g. Website, SEO, WhatsApp Integration" />
                 </div>
                 <div class="field">
-                    <label for="pImage">Project Image (optional)</label>
-                    <input type="file" id="pImage" accept="image/*" />
+                    <label for="pImage">Project Image (optional, JPG/PNG/WebP, max 5MB)</label>
+                    <input type="file" id="pImage" accept="image/jpeg,image/png,image/webp" />
                 </div>
                 <div class="field">
                     <label for="pLiveUrl">Live Website URL (optional)</label>
@@ -165,56 +209,88 @@
                     <label for="pCaseStudyUrl">Case Study URL (optional)</label>
                     <input type="url" id="pCaseStudyUrl" placeholder="https://…" />
                 </div>
-                <button type="submit" class="btn-primary" style="width:100%;justify-content:center;">Add Project</button>
-                <div id="projectFormMsg" class="form-msg" aria-live="polite"></div>
+                <div class="form-row-2">
+                    <div class="field checkbox-row">
+                        <input type="checkbox" id="pPublished" />
+                        <label for="pPublished">Published (visible on the live site)</label>
+                    </div>
+                    <div class="field checkbox-row">
+                        <input type="checkbox" id="pFeatured" />
+                        <label for="pFeatured">Featured</label>
+                    </div>
+                </div>
+                <button type="submit" id="projectSubmitBtn" class="btn-primary" style="width:100%;justify-content:center;">Add Project</button>
+                <button type="button" id="projectCancelEditBtn" class="btn-logout" style="width:100%;justify-content:center;margin-top:10px;display:none;">Cancel Edit</button>
+                <div id="projectFormMsg" class="form-msg" role="status" aria-live="polite"></div>
             </form>
         </div>
 
         <div class="admin-card">
-            <h2>Existing Real Projects</h2>
+            <h2>Existing Projects</h2>
             <div id="projectList"></div>
         </div>
     </div>
 
     <script type="module">
-        import { firebaseConfig, ADMIN_EMAIL, isFirebaseConfigured } from './firebase-config.js';
+        import { isSupabaseConfigured } from './supabase-config.js';
 
-        if (!isFirebaseConfigured()) {
+        if (!isSupabaseConfigured()) {
             document.getElementById('configWarning').style.display = 'block';
         } else {
             runAdmin();
         }
 
-        async function runAdmin() {
-            const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js');
-            const authMod = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js');
-            const fsMod = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js');
-            const storageMod = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js');
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str == null ? '' : String(str);
+            return div.innerHTML;
+        }
 
-            const app = initializeApp(firebaseConfig);
-            const auth = authMod.getAuth(app);
-            const db = fsMod.getFirestore(app);
-            const storage = storageMod.getStorage(app);
+        async function runAdmin() {
+            const { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } = await import('./supabase-config.js');
+            const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+            const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
             const loginPanel = document.getElementById('loginPanel');
             const appPanel = document.getElementById('appPanel');
             const loginMsg = document.getElementById('loginMsg');
 
-            authMod.onAuthStateChanged(auth, (user) => {
-                if (user && user.email === ADMIN_EMAIL) {
-                    loginPanel.style.display = 'none';
-                    appPanel.style.display = 'block';
-                    document.getElementById('whoEmail').textContent = user.email;
-                    loadPendingReviews();
-                    loadProjects();
-                } else if (user) {
-                    // Signed in but not the admin account — sign out immediately.
-                    authMod.signOut(auth);
+            /* A signed-in Supabase user is NOT enough — they must also
+               have profiles.role = 'admin'. This is a UX convenience
+               only; the real security boundary is Postgres RLS. */
+            async function checkAdminAndEnter(user) {
+                const { data, error } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', user.id)
+                    .maybeSingle();
+
+                if (error || !data || data.role !== 'admin') {
+                    await supabase.auth.signOut();
                     loginMsg.textContent = 'This account is not authorised as admin.';
                     loginMsg.className = 'error';
                     loginPanel.style.display = 'block';
                     appPanel.style.display = 'none';
-                } else {
+                    return;
+                }
+
+                loginPanel.style.display = 'none';
+                appPanel.style.display = 'block';
+                document.getElementById('whoEmail').textContent = user.email;
+                loadPendingReviews();
+                loadProjects();
+            }
+
+            /* Restore an existing session on page load. */
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.user) {
+                await checkAdminAndEnter(session.user);
+            } else {
+                loginPanel.style.display = 'block';
+            }
+
+            supabase.auth.onAuthStateChange((event, newSession) => {
+                if (event === 'SIGNED_OUT') {
                     loginPanel.style.display = 'block';
                     appPanel.style.display = 'none';
                 }
@@ -224,92 +300,165 @@
                 const email = document.getElementById('loginEmail').value.trim();
                 const password = document.getElementById('loginPassword').value;
                 loginMsg.textContent = '';
-                try {
-                    await authMod.signInWithEmailAndPassword(auth, email, password);
-                } catch (err) {
+                loginMsg.className = 'info';
+                if (!email || !password) {
+                    loginMsg.textContent = 'Please enter your email and password.';
+                    loginMsg.className = 'error';
+                    return;
+                }
+                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                if (error) {
                     loginMsg.textContent = 'Login failed — check email and password.';
                     loginMsg.className = 'error';
+                    return;
                 }
+                await checkAdminAndEnter(data.user);
             });
 
-            document.getElementById('logoutBtn').addEventListener('click', () => authMod.signOut(auth));
+            document.getElementById('logoutBtn').addEventListener('click', () => supabase.auth.signOut());
 
             /* ── Pending reviews ── */
             async function loadPendingReviews() {
                 const list = document.getElementById('pendingList');
                 list.innerHTML = '<p class="empty-note">Loading…</p>';
-                const q = fsMod.query(
-                    fsMod.collection(db, 'reviews'),
-                    fsMod.where('status', '==', 'pending'),
-                    fsMod.orderBy('createdAt', 'desc')
-                );
-                const snap = await fsMod.getDocs(q);
-                if (snap.empty) {
+
+                const { data, error } = await supabase
+                    .from('reviews')
+                    .select('id, name, company, project_name, rating, message')
+                    .eq('status', 'pending')
+                    .order('created_at', { ascending: false });
+
+                if (error) {
+                    list.innerHTML = `<p class="empty-note">Could not load reviews: ${escapeHtml(error.message)}</p>`;
+                    return;
+                }
+                if (!data || data.length === 0) {
                     list.innerHTML = '<p class="empty-note">No pending reviews right now.</p>';
                     return;
                 }
+
                 list.innerHTML = '';
-                snap.forEach(docSnap => {
-                    const r = docSnap.data();
+                data.forEach(r => {
                     const stars = '★'.repeat(r.rating || 0) + '☆'.repeat(5 - (r.rating || 0));
                     const item = document.createElement('div');
                     item.className = 'pending-item';
                     item.innerHTML = `
                         <div class="stars">${stars}</div>
                         <div><strong>${escapeHtml(r.name)}</strong> ${r.company ? '· ' + escapeHtml(r.company) : ''}</div>
-                        <div class="meta">${escapeHtml(r.projectName || '')}</div>
+                        <div class="meta">${escapeHtml(r.project_name || '')}</div>
                         <p>${escapeHtml(r.message)}</p>
                         <div class="pending-actions">
-                            <button class="btn-approve" data-id="${docSnap.id}" data-action="approved">Approve</button>
-                            <button class="btn-reject" data-id="${docSnap.id}" data-action="rejected">Reject</button>
+                            <button class="btn-approve" data-id="${r.id}" data-action="approved">Approve</button>
+                            <button class="btn-reject" data-id="${r.id}" data-action="rejected">Reject</button>
                         </div>
                     `;
                     list.appendChild(item);
                 });
+
                 list.querySelectorAll('button[data-action]').forEach(btn => {
                     btn.addEventListener('click', async () => {
                         btn.disabled = true;
-                        await fsMod.updateDoc(fsMod.doc(db, 'reviews', btn.dataset.id), { status: btn.dataset.action });
+                        const status = btn.dataset.action;
+                        const patch = { status };
+                        if (status === 'approved') patch.approved_at = new Date().toISOString();
+                        const { error } = await supabase.from('reviews').update(patch).eq('id', btn.dataset.id);
+                        if (error) {
+                            alert('Could not update review: ' + error.message);
+                            btn.disabled = false;
+                            return;
+                        }
                         loadPendingReviews();
                     });
                 });
             }
 
-            /* ── Add project ── */
-            document.getElementById('projectForm').addEventListener('submit', async (e) => {
+            /* ── Add / edit project ── */
+            const form = document.getElementById('projectForm');
+            const formTitle = document.getElementById('projectFormTitle');
+            const submitBtn = document.getElementById('projectSubmitBtn');
+            const cancelEditBtn = document.getElementById('projectCancelEditBtn');
+
+            function resetForm() {
+                form.reset();
+                document.getElementById('pId').value = '';
+                formTitle.textContent = 'Add a Project';
+                submitBtn.textContent = 'Add Project';
+                cancelEditBtn.style.display = 'none';
+            }
+
+            cancelEditBtn.addEventListener('click', resetForm);
+
+            function isSafeHttpUrl(url) {
+                if (!url) return true; // empty is allowed (optional field)
+                try {
+                    const parsed = new URL(url);
+                    return parsed.protocol === 'https:' || parsed.protocol === 'http:';
+                } catch {
+                    return false;
+                }
+            }
+
+            form.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const msg = document.getElementById('projectFormMsg');
-                const submitBtn = e.target.querySelector('button[type="submit"]');
                 submitBtn.disabled = true;
 
+                const liveUrl = document.getElementById('pLiveUrl').value.trim();
+                const caseStudyUrl = document.getElementById('pCaseStudyUrl').value.trim();
+                if (!isSafeHttpUrl(liveUrl) || !isSafeHttpUrl(caseStudyUrl)) {
+                    msg.textContent = '⚠️ URLs must start with http:// or https://';
+                    msg.className = 'form-msg error';
+                    submitBtn.disabled = false;
+                    return;
+                }
+
                 try {
-                    let imageUrl = '';
+                    let imagePath = null;
                     const file = document.getElementById('pImage').files[0];
                     if (file) {
-                        const path = `projects/${Date.now()}_${file.name}`;
-                        const storageRef = storageMod.ref(storage, path);
-                        await storageMod.uploadBytes(storageRef, file);
-                        imageUrl = await storageMod.getDownloadURL(storageRef);
+                        if (file.size > 5 * 1024 * 1024) throw new Error('Image must be under 5MB.');
+                        if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) throw new Error('Image must be JPG, PNG or WebP.');
+                        const path = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+                        const { error: uploadError } = await supabase.storage.from('portfolio-images').upload(path, file);
+                        if (uploadError) throw uploadError;
+                        const { data: pub } = supabase.storage.from('portfolio-images').getPublicUrl(path);
+                        imagePath = pub.publicUrl;
                     }
 
-                    await fsMod.addDoc(fsMod.collection(db, 'projects'), {
-                        businessName: document.getElementById('pBusiness').value.trim(),
+                    const services = document.getElementById('pServices').value
+                        .split(',').map(s => s.trim()).filter(Boolean);
+
+                    const record = {
+                        business_name: document.getElementById('pBusiness').value.trim(),
+                        slug: document.getElementById('pSlug').value.trim().toLowerCase(),
                         category: document.getElementById('pCategory').value,
                         description: document.getElementById('pDescription').value.trim(),
-                        servicesDelivered: document.getElementById('pServices').value.trim(),
-                        imageUrl,
-                        liveUrl: document.getElementById('pLiveUrl').value.trim(),
-                        caseStudyUrl: document.getElementById('pCaseStudyUrl').value.trim(),
-                        createdAt: fsMod.serverTimestamp()
-                    });
+                        services,
+                        live_url: liveUrl || null,
+                        case_study_url: caseStudyUrl || null,
+                        published: document.getElementById('pPublished').checked,
+                        featured: document.getElementById('pFeatured').checked,
+                        sort_order: Number(document.getElementById('pSortOrder').value) || 0
+                    };
+                    if (imagePath) record.image_path = imagePath;
 
-                    e.target.reset();
-                    msg.textContent = '✅ Project added — it now appears on the live site.';
+                    const editingId = document.getElementById('pId').value;
+                    const { error } = editingId
+                        ? await supabase.from('projects').update(record).eq('id', editingId)
+                        : await supabase.from('projects').insert(record);
+
+                    if (error) {
+                        if (error.code === '23505') throw new Error('That slug is already used by another project — choose a different one.');
+                        throw error;
+                    }
+
+                    resetForm();
+                    msg.textContent = '✅ Saved.';
                     msg.className = 'form-msg success';
                     loadProjects();
                 } catch (err) {
                     console.error(err);
-                    msg.textContent = '❌ Could not add project: ' + err.message;
+                    msg.textContent = '❌ Could not save project: ' + err.message;
                     msg.className = 'form-msg error';
                 } finally {
                     submitBtn.disabled = false;
@@ -318,40 +467,78 @@
 
             async function loadProjects() {
                 const list = document.getElementById('projectList');
-                const q = fsMod.query(fsMod.collection(db, 'projects'), fsMod.orderBy('createdAt', 'desc'));
-                const snap = await fsMod.getDocs(q);
-                if (snap.empty) {
-                    list.innerHTML = '<p class="empty-note">No real projects added yet.</p>';
+                const { data, error } = await supabase
+                    .from('projects')
+                    .select('*')
+                    .order('sort_order', { ascending: true })
+                    .order('created_at', { ascending: false });
+
+                if (error) {
+                    list.innerHTML = `<p class="empty-note">Could not load projects: ${escapeHtml(error.message)}</p>`;
                     return;
                 }
+                if (!data || data.length === 0) {
+                    list.innerHTML = '<p class="empty-note">No projects added yet.</p>';
+                    return;
+                }
+
                 list.innerHTML = '';
-                snap.forEach(docSnap => {
-                    const p = docSnap.data();
+                data.forEach(p => {
                     const row = document.createElement('div');
                     row.className = 'project-row';
                     row.innerHTML = `
-                        <img src="${p.imageUrl || 'images/mylog.webp'}" alt="" />
+                        <img src="${p.image_path ? escapeHtml(p.image_path) : 'images/mylog.webp'}" alt="" />
                         <div class="info">
-                            <strong>${escapeHtml(p.businessName)}</strong>
-                            <span>${escapeHtml(p.category)} · ${escapeHtml(p.servicesDelivered || '')}</span>
+                            <strong>${escapeHtml(p.business_name)}</strong>
+                            <span>${escapeHtml(p.category)} · ${escapeHtml((p.services || []).join(', '))}</span>
+                            <div class="badges">
+                                <span class="badge ${p.published ? 'on-published' : ''}">${p.published ? 'Published' : 'Draft'}</span>
+                                ${p.featured ? '<span class="badge on-featured">Featured</span>' : ''}
+                            </div>
                         </div>
-                        <button class="btn-delete" data-id="${docSnap.id}">Delete</button>
+                        <div class="row-actions">
+                            <button data-act="toggle-published" data-id="${p.id}" data-value="${!p.published}">${p.published ? 'Unpublish' : 'Publish'}</button>
+                            <button data-act="toggle-featured" data-id="${p.id}" data-value="${!p.featured}">${p.featured ? 'Unfeature' : 'Feature'}</button>
+                            <button data-act="edit" data-id="${p.id}">Edit</button>
+                            <button data-act="delete" data-id="${p.id}" class="btn-delete">Delete</button>
+                        </div>
                     `;
                     list.appendChild(row);
-                });
-                list.querySelectorAll('.btn-delete').forEach(btn => {
-                    btn.addEventListener('click', async () => {
+
+                    row.querySelector('[data-act="toggle-published"]').addEventListener('click', async (ev) => {
+                        const btn = ev.currentTarget;
+                        await supabase.from('projects').update({ published: btn.dataset.value === 'true' }).eq('id', p.id);
+                        loadProjects();
+                    });
+                    row.querySelector('[data-act="toggle-featured"]').addEventListener('click', async (ev) => {
+                        const btn = ev.currentTarget;
+                        await supabase.from('projects').update({ featured: btn.dataset.value === 'true' }).eq('id', p.id);
+                        loadProjects();
+                    });
+                    row.querySelector('[data-act="edit"]').addEventListener('click', () => {
+                        document.getElementById('pId').value = p.id;
+                        document.getElementById('pBusiness').value = p.business_name || '';
+                        document.getElementById('pSlug').value = p.slug || '';
+                        document.getElementById('pCategory').value = p.category || 'Business Website';
+                        document.getElementById('pSortOrder').value = p.sort_order ?? 0;
+                        document.getElementById('pDescription').value = p.description || '';
+                        document.getElementById('pServices').value = (p.services || []).join(', ');
+                        document.getElementById('pLiveUrl').value = p.live_url || '';
+                        document.getElementById('pCaseStudyUrl').value = p.case_study_url || '';
+                        document.getElementById('pPublished').checked = !!p.published;
+                        document.getElementById('pFeatured').checked = !!p.featured;
+                        formTitle.textContent = 'Edit Project';
+                        submitBtn.textContent = 'Save Changes';
+                        cancelEditBtn.style.display = 'block';
+                        document.getElementById('projectForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    });
+                    row.querySelector('[data-act="delete"]').addEventListener('click', async () => {
                         if (!confirm('Delete this project from the live site?')) return;
-                        await fsMod.deleteDoc(fsMod.doc(db, 'projects', btn.dataset.id));
+                        const { error: delErr } = await supabase.from('projects').delete().eq('id', p.id);
+                        if (delErr) { alert('Could not delete: ' + delErr.message); return; }
                         loadProjects();
                     });
                 });
-            }
-
-            function escapeHtml(str) {
-                const div = document.createElement('div');
-                div.textContent = str == null ? '' : String(str);
-                return div.innerHTML;
             }
         }
     </script>

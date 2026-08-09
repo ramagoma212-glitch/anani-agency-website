@@ -554,7 +554,13 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
             EMAILJS_SERVICE_ID  !== 'YOUR_SERVICE_ID' &&
             EMAILJS_TEMPLATE_ID !== 'YOUR_TEMPLATE_ID'
         ) {
-            /* Real send via EmailJS */
+            /* Real send via EmailJS.
+               The EmailJS dashboard template must contain all 7 of these variables
+               for the received email to show every field:
+               {{from_name}} {{from_email}} {{subject}} {{message}}
+               {{service_interest}} {{budget}} {{to_email}}
+               service_interest/budget/to_email are not part of the default EmailJS
+               starter template — confirm they're in the template body before launch. */
             const templateParams = {
                 from_name       : nameField.value.trim(),
                 from_email      : emailField.value.trim(),

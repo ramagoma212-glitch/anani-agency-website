@@ -6,22 +6,23 @@
     <title>RM Digitals | Web Development, SEO &amp; AI Solutions for South African Businesses</title>
     <meta name="description" content="RM Digitals, led by Ramagoma Muthuhadini (Anani), builds professional websites, SEO and AI automation for South African businesses. Based in Thohoyandou, Limpopo — serving clients nationwide." />
 
-    <!-- SEO NOTE: rmdigitals.co.za is the intended production domain
-         (apex, no www). CNAME file added and canonical/OG/structured-data
-         URLs updated; DNS activation at the registrar is pending. -->
+    <!-- SEO NOTE: custom domain (rmdigitals.co.za) purchase/DNS is
+         deferred by owner decision. Live production URL is currently
+         the GitHub Pages project URL below; canonical/OG/structured-data
+         URLs point there until the domain milestone is resumed. -->
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
     <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png" />
     <link rel="apple-touch-icon" href="apple-touch-icon.png" />
 
-    <link rel="canonical" href="https://rmdigitals.co.za/" />
+    <link rel="canonical" href="https://ramagoma212-glitch.github.io/anani-agency-website/" />
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="RM Digitals" />
     <meta property="og:title" content="RM Digitals | Web Development, SEO &amp; AI Solutions for South African Businesses" />
     <meta property="og:description" content="RM Digitals, led by Ramagoma Muthuhadini (Anani), builds professional websites, SEO and AI automation for South African businesses. Based in Thohoyandou, Limpopo — serving clients nationwide." />
-    <meta property="og:url" content="https://rmdigitals.co.za/" />
-    <meta property="og:image" content="https://rmdigitals.co.za/images/og-image.jpg" />
+    <meta property="og:url" content="https://ramagoma212-glitch.github.io/anani-agency-website/" />
+    <meta property="og:image" content="https://ramagoma212-glitch.github.io/anani-agency-website/images/og-image.jpg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:locale" content="en_ZA" />
@@ -30,7 +31,7 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="RM Digitals | Web Development, SEO &amp; AI Solutions for South African Businesses" />
     <meta name="twitter:description" content="RM Digitals, led by Ramagoma Muthuhadini (Anani), builds professional websites, SEO and AI automation for South African businesses. Based in Thohoyandou, Limpopo — serving clients nationwide." />
-    <meta name="twitter:image" content="https://rmdigitals.co.za/images/og-image.jpg" />
+    <meta name="twitter:image" content="https://ramagoma212-glitch.github.io/anani-agency-website/images/og-image.jpg" />
 
 
     <!-- Google Fonts: Syne (display) + Outfit (body) -->
@@ -55,17 +56,17 @@
     "@graph": [
         {
             "@type": "WebSite",
-            "@id": "https://rmdigitals.co.za/#website",
+            "@id": "https://ramagoma212-glitch.github.io/anani-agency-website/#website",
             "name": "RM Digitals",
-            "url": "https://rmdigitals.co.za/",
+            "url": "https://ramagoma212-glitch.github.io/anani-agency-website/",
             "inLanguage": "en-ZA"
         },
         {
             "@type": "ProfessionalService",
-            "@id": "https://rmdigitals.co.za/#organization",
+            "@id": "https://ramagoma212-glitch.github.io/anani-agency-website/#organization",
             "name": "RM Digitals",
-            "image": "https://rmdigitals.co.za/images/og-image.jpg",
-            "url": "https://rmdigitals.co.za/",
+            "image": "https://ramagoma212-glitch.github.io/anani-agency-website/images/og-image.jpg",
+            "url": "https://ramagoma212-glitch.github.io/anani-agency-website/",
             "telephone": "+27648412146",
             "email": "ramagoma212@gmail.com",
             "address": {
@@ -90,7 +91,7 @@
                 "https://www.instagram.com/anani.rm",
                 "https://www.facebook.com/AnaniRM"
             ],
-            "priceRange": "R4,500 - R25,000+"
+            "priceRange": "R2,500 - R18,000+"
         }
     ]
 }
@@ -102,9 +103,11 @@
     <!-- Logo image (mylog.jpg) spins while the page loads -->
     <div id="loader">
         <div class="loader-inner">
-            <div class="loader-ring"></div>
-            <div class="loader-logo">
+            <div class="loader-avatar-wrap">
+                <div class="loader-ring"></div>
                 <img src="images/mylog.webp" alt="Anani RM" class="loader-logo-img" width="52" height="52" />
+            </div>
+            <div class="loader-logo">
                 <span>Loading<span class="loader-dots">...</span></span>
             </div>
         </div>
@@ -690,8 +693,17 @@
                 <h2 class="section-title">What Clients <span class="gradient-text">Say</span></h2>
             </div>
 
-            <div class="testimonials-grid">
+            <div class="testimonials-grid" id="testimonialsGrid">
 
+                <!-- Milestone 15: the two demo/placeholder testimonials that used to render
+                     here unconditionally (Rolivhuwa N / SeasonedzGroup and Avhatakali R /
+                     Rams Construction) have been removed from public display at the owner's
+                     request. Kept on file (commented out, not deleted) rather than erased,
+                     consistent with how the CV-service testimonial below was already handled.
+                     The section now shows only real, admin-approved Firebase reviews — see
+                     #testimonialsEmpty below and renderApprovedReviews() in
+                     reviews-portfolio.js, which hides that empty state once a real review
+                     is approved.
                 <div class="testi-card reveal-card">
                     <div class="quote-mark">"</div>
                     <div class="stars">★★★★</div>
@@ -717,6 +729,7 @@
                         </div>
                     </div>
                 </div>
+                -->
 
                 <!-- Genuine testimonial, kept on file but not shown publicly — it's about a
                      CV service, which is no longer part of the public website-development
@@ -736,6 +749,18 @@
                 -->
 
             </div><!-- /.testimonials-grid -->
+
+            <!-- Shown by default; hidden by renderApprovedReviews() in
+                 reviews-portfolio.js the moment at least one real, approved
+                 Firebase review exists. Never replaced with invented reviews. -->
+            <div class="testimonials-empty" id="testimonialsEmpty">
+                <i class="fas fa-comment-dots"></i>
+                <p>Client stories are coming soon.</p>
+                <a href="#reviewFormWrap" id="shareExperienceBtn" class="btn-secondary">
+                    <span>Share Your Experience</span>
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
 
             <!-- Leave a Review — compact, collapsed by default. Writes to
                  Firestore with status "pending"; only appears publicly once
@@ -816,6 +841,21 @@
                 <span class="section-tag">Get In Touch</span>
                 <h2 class="section-title">Tell Us About Your <span class="gradient-text">Website Project</span></h2>
                 <p class="section-subtitle">Tell us what you need, your goals and your estimated budget. We'll recommend a realistic website solution based on your requirements.</p>
+            </div>
+
+            <div class="budget-note reveal">
+                <i class="fas fa-comments"></i>
+                <p>
+                    Working with a specific budget? Talk to us — our prices are starting points,
+                    and where possible we can adjust the project scope to fit your budget. Call or
+                    WhatsApp us, tell us what you need and what you can spend, and we'll recommend
+                    a realistic solution. Advanced, custom or integration-heavy websites may require
+                    a higher quote.
+                </p>
+                <div class="budget-note-actions">
+                    <a href="tel:+27648412146" class="btn-secondary"><i class="fas fa-phone"></i><span>Call Us</span></a>
+                    <a href="https://wa.me/27648412146?text=Hi%20Anani%2C%20I%27d%20like%20to%20discuss%20my%20budget%20for%20a%20website%20project." target="_blank" rel="noopener noreferrer" class="whatsapp-btn"><i class="fab fa-whatsapp"></i><span>WhatsApp Us</span></a>
+                </div>
             </div>
 
             <div class="contact-grid">
@@ -1060,12 +1100,17 @@
     </footer>
 
     <!-- Back-to-top floating button -->
-     <a href="https://wa.me/27648412146?text=Hi%20Anani,%20I%27m%20interested%20in%20your%20digital%20services!"
+     <!-- AI WhatsApp Assistant — this is the ONLY place on the site that
+          uses the dedicated AI WhatsApp number (27754738149). Every other
+          WhatsApp link on the site (footer, contact section, pricing CTAs,
+          budget callouts) is the normal business number, 27648412146, and
+          must stay that way — do not replace this number site-wide. -->
+     <a href="https://wa.me/27754738149?text=Hi%20RM%20Digitals%2C%20I%20need%20help%20with%20a%20website."
    target="_blank"
    rel="noopener noreferrer"
    class="wa-autoreply-badge"
-   title="Chat with Anani — WhatsApp AI Auto-Reply is Live!"
-   aria-label="Try WhatsApp AI Auto-Reply">
+   title="Chat with our AI WhatsApp Assistant — Instant Reply"
+   aria-label="Chat with our AI WhatsApp Assistant">
 
     <!-- Live pulsing green dot — signals the bot is active -->
     <span class="wa-badge-dot"></span>
@@ -1082,8 +1127,8 @@
 
     <!-- Text: visible on desktop, hidden on mobile FAB -->
     <div class="wa-badge-text">
-        <span class="wa-badge-title">TRY WA AI AUTO-REPLY!!</span>
-        <span class="wa-badge-sub">AI Active · 24/7 Instant Reply</span>
+        <span class="wa-badge-title">CHAT WITH OUR AI ASSISTANT</span>
+        <span class="wa-badge-sub">WhatsApp AI · 24/7 Instant Reply</span>
     </div>
 
     <!-- WhatsApp icon -->

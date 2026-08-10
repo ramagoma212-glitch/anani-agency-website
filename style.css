@@ -109,29 +109,46 @@ button { font-family: var(--f-body); }
     gap: 20px;
 }
 
-/* Spinning ring */
+/* Single stable wrapper for the avatar image + its ring, so they are
+   always sized/centred off the same box and can never drift apart. */
+.loader-avatar-wrap {
+    position: relative;
+    width: 64px; height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Spinning ring — an absolutely-positioned circle that exactly fills
+   .loader-avatar-wrap (inset:0), which is ~6px larger in diameter than
+   the 52px image centred inside it, giving a clean uniform gap. */
 .loader-ring {
-    width: 70px; height: 70px;
+    position: absolute;
+    inset: 0;
     border: 3px solid var(--border);
     border-top-color: var(--cyan);
     border-radius: 50%;
     animation: spin .8s linear infinite;
-    position: absolute;
 }
 
-/* Logo image inside loader */
-.loader-logo {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 14px;
-}
 .loader-logo-img {
     width: 52px; height: 52px;
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid rgba(0,212,255,.4);
     animation: loaderPulse 1.5s ease-in-out infinite;
+    position: relative;
+    z-index: 1;
+}
+
+/* Loading text — separate from the avatar wrapper so the ring only
+   ever surrounds the picture, never the text underneath it. */
+.loader-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
 }
 .loader-logo span {
     font-family: var(--f-display);
@@ -413,11 +430,15 @@ button { font-family: var(--f-body); }
 .hamburger {
     display: none;
     flex-direction: column;
+    align-items: center;
+    justify-content: center;
     gap: 5px;
     background: none;
     border: none;
     cursor: pointer;
     padding: 4px;
+    min-width: 44px;
+    min-height: 44px;
 }
 .hamburger span {
     display: block;
@@ -451,7 +472,9 @@ button { font-family: var(--f-body); }
 
 .mobile-close {
     position: absolute;
-    top: 22px; right: 24px;
+    top: 9px; right: 11px;
+    width: 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
     background: none; border: none;
     color: var(--text-mid);
     font-size: 1.1rem;
@@ -1423,6 +1446,25 @@ section { padding: var(--section-gap); position: relative; }
     max-width: 760px;
     margin: 0 auto;
 }
+/* Center gracefully when there is only 1 real approved review so far */
+.testimonials-grid:has(.testi-card:only-child) {
+    grid-template-columns: 1fr;
+    max-width: 420px;
+    margin: 0 auto;
+}
+
+/* Shown by default until at least one real review is approved */
+.testimonials-empty {
+    max-width: 480px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 44px 30px;
+    background: var(--bg-glass);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+}
+.testimonials-empty i { font-size: 1.8rem; color: var(--cyan); margin-bottom: 14px; display: block; }
+.testimonials-empty p { font-size: .95rem; color: var(--text-mid); margin-bottom: 20px; }
 
 .testi-card {
     background: var(--bg-glass);
@@ -1483,6 +1525,38 @@ section { padding: var(--section-gap); position: relative; }
    ============================================================ */
 .contact {
     background: linear-gradient(180deg, var(--bg-layer) 0%, var(--bg-base) 100%);
+}
+
+.budget-note {
+    max-width: 720px;
+    margin: 0 auto 48px;
+    text-align: center;
+    padding: 28px 30px;
+    background: var(--bg-glass);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+}
+.budget-note i {
+    font-size: 1.3rem;
+    color: var(--cyan);
+    margin-bottom: 12px;
+    display: block;
+}
+.budget-note p {
+    font-size: .88rem;
+    color: var(--text-mid);
+    line-height: 1.75;
+    margin-bottom: 20px;
+}
+.budget-note-actions {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+.budget-note-actions .btn-secondary,
+.budget-note-actions .whatsapp-btn {
+    min-height: 44px;
 }
 
 .contact-grid {
@@ -1631,6 +1705,24 @@ section { padding: var(--section-gap); position: relative; }
     resize: none;
     transition: var(--t);
 }
+
+/* ── Native <select> dropdown readability (site-wide) ──────────────
+   The closed select is styled above (dark, transparent, light text),
+   but the native OPEN option popup is rendered by the browser/OS, not
+   by our CSS — without an explicit color-scheme it can fall back to a
+   light system popup with near-white text, which is unreadable.
+   color-scheme tells Chrome/Edge to draw the native popup using dark
+   system colours; the explicit option background/color below is a
+   fallback for engines that ignore color-scheme on <option>. Applies
+   to every <select> on the site (contact form, review form, admin
+   lead/project selects) since they all share this base styling. */
+select { color-scheme: dark; }
+select option {
+    background: var(--bg-layer);
+    color: var(--text-hi);
+}
+select option:disabled { color: var(--text-lo); }
+select option:checked { background: var(--bg-layer); color: var(--cyan); }
 .field input::placeholder,
 .field textarea::placeholder { color: var(--text-lo); }
 
@@ -1859,10 +1951,31 @@ section { padding: var(--section-gap); position: relative; }
     .about-accent-photo    { left: -8px; }
 
     .portfolio-grid    { grid-template-columns: 1fr; }
-    .testimonials-grid { grid-template-columns: 1fr; }
+    .testimonials-grid,
+    .testimonials-grid:has(.testi-card:nth-child(2):last-child),
+    .testimonials-grid:has(.testi-card:only-child) {
+        grid-template-columns: 1fr;
+        max-width: 100%;
+    }
+    .testi-card         { padding: 24px 20px; word-wrap: break-word; overflow-wrap: break-word; }
+    .client-row         { flex-wrap: wrap; }
+    .quote-mark         { font-size: 5rem; }
+
+    .testimonials-empty { padding: 32px 22px; }
+
+    .review-form-wrap        { padding: 0 20px; max-width: 100%; }
+    .review-form-wrap.open   { padding: 30px 20px; }
+    .star-input               { font-size: 1.6rem; gap: 4px; }
 
     .contact-grid      { grid-template-columns: 1fr; gap: 40px; }
     .contact-form-wrap { padding: 28px 20px; }
+
+    /* 16px minimum prevents iOS Safari auto-zooming the page on input focus */
+    .field input,
+    .field select,
+    .field textarea { font-size: 16px; }
+
+    .budget-note       { padding: 22px 20px; margin-bottom: 32px; }
 
     .footer-grid       { grid-template-columns: 1fr; gap: 28px; }
     .footer-bottom     { flex-direction: column; text-align: center; }
@@ -1887,6 +2000,11 @@ section { padding: var(--section-gap); position: relative; }
         text-align: left;
         height: auto;
     }
+
+    .budget-note-actions,
+    .budget-callout-actions { flex-direction: column; align-items: stretch; }
+    .budget-note-actions a,
+    .budget-callout-actions a { justify-content: center; }
 
     .about-ring { display: none; }
 
@@ -2141,6 +2259,17 @@ section { padding: var(--section-gap); position: relative; }
         width: 40px;
         height: 40px;
     }
+
+    .testi-card       { padding: 20px 16px; }
+    .testi-card p     { font-size: .82rem; }
+    .quote-mark       { font-size: 4rem; }
+    .client-avatar    { width: 36px; height: 36px; font-size: .7rem; }
+
+    .review-form-wrap.open { padding: 24px 14px; }
+    .star-input             { font-size: 1.4rem; gap: 3px; }
+
+    .testimonials-empty { padding: 26px 16px; }
+    .testimonials-empty p { font-size: .88rem; }
 
     }
 

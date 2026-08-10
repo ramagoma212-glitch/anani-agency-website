@@ -7,22 +7,23 @@
     <meta name="description" content="Transparent pricing for website development, SEO and website maintenance from RM Digitals (Anani Ramagoma). South African Rand pricing, no hidden fees, request a free quote." />
 
     
-    <!-- SEO NOTE: rmdigitals.co.za is the intended production domain
-         (apex, no www). CNAME file added and canonical/OG/structured-data
-         URLs updated; DNS activation at the registrar is pending. -->
+    <!-- SEO NOTE: custom domain (rmdigitals.co.za) purchase/DNS is
+         deferred by owner decision. Live production URL is currently
+         the GitHub Pages project URL below; canonical/OG/structured-data
+         URLs point there until the domain milestone is resumed. -->
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
     <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png" />
     <link rel="apple-touch-icon" href="apple-touch-icon.png" />
 
-    <link rel="canonical" href="https://rmdigitals.co.za/pricing.html" />
+    <link rel="canonical" href="https://ramagoma212-glitch.github.io/anani-agency-website/pricing.html" />
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="RM Digitals" />
     <meta property="og:title" content="Pricing | RM Digitals — Website, SEO &amp; Maintenance Packages for South African Businesses" />
     <meta property="og:description" content="Transparent pricing for website development, SEO and website maintenance from RM Digitals (Anani Ramagoma). South African Rand pricing, no hidden fees, request a free quote." />
-    <meta property="og:url" content="https://rmdigitals.co.za/pricing.html" />
-    <meta property="og:image" content="https://rmdigitals.co.za/images/og-image.jpg" />
+    <meta property="og:url" content="https://ramagoma212-glitch.github.io/anani-agency-website/pricing.html" />
+    <meta property="og:image" content="https://ramagoma212-glitch.github.io/anani-agency-website/images/og-image.jpg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:locale" content="en_ZA" />
@@ -31,7 +32,7 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Pricing | RM Digitals — Website, SEO &amp; Maintenance Packages for South African Businesses" />
     <meta name="twitter:description" content="Transparent pricing for website development, SEO and website maintenance from RM Digitals (Anani Ramagoma). South African Rand pricing, no hidden fees, request a free quote." />
-    <meta name="twitter:image" content="https://rmdigitals.co.za/images/og-image.jpg" />
+    <meta name="twitter:image" content="https://ramagoma212-glitch.github.io/anani-agency-website/images/og-image.jpg" />
 
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -133,6 +134,20 @@
             font-family: var(--f-display); font-size: 1.4rem; font-weight: 800; color: var(--cyan); margin-bottom: 6px;
         }
         .mini-pricing-card .mini-period { font-size: .74rem; color: var(--text-lo); margin-bottom: 14px; display: block; }
+
+        /* ── SEO Health Check limited discount ── */
+        .mini-pricing-card.discount-card { border-color: rgba(0,230,150,.35); position: relative; }
+        .discount-badge {
+            position: absolute; top: -12px; right: 18px;
+            padding: 4px 12px; background: linear-gradient(135deg, #00e696, #00b8d9);
+            color: #04231c; font-family: var(--f-display); font-size: .68rem; font-weight: 800;
+            letter-spacing: .5px; border-radius: 100px;
+        }
+        .price-compare { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+        .price-compare .price-was {
+            font-size: .95rem; color: var(--text-lo); text-decoration: line-through; font-weight: 600;
+        }
+        .price-compare .mini-price { margin-bottom: 0; }
         .mini-pricing-card ul { list-style: none; display: flex; flex-direction: column; gap: 6px; }
         .mini-pricing-card ul li {
             display: flex; align-items: flex-start; gap: 7px; font-size: .78rem; color: var(--text-mid); line-height: 1.5;
@@ -156,6 +171,11 @@
         .budget-callout p { font-size: .88rem; color: var(--text-mid); line-height: 1.75; margin-bottom: 18px; }
         .budget-callout-divider { height: 1px; background: var(--border); margin: 26px 0 20px; }
         .budget-callout h3 { font-family: var(--f-display); font-size: 1rem; font-weight: 700; margin-bottom: 10px; }
+        .budget-callout-actions {
+            display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-bottom: 4px;
+        }
+        .budget-callout-actions .btn-secondary,
+        .budget-callout-actions .btn-whatsapp { min-height: 44px; }
 
         /* ── Maintenance plans (reuses services-grid / service-card look) ── */
         .maintenance-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
@@ -252,13 +272,13 @@
             "@type": "ListItem",
             "position": 1,
             "name": "Home",
-            "item": "https://rmdigitals.co.za/"
+            "item": "https://ramagoma212-glitch.github.io/anani-agency-website/"
         },
         {
             "@type": "ListItem",
             "position": 2,
             "name": "Pricing",
-            "item": "https://rmdigitals.co.za/pricing.html"
+            "item": "https://ramagoma212-glitch.github.io/anani-agency-website/pricing.html"
         }
     ]
 }
@@ -269,9 +289,11 @@
     <!-- ===== LOADING SCREEN — identical to index.html ===== -->
     <div id="loader">
         <div class="loader-inner">
-            <div class="loader-ring"></div>
-            <div class="loader-logo">
+            <div class="loader-avatar-wrap">
+                <div class="loader-ring"></div>
                 <img src="images/mylog.webp" alt="Anani RM" class="loader-logo-img" width="52" height="52" />
+            </div>
+            <div class="loader-logo">
                 <span>Loading<span class="loader-dots">...</span></span>
             </div>
         </div>
@@ -403,7 +425,7 @@
                 <div class="pricing-tier-card reveal-card">
                     <h3>Landing Page</h3>
                     <p class="pricing-tier-for">Campaigns, individual services, startups and simple lead generation.</p>
-                    <div class="pricing-tier-amount">From R4,500</div>
+                    <div class="pricing-tier-amount">From R2,500</div>
                     <ul class="pricing-tier-features">
                         <li><i class="fas fa-check"></i> Single high-converting page</li>
                         <li><i class="fas fa-check"></i> Responsive mobile design</li>
@@ -417,7 +439,7 @@
                 <div class="pricing-tier-card reveal-card">
                     <h3>Starter Business Website</h3>
                     <p class="pricing-tier-for">Small businesses needing a solid, professional online presence.</p>
-                    <div class="pricing-tier-amount">From R6,500</div>
+                    <div class="pricing-tier-amount">From R4,500</div>
                     <ul class="pricing-tier-features">
                         <li><i class="fas fa-check"></i> Up to 5 pages (Home, About, Services, Contact)</li>
                         <li><i class="fas fa-check"></i> Responsive mobile design</li>
@@ -440,7 +462,7 @@
                     <span class="pricing-tier-badge">Most Popular</span>
                     <h3>Professional Business Website</h3>
                     <p class="pricing-tier-for">Growing businesses that want a stronger technical SEO foundation.</p>
-                    <div class="pricing-tier-amount">From R9,500</div>
+                    <div class="pricing-tier-amount">From R6,500</div>
                     <ul class="pricing-tier-features">
                         <li><i class="fas fa-check"></i> Up to 7 pages, custom responsive design</li>
                         <li><i class="fas fa-check"></i> Professional homepage, About &amp; service pages</li>
@@ -463,7 +485,7 @@
                 <div class="pricing-tier-card reveal-card">
                     <h3>Business Growth Website</h3>
                     <p class="pricing-tier-for">Businesses ready to invest in SEO-led growth and conversion.</p>
-                    <div class="pricing-tier-amount">From R14,500</div>
+                    <div class="pricing-tier-amount">From R8,500</div>
                     <ul class="pricing-tier-features">
                         <li><i class="fas fa-check"></i> Everything from Professional</li>
                         <li><i class="fas fa-check"></i> More service pages</li>
@@ -486,7 +508,7 @@
                 <div class="pricing-tier-card reveal-card" id="ecommerce">
                     <h3>Ecommerce Website</h3>
                     <p class="pricing-tier-for">Businesses that want to sell products online.</p>
-                    <div class="pricing-tier-amount">From R18,000</div>
+                    <div class="pricing-tier-amount">From R12,500</div>
                     <ul class="pricing-tier-features">
                         <li><i class="fas fa-check"></i> Product catalogue &amp; secure checkout</li>
                         <li><i class="fas fa-check"></i> Payment gateway integration</li>
@@ -499,7 +521,7 @@
                 <div class="pricing-tier-card reveal-card">
                     <h3>Custom Web System / Portal</h3>
                     <p class="pricing-tier-for">Businesses needing more than a website — a real system.</p>
-                    <div class="pricing-tier-amount">From R25,000</div>
+                    <div class="pricing-tier-amount">From R18,000</div>
                     <ul class="pricing-tier-features">
                         <li><i class="fas fa-check"></i> User authentication</li>
                         <li><i class="fas fa-check"></i> Dashboards &amp; database functionality</li>
@@ -513,22 +535,33 @@
             </div>
 
             <div class="budget-callout reveal">
+                <h3>Working With A Specific Budget?</h3>
                 <p>
-                    Starting prices shown are guides. Final pricing depends on the scope,
-                    functionality and requirements of your project. If you have a specific
-                    budget, contact us and we can discuss the most suitable solution within
-                    a realistic scope.
+                    Talk to us. Our prices are starting points, and where possible we can adjust
+                    the project scope to fit your budget. Call or WhatsApp us, tell us what you
+                    need and what you can spend, and we'll recommend a realistic solution.
+                    Advanced, custom or integration-heavy websites may require a higher quote.
                 </p>
-                <a href="index.html#contact" class="btn-secondary">
-                    <span>Have a specific budget? Let's discuss your project.</span>
-                    <i class="fas fa-arrow-right"></i>
-                </a>
+                <div class="budget-callout-actions">
+                    <a href="tel:+27648412146" class="btn-secondary">
+                        <i class="fas fa-phone"></i>
+                        <span>Call Us</span>
+                    </a>
+                    <a href="https://wa.me/27648412146?text=Hi%20Anani%2C%20I%27d%20like%20to%20discuss%20my%20budget%20for%20a%20website%20project." target="_blank" rel="noopener noreferrer" class="btn-whatsapp">
+                        <i class="fab fa-whatsapp"></i>
+                        <span>WhatsApp Us</span>
+                    </a>
+                </div>
                 <div class="budget-callout-divider"></div>
                 <h3>Need Something Different?</h3>
                 <p>
                     Every business is different. Tell us what you need and your estimated
                     budget, and we'll recommend a realistic solution and quotation.
                 </p>
+                <a href="index.html#contact" class="btn-secondary">
+                    <span>Send an Enquiry</span>
+                    <i class="fas fa-arrow-right"></i>
+                </a>
             </div>
         </div>
     </section>
@@ -548,9 +581,13 @@
 
             <div class="mini-pricing-grid reveal-card">
 
-                <div class="mini-pricing-card">
+                <div class="mini-pricing-card discount-card">
+                    <span class="discount-badge">50% OFF</span>
                     <h3>SEO Health Check</h3>
-                    <span class="mini-price">R1,500</span>
+                    <div class="price-compare">
+                        <span class="price-was">R1,500</span>
+                        <span class="mini-price">R750</span>
+                    </div>
                     <span class="mini-period">once-off</span>
                     <ul><li><i class="fas fa-check"></i> Full technical &amp; on-page audit with a prioritised action list</li></ul>
                 </div>

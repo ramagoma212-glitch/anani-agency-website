@@ -65,9 +65,15 @@ async function loadFirebase() {
    Queries WHERE status == 'approved' explicitly: Firestore Security
    Rules are not filters, so a public client reading "all reviews"
    would simply be denied by firestore.rules rather than silently
-   filtered — the query itself must match what the rules allow. */
+   filtered — the query itself must match what the rules allow.
+
+   The section shows a static "coming soon" empty state (#testimonialsEmpty)
+   by default. This function hides it the moment at least one real,
+   approved review is found — the public site never invents placeholder
+   reviews to fill the gap. */
 async function renderApprovedReviews(db, firestore) {
     const grid = document.querySelector('.testimonials-grid');
+    const emptyState = document.getElementById('testimonialsEmpty');
     if (!grid) return;
 
     const { collection, query, where, orderBy, limit, getDocs } = firestore;
@@ -84,6 +90,8 @@ async function renderApprovedReviews(db, firestore) {
         console.warn('Could not load reviews (Firestore not set up yet?):', err.message);
         return;
     }
+
+    if (!snap.empty && emptyState) emptyState.style.display = 'none';
 
     snap.forEach(doc => {
         const r = doc.data();
@@ -177,11 +185,30 @@ function initReviewToggle() {
     const toggleBtn = document.getElementById('reviewToggleBtn');
     const wrap = document.getElementById('reviewFormWrap');
     if (!toggleBtn || !wrap) return;
+
+    function openForm() {
+        if (wrap.classList.contains('open')) return;
+        wrap.classList.add('open');
+        toggleBtn.setAttribute('aria-expanded', 'true');
+        toggleBtn.textContent = 'Hide Review Form';
+    }
+
     toggleBtn.addEventListener('click', () => {
         const open = wrap.classList.toggle('open');
         toggleBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
         toggleBtn.textContent = open ? 'Hide Review Form' : 'Leave a Review';
     });
+
+    // "Share Your Experience" empty-state CTA: open the form (it starts
+    // collapsed) rather than just anchor-scrolling to a hidden box.
+    const shareBtn = document.getElementById('shareExperienceBtn');
+    if (shareBtn) {
+        shareBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            openForm();
+            wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+    }
 }
 
 /* ── "Leave a Review" form submission ──

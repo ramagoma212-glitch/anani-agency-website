@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /admin.html
 
-Sitemap: https://rmdigitals.co.za/sitemap.xml
+Sitemap: https://ramagoma212-glitch.github.io/anani-agency-website/sitemap.xml

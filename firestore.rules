@@ -129,6 +129,18 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
 
+    /* ── Invoices & Receipts (Milestone 20) ──
+       Private financial records. Admin only for now — Milestone 22
+       extends these two rules (only) with a narrow client-owner read
+       path once the clientAccounts/portalInvites infrastructure
+       exists. No client write access is ever introduced. */
+    match /invoices/{invoiceId} {
+      allow read, write: if isAdmin();
+    }
+    match /receipts/{receiptId} {
+      allow read, write: if isAdmin();
+    }
+
     /* Deny everything else by default. */
     match /{document=**} {
       allow read, write: if false;

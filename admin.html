@@ -398,6 +398,7 @@
         .payment-row .amt { font-family: var(--f-display); font-weight: 700; min-width: 90px; }
         .payment-row .meta { flex: 1; font-size: .78rem; color: var(--text-mid); min-width: 140px; word-break: break-word; }
         .payment-row button { background: none; border: 1px solid var(--border); color: #ff7070; padding: 4px 10px; border-radius: 8px; cursor: pointer; font-size: .72rem; }
+        .payment-row button.receipt-btn { color: var(--cyan); }
 
         .financial-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
         @media (max-width: 700px) { .financial-grid { grid-template-columns: repeat(2, 1fr); } }
@@ -460,6 +461,53 @@
         #completionPrintArea .cs-row { display: flex; justify-content: space-between; font-size: .85rem; padding: 4px 0; border-bottom: 1px solid #eee; }
         #completionPrintArea ul { list-style: none; }
         #completionPrintArea ul li { font-size: .84rem; padding: 3px 0; }
+
+        /* ============================================================
+           INVOICES & RECEIPTS (Milestone 20)
+           Reuses the .quote-* item-row / print-area patterns from
+           Milestone 17 wherever the shape matches — see .quote-item-row,
+           .quote-print-area, .quote-totals for the shared rules.
+           ============================================================ */
+        .status-badge.status-draft      { color: var(--text-mid); border-color: var(--border); }
+        .status-badge.status-sent       { color: var(--cyan); border-color: rgba(0,212,255,.3); }
+        .status-badge.status-part_paid  { color: var(--gold); border-color: rgba(255,214,10,.3); }
+        .status-badge.status-paid       { color: var(--green); border-color: rgba(0,255,136,.3); }
+        .status-badge.status-overdue    { color: #ff7070; border-color: rgba(255,80,80,.3); }
+        .status-badge.status-cancelled  { color: var(--text-lo); border-color: var(--border); text-decoration: line-through; }
+        .status-badge.status-overpaid   { color: var(--gold); border-color: rgba(255,214,10,.3); }
+        .status-badge.status-voided     { color: var(--text-lo); border-color: var(--border); text-decoration: line-through; }
+
+        .invoice-row, .receipt-row {
+            display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+            border: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px; flex-wrap: wrap; cursor: pointer;
+        }
+        .invoice-row:hover, .receipt-row:hover { border-color: var(--border-glow); }
+        .invoice-row .info, .receipt-row .info { flex: 1; min-width: 180px; }
+        .invoice-row .info strong, .receipt-row .info strong { display: block; font-size: .92rem; word-break: break-word; }
+        .invoice-row .info span, .receipt-row .info span { font-size: .76rem; color: var(--text-mid); word-break: break-word; }
+        .invoice-row .meta-col, .receipt-row .meta-col { font-size: .76rem; color: var(--text-mid); min-width: 80px; }
+        .invoice-row .amount-col, .receipt-row .amount-col { font-family: var(--f-display); font-weight: 700; font-size: .9rem; min-width: 80px; }
+
+        .invoice-modal-box, .receipt-modal-box { max-width: 720px; }
+        .invoice-preview-box { max-width: 720px; }
+        #invoicePrintArea, #receiptPrintArea { background: #fff; color: #111; border-radius: 12px; padding: 32px; }
+        #invoicePrintArea *, #receiptPrintArea * { color: #111; }
+        .allocation-row {
+            display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); flex-wrap: wrap; font-size: .82rem;
+        }
+        .allocation-row:last-child { border-bottom: none; }
+        .allocation-row button { background: none; border: 1px solid var(--border); color: var(--text-mid); padding: 5px 10px; border-radius: 8px; cursor: pointer; font-size: .74rem; }
+
+        @media print {
+            #invoicePreviewOverlay, #invoicePreviewOverlay *,
+            #receiptPreviewOverlay, #receiptPreviewOverlay * { visibility: visible; }
+            #invoicePreviewOverlay, #receiptPreviewOverlay { position: absolute; inset: 0; background: #fff !important; padding: 0; }
+            #invoicePreviewOverlay.active, #receiptPreviewOverlay.active { display: block !important; }
+            #invoicePreviewOverlay .invoice-preview-box,
+            #receiptPreviewOverlay .receipt-modal-box { max-width: 100%; max-height: none; box-shadow: none; border: none; padding: 0; }
+            #invoicePreviewOverlay #invoicePrintArea,
+            #receiptPreviewOverlay #receiptPrintArea { border-radius: 0; padding: 0; }
+        }
     </style>
 </head>
 <body>
@@ -841,6 +889,58 @@
                 <p class="empty-note">Loading…</p>
             </div>
         </div>
+
+        <div class="admin-card">
+            <h2>Invoices</h2>
+            <p style="font-size:.78rem;color:var(--text-lo);margin:-12px 0 16px;">Billed amounts. Payments are still recorded on the Client Project — an invoice shows what's been allocated to it.</p>
+
+            <div class="quote-summary" id="invoiceSummary">
+                <div class="quote-stat"><span class="num" id="isDraft">0</span><span class="lbl">Draft</span></div>
+                <div class="quote-stat"><span class="num" id="isSent">0</span><span class="lbl">Sent</span></div>
+                <div class="quote-stat"><span class="num" id="isPartPaid">0</span><span class="lbl">Part Paid</span></div>
+                <div class="quote-stat"><span class="num" id="isPaid">0</span><span class="lbl">Paid</span></div>
+                <div class="quote-stat warn"><span class="num" id="isOverdue">0</span><span class="lbl">Overdue</span></div>
+                <div class="quote-stat"><span class="num" id="isTotalValue">R0</span><span class="lbl">Open Invoice Value</span></div>
+                <div class="quote-stat"><span class="num" id="isOverdueValue">R0</span><span class="lbl">Overdue Value</span></div>
+            </div>
+
+            <div class="quote-toolbar">
+                <input type="search" id="invoiceSearch" placeholder="Search invoice #, client, project…" />
+                <select id="invoiceFilterStatus">
+                    <option value="all">All statuses</option>
+                    <option value="draft">Draft</option>
+                    <option value="sent">Sent</option>
+                    <option value="part_paid">Part Paid</option>
+                    <option value="paid">Paid</option>
+                    <option value="overdue">Overdue</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+                <select id="invoiceSort">
+                    <option value="newest">Newest first</option>
+                    <option value="due">By due date</option>
+                    <option value="amount">By amount</option>
+                    <option value="status">By status</option>
+                </select>
+                <button type="button" class="btn-primary" id="invoiceNewBtn">New Invoice</button>
+            </div>
+
+            <div id="invoiceList">
+                <p class="empty-note">Loading…</p>
+            </div>
+        </div>
+
+        <div class="admin-card">
+            <h2>Receipts</h2>
+            <p style="font-size:.78rem;color:var(--text-lo);margin:-12px 0 16px;">Manually recorded proof-of-payment records — not bank-verified.</p>
+
+            <div class="quote-toolbar">
+                <input type="search" id="receiptSearch" placeholder="Search receipt #, client…" />
+            </div>
+
+            <div id="receiptList">
+                <p class="empty-note">Loading…</p>
+            </div>
+        </div>
     </div>
 
     <div class="lead-modal-overlay" id="leadModalOverlay">
@@ -1030,6 +1130,7 @@
                 <button type="button" class="btn-logout" id="qpDuplicateBtn"><i class="fas fa-copy"></i> Duplicate</button>
                 <button type="button" class="btn-logout" id="qpDeleteBtn" style="color:#ff7070;border-color:rgba(255,80,80,.3);"><i class="fas fa-trash"></i> Delete</button>
                 <button type="button" class="btn-primary" id="qpStartProjectBtn" style="display:none;background:var(--grad);"><i class="fas fa-diagram-project"></i> Start Client Project</button>
+                <button type="button" class="btn-logout" id="qpCreateInvoiceBtn" style="display:none;"><i class="fas fa-file-invoice"></i> Create Invoice</button>
             </div>
 
             <div class="lead-status-row quote-print-noprint">
@@ -1166,6 +1267,15 @@
                 <button type="button" class="btn-logout" id="cmNewProjectBtn" style="width:100%;justify-content:center;margin-top:10px;">
                     <i class="fas fa-diagram-project"></i> Create Project for This Client
                 </button>
+            </div>
+
+            <div class="cp-section">
+                <h4>Invoices</h4>
+                <div id="cmInvoicesList"><p class="empty-note">—</p></div>
+            </div>
+            <div class="cp-section">
+                <h4>Receipts</h4>
+                <div id="cmReceiptsList"><p class="empty-note">—</p></div>
             </div>
 
             <div style="margin-top:14px; text-align:right;">
@@ -1378,6 +1488,16 @@
             </div>
 
             <div class="cp-section">
+                <h4>Invoices</h4>
+                <div id="cpInvoicesList"><p class="empty-note">Save this project first to create invoices.</p></div>
+                <div class="quote-item-controls" style="margin-top:10px;">
+                    <button type="button" class="btn-logout" id="cpNewDepositInvoiceBtn">+ Deposit Invoice</button>
+                    <button type="button" class="btn-logout" id="cpNewProgressInvoiceBtn">+ Progress Invoice</button>
+                    <button type="button" class="btn-logout" id="cpNewFinalInvoiceBtn">+ Final Invoice</button>
+                </div>
+            </div>
+
+            <div class="cp-section">
                 <h4>Content Checklist</h4>
                 <p class="field-hint" id="cpChecklistProgress" style="margin:-4px 0 10px;">0 of 0 received</p>
                 <div id="cpChecklistList"><p class="empty-note">No checklist items yet.</p></div>
@@ -1551,6 +1671,315 @@
                     Ramagoma Muthuhadini (Anani) · Thohoyandou, Limpopo, South Africa<br>
                     WhatsApp/Phone: +27 64 841 2146 · Email: ramagoma212@gmail.com
                 </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         INVOICE BUILDER (Milestone 20)
+    ============================================================ -->
+    <div class="lead-modal-overlay" id="invoiceBuilderOverlay">
+        <div class="lead-modal-box invoice-modal-box">
+            <button class="lead-modal-close" id="invoiceBuilderClose" aria-label="Close">&times;</button>
+            <h3 id="ibHeading">New Invoice</h3>
+            <input type="hidden" id="ibInvoiceId" value="" />
+            <input type="hidden" id="ibClientId" value="" />
+            <input type="hidden" id="ibClientProjectId" value="" />
+            <input type="hidden" id="ibQuoteId" value="" />
+            <input type="hidden" id="ibQuoteNumber" value="" />
+            <input type="hidden" id="ibInvoiceNumber" value="" />
+
+            <div id="ibPreviousInvoicesNote" class="budget-context-note" style="display:none;"></div>
+
+            <div class="form-row-2">
+                <div class="field">
+                    <label for="ibClientName">Client Name</label>
+                    <input type="text" id="ibClientName" maxlength="150" required />
+                </div>
+                <div class="field">
+                    <label for="ibBusinessName">Business / Company (optional)</label>
+                    <input type="text" id="ibBusinessName" maxlength="150" />
+                </div>
+            </div>
+            <div class="form-row-2">
+                <div class="field">
+                    <label for="ibClientEmail">Client Email (optional)</label>
+                    <input type="text" id="ibClientEmail" maxlength="200" />
+                </div>
+                <div class="field">
+                    <label for="ibClientPhone">Client Phone (optional)</label>
+                    <input type="text" id="ibClientPhone" maxlength="40" />
+                </div>
+            </div>
+
+            <div class="form-row-2">
+                <div class="field">
+                    <label for="ibInvoiceType">Invoice Type</label>
+                    <select id="ibInvoiceType">
+                        <option value="standard">Standard</option>
+                        <option value="deposit">Deposit</option>
+                        <option value="progress">Progress</option>
+                        <option value="final">Final</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="ibDueDate">Due Date</label>
+                    <input type="date" id="ibDueDate" required />
+                </div>
+            </div>
+            <div class="field">
+                <label for="ibTitle">Invoice Title</label>
+                <input type="text" id="ibTitle" maxlength="150" placeholder="e.g. Deposit — Professional Business Website" required />
+            </div>
+            <div class="field">
+                <label for="ibDescription">Description (optional)</label>
+                <textarea id="ibDescription" rows="2" maxlength="1000"></textarea>
+            </div>
+
+            <div class="quote-item-controls">
+                <select id="ibDepositHelper" style="display:none;">
+                    <option value="">— Deposit shortcut —</option>
+                    <option value="percent">% of contract value</option>
+                    <option value="fixed">Fixed Rand amount</option>
+                </select>
+                <input type="number" id="ibDepositValue" placeholder="e.g. 50" style="display:none;max-width:140px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid var(--border);color:var(--text-hi);" />
+                <button type="button" class="btn-logout" id="ibDepositApplyBtn" style="display:none;">Apply as Line Item</button>
+            </div>
+
+            <label>Line Items</label>
+            <div class="quote-item-controls">
+                <select id="ibQuickAdd">
+                    <option value="">— Quick Add Service —</option>
+                </select>
+                <button type="button" class="btn-logout" id="ibAddCustomItemBtn">+ Add Custom Item</button>
+            </div>
+            <div class="quote-items-wrap">
+                <div class="quote-item-row head">
+                    <span>Description</span><span>Qty</span><span>Unit Price</span><span>Line Total</span><span></span>
+                </div>
+                <div id="ibItemsList"></div>
+            </div>
+            <p class="empty-note" id="ibItemsEmpty" style="display:none;">No line items yet — use Quick Add or "+ Add Custom Item" above.</p>
+
+            <div class="form-row-2">
+                <div class="field">
+                    <label for="ibDiscountType">Discount</label>
+                    <select id="ibDiscountType">
+                        <option value="none">No discount</option>
+                        <option value="percent">Percentage (%)</option>
+                        <option value="fixed">Fixed Amount (R)</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="ibDiscountValue">Discount Value</label>
+                    <input type="number" id="ibDiscountValue" min="0" step="0.01" value="0" disabled />
+                </div>
+            </div>
+
+            <div class="quote-totals">
+                <div class="quote-totals-row"><span>Subtotal</span><span id="ibSubtotalOut">R0.00</span></div>
+                <div class="quote-totals-row"><span>Discount</span><span id="ibDiscountOut">R0.00</span></div>
+                <div class="quote-totals-row grand"><span>Total</span><span id="ibTotalOut">R0.00</span></div>
+            </div>
+            <div id="ibContractWarning" class="field-hint" style="display:none;color:#ff9f40;"></div>
+
+            <div class="field">
+                <label for="ibPaymentArrangement">Payment Arrangement (optional)</label>
+                <input type="text" id="ibPaymentArrangement" maxlength="200" />
+            </div>
+            <div class="field">
+                <label for="ibPaymentInstructions">Payment Instructions (optional — shown on the invoice; leave blank to show nothing)</label>
+                <textarea id="ibPaymentInstructions" rows="3" maxlength="500" placeholder="e.g. EFT to [bank details] — only fill this in with real, current banking details you want the client to see."></textarea>
+            </div>
+            <div class="field">
+                <label for="ibNotes">Notes (optional)</label>
+                <textarea id="ibNotes" rows="2" maxlength="1000"></textarea>
+            </div>
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
+                <button type="button" class="btn-primary" id="ibSaveBtn" style="flex:1;justify-content:center;">Save Invoice</button>
+                <button type="button" class="btn-logout" id="ibSaveAndPreviewBtn" style="flex:1;justify-content:center;">Save &amp; Preview</button>
+            </div>
+            <div id="ibFormMsg" class="form-msg" role="status" aria-live="polite"></div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         INVOICE PREVIEW / PRINT (Milestone 20)
+    ============================================================ -->
+    <div class="lead-modal-overlay" id="invoicePreviewOverlay">
+        <div class="lead-modal-box invoice-preview-box">
+            <button class="lead-modal-close quote-print-noprint" id="invoicePreviewClose" aria-label="Close">&times;</button>
+
+            <div class="quote-preview-actions quote-print-noprint">
+                <button type="button" class="btn-primary" id="ipPrintBtn"><i class="fas fa-print"></i> Print / Save as PDF</button>
+                <button type="button" class="btn-logout" id="ipEmailBtn"><i class="fas fa-envelope"></i> Email Invoice</button>
+                <button type="button" class="btn-logout" id="ipWhatsappBtn"><i class="fab fa-whatsapp"></i> WhatsApp Client</button>
+                <button type="button" class="btn-logout" id="ipEditBtn"><i class="fas fa-pen"></i> Edit</button>
+                <button type="button" class="btn-logout" id="ipRecordPaymentBtn"><i class="fas fa-money-bill-wave"></i> Record Payment</button>
+                <button type="button" class="btn-logout" id="ipAllocateBtn"><i class="fas fa-link"></i> Allocate Existing Payment</button>
+                <button type="button" class="btn-logout" id="ipDeleteBtn" style="color:#ff7070;border-color:rgba(255,80,80,.3);"><i class="fas fa-trash"></i> Delete</button>
+            </div>
+
+            <div class="lead-status-row quote-print-noprint">
+                <span class="status-badge" id="ipStatusBadge"></span>
+                <select id="ipWorkflowSelect">
+                    <option value="draft">Draft</option>
+                    <option value="sent">Sent</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+            </div>
+
+            <div id="ipPaymentsList" class="quote-print-noprint" style="margin-bottom:14px;"></div>
+
+            <div class="quote-print-area" id="invoicePrintArea">
+                <div class="quote-print-header">
+                    <div>
+                        <h2>RM Digitals</h2>
+                        <p style="font-size:.8rem;" id="ipTypeLabel">Invoice</p>
+                    </div>
+                    <div class="quote-meta">
+                        <div><strong id="ipInvoiceNumber"></strong></div>
+                        <div>Issue Date: <span id="ipIssueDate"></span></div>
+                        <div>Due Date: <span id="ipDueDate"></span></div>
+                    </div>
+                </div>
+
+                <div class="quote-print-section">
+                    <h4>Billed To</h4>
+                    <div id="ipClientBlock"></div>
+                </div>
+
+                <div class="quote-print-section">
+                    <h4>Invoice</h4>
+                    <div id="ipTitle" style="font-weight:700;"></div>
+                    <p id="ipDescription" style="font-size:.85rem;margin-top:4px;"></p>
+                </div>
+
+                <div class="quote-print-section">
+                    <table class="quote-print-table">
+                        <thead><tr><th>Description</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr></thead>
+                        <tbody id="ipItemsBody"></tbody>
+                    </table>
+                    <div class="quote-print-totals">
+                        <div class="row"><span>Subtotal</span><span id="ipSubtotal"></span></div>
+                        <div class="row" id="ipDiscountRow"><span>Discount</span><span id="ipDiscount"></span></div>
+                        <div class="row grand"><span>Total</span><span id="ipTotal"></span></div>
+                        <div class="row"><span>Paid</span><span id="ipPaid"></span></div>
+                        <div class="row grand"><span id="ipOutstandingLabel">Outstanding</span><span id="ipOutstanding"></span></div>
+                    </div>
+                </div>
+
+                <div class="quote-print-section" id="ipPaymentArrangementSection">
+                    <h4>Payment Arrangement</h4>
+                    <p id="ipPaymentArrangement" style="font-size:.85rem;"></p>
+                </div>
+                <div class="quote-print-section" id="ipPaymentInstructionsSection">
+                    <h4>Payment Instructions</h4>
+                    <p id="ipPaymentInstructions" style="font-size:.85rem;white-space:pre-wrap;"></p>
+                </div>
+                <div class="quote-print-section" id="ipNotesSection">
+                    <h4>Notes</h4>
+                    <p id="ipNotes" style="font-size:.85rem;"></p>
+                </div>
+
+                <div class="quote-print-section" style="border-top:1px solid #ddd;padding-top:14px;">
+                    <p style="font-size:.8rem;">
+                        RM Digitals — Ramagoma Muthuhadini (Anani) · Thohoyandou, Limpopo, South Africa<br>
+                        WhatsApp/Phone: +27 64 841 2146 · Email: ramagoma212@gmail.com
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         RECORD PAYMENT (mini form, used from an Invoice) (Milestone 20)
+    ============================================================ -->
+    <div class="lead-modal-overlay" id="invoicePaymentOverlay">
+        <div class="lead-modal-box">
+            <button class="lead-modal-close" id="invoicePaymentClose" aria-label="Close">&times;</button>
+            <h3>Record Payment</h3>
+            <p class="field-hint" style="margin-bottom:14px;">This is recorded on the Client Project's payment history and allocated to this invoice.</p>
+            <div class="form-row-2">
+                <div class="field">
+                    <label for="ipoAmount">Amount (R)</label>
+                    <input type="number" id="ipoAmount" min="0" step="0.01" />
+                </div>
+                <div class="field">
+                    <label for="ipoDate">Date</label>
+                    <input type="date" id="ipoDate" />
+                </div>
+            </div>
+            <div class="form-row-2">
+                <div class="field">
+                    <label for="ipoMethod">Method</label>
+                    <select id="ipoMethod">
+                        <option value="EFT">EFT</option>
+                        <option value="Cash">Cash</option>
+                        <option value="Card">Card</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="ipoReference">Reference (optional)</label>
+                    <input type="text" id="ipoReference" maxlength="100" />
+                </div>
+            </div>
+            <div class="field">
+                <label for="ipoNotes">Notes (optional)</label>
+                <input type="text" id="ipoNotes" maxlength="200" />
+            </div>
+            <button type="button" class="btn-primary" id="ipoSaveBtn" style="width:100%;justify-content:center;">Record Payment</button>
+            <div id="ipoMsg" class="form-msg" role="status" aria-live="polite"></div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         RECEIPT PREVIEW / PRINT (Milestone 20)
+    ============================================================ -->
+    <div class="lead-modal-overlay" id="receiptPreviewOverlay">
+        <div class="lead-modal-box receipt-modal-box">
+            <button class="lead-modal-close quote-print-noprint" id="receiptPreviewClose" aria-label="Close">&times;</button>
+            <div class="quote-preview-actions quote-print-noprint">
+                <button type="button" class="btn-primary" id="rpPrintBtn"><i class="fas fa-print"></i> Print / Save as PDF</button>
+                <button type="button" class="btn-logout" id="rpVoidBtn" style="color:#ff7070;border-color:rgba(255,80,80,.3);"><i class="fas fa-ban"></i> Void Receipt</button>
+            </div>
+            <div id="rpVoidBadgeRow" style="display:none;margin-bottom:10px;">
+                <span class="status-badge status-voided">Voided</span>
+            </div>
+            <div class="quote-print-area" id="receiptPrintArea">
+                <div class="quote-print-header">
+                    <div>
+                        <h2>RM Digitals</h2>
+                        <p style="font-size:.8rem;">Payment Receipt</p>
+                    </div>
+                    <div class="quote-meta">
+                        <div><strong id="rpReceiptNumber"></strong></div>
+                        <div>Date: <span id="rpDate"></span></div>
+                    </div>
+                </div>
+                <div class="quote-print-section">
+                    <h4>Received From</h4>
+                    <div id="rpClientBlock"></div>
+                </div>
+                <div class="quote-print-section">
+                    <h4>Related Invoice</h4>
+                    <p id="rpInvoiceRef" style="font-size:.85rem;">—</p>
+                </div>
+                <div class="quote-print-section">
+                    <h4>Payment Details</h4>
+                    <div class="cs-row"><span>Amount Received</span><span id="rpAmount"></span></div>
+                    <div class="cs-row"><span>Payment Method</span><span id="rpMethod"></span></div>
+                    <div class="cs-row" id="rpReferenceRow"><span>Reference</span><span id="rpReference"></span></div>
+                    <p id="rpDescription" style="font-size:.85rem;margin-top:8px;"></p>
+                </div>
+                <div class="quote-print-section" style="border-top:1px solid #ddd;padding-top:14px;">
+                    <p style="font-size:.8rem;">
+                        RM Digitals — Ramagoma Muthuhadini (Anani) · Thohoyandou, Limpopo, South Africa<br>
+                        WhatsApp/Phone: +27 64 841 2146 · Email: ramagoma212@gmail.com
+                    </p>
+                </div>
             </div>
         </div>
     </div>

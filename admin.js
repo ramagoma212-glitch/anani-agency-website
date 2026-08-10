@@ -182,6 +182,12 @@ function reviewRequestMessage(name) {
     return `Hi ${name || ''}, thank you for trusting RM Digitals with your website project. We'd appreciate hearing about your experience — your feedback helps us improve and helps other businesses understand what it's like to work with us. You can share it here: ${reviewRequestUrl()}`;
 }
 
+/* ── Invoices & Receipts (Milestone 20) ──────────────────────────── */
+const INVOICE_DISPLAY_LABELS = {
+    draft: 'Draft', sent: 'Sent', part_paid: 'Part Paid', paid: 'Paid',
+    overdue: 'Overdue', cancelled: 'Cancelled', overpaid: 'Overpaid'
+};
+
 async function runAdmin() {
     const { firebaseConfig } = await import('./firebase-config.js');
     const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js');
@@ -227,7 +233,10 @@ async function runAdmin() {
         loadLeads();
         loadQuotes();
         loadClients();
-        loadClientProjects();
+        // Invoices depend on allClientProjects (to compute live paid/outstanding
+        // totals from each project's payments), so they load only once client
+        // projects are in — everything else above loads independently/in parallel.
+        loadClientProjects().then(() => { loadInvoices(); loadReceipts(); });
     }
 
     authMod.onAuthStateChanged(auth, (user) => {
@@ -1320,6 +1329,7 @@ async function runAdmin() {
         document.getElementById('qpTerms').textContent = quote.terms || '';
 
         document.getElementById('qpStartProjectBtn').style.display = quote.status === 'accepted' ? 'inline-flex' : 'none';
+        document.getElementById('qpCreateInvoiceBtn').style.display = quote.status === 'accepted' ? 'inline-flex' : 'none';
 
         document.getElementById('quotePreviewOverlay').classList.add('active');
     }
@@ -1605,7 +1615,60 @@ async function runAdmin() {
             projectsList.innerHTML = '<p class="empty-note">Save this client first.</p>';
         }
 
+        renderCmInvoicesAndReceipts(client);
+
         document.getElementById('clientModalOverlay').classList.add('active');
+    }
+
+    function renderCmInvoicesAndReceipts(client) {
+        const invoicesList = document.getElementById('cmInvoicesList');
+        const receiptsList = document.getElementById('cmReceiptsList');
+        if (!client) {
+            invoicesList.innerHTML = '<p class="empty-note">Save this client first.</p>';
+            receiptsList.innerHTML = '<p class="empty-note">Save this client first.</p>';
+            return;
+        }
+        const clientInvoices = allInvoices.filter(inv => inv.clientId === client.id);
+        if (!clientInvoices.length) {
+            invoicesList.innerHTML = '<p class="empty-note">No invoices yet.</p>';
+        } else {
+            invoicesList.innerHTML = '';
+            clientInvoices.forEach(inv => {
+                const disp = displayInvoiceStatus(inv);
+                const row = document.createElement('div');
+                row.className = 'invoice-row';
+                row.innerHTML = `
+                    <div class="info"><strong>${escapeHtml(inv.invoiceNumber)}</strong><span>${escapeHtml(inv.title || '')}</span></div>
+                    <div class="amount-col">${formatRand(inv.total)}</div>
+                    <span class="status-badge status-${escapeHtml(disp)}">${escapeHtml(INVOICE_DISPLAY_LABELS[disp] || disp)}</span>
+                `;
+                row.addEventListener('click', () => {
+                    document.getElementById('clientModalOverlay').classList.remove('active');
+                    openInvoicePreview(inv.id);
+                });
+                invoicesList.appendChild(row);
+            });
+        }
+        const clientReceipts = allReceipts.filter(r => r.clientId === client.id);
+        if (!clientReceipts.length) {
+            receiptsList.innerHTML = '<p class="empty-note">No receipts yet.</p>';
+        } else {
+            receiptsList.innerHTML = '';
+            clientReceipts.forEach(r => {
+                const row = document.createElement('div');
+                row.className = 'receipt-row';
+                row.innerHTML = `
+                    <div class="info"><strong>${escapeHtml(r.receiptNumber)}</strong></div>
+                    <div class="amount-col">${formatRand(r.amount)}</div>
+                    <span class="status-badge ${r.voided ? 'status-voided' : 'status-paid'}">${r.voided ? 'Voided' : 'Issued'}</span>
+                `;
+                row.addEventListener('click', () => {
+                    document.getElementById('clientModalOverlay').classList.remove('active');
+                    openReceiptPreview(r.id);
+                });
+                receiptsList.appendChild(row);
+            });
+        }
     }
     document.getElementById('clientModalClose').addEventListener('click', () => document.getElementById('clientModalOverlay').classList.remove('active'));
     document.getElementById('clientModalOverlay').addEventListener('click', (e) => { if (e.target.id === 'clientModalOverlay') document.getElementById('clientModalOverlay').classList.remove('active'); });
@@ -1682,6 +1745,11 @@ async function runAdmin() {
     });
 
     /* ── Client Picker — standalone "New Project" with no quote/lead/client context ── */
+    // Generalised (Milestone 20): originally only opened the Project
+    // Detail modal; now accepts any callback so the same find-or-create
+    // client flow can also feed the Invoice Builder.
+    let clientPickerOnChoose = (client) => openProjectDetail({ client });
+
     function renderCpkResults(term) {
         const results = document.getElementById('cpkResults');
         const t = term.trim().toLowerCase();
@@ -1697,12 +1765,13 @@ async function runAdmin() {
             row.innerHTML = `<div class="info"><strong>${escapeHtml(c.name)}</strong><span>${escapeHtml(c.businessName || '')}</span></div>`;
             row.addEventListener('click', () => {
                 document.getElementById('clientPickerOverlay').classList.remove('active');
-                openProjectDetail({ client: c });
+                clientPickerOnChoose(c);
             });
             results.appendChild(row);
         });
     }
-    function openClientPicker() {
+    function openClientPicker(onChoose) {
+        clientPickerOnChoose = typeof onChoose === 'function' ? onChoose : (client) => openProjectDetail({ client });
         document.getElementById('cpkSearch').value = '';
         document.getElementById('cpkName').value = '';
         document.getElementById('cpkBusiness').value = '';
@@ -1733,7 +1802,7 @@ async function runAdmin() {
             useBtn.type = 'button'; useBtn.className = 'btn-logout'; useBtn.textContent = 'Use This Client';
             useBtn.addEventListener('click', () => {
                 document.getElementById('clientPickerOverlay').classList.remove('active');
-                openProjectDetail({ client: match });
+                clientPickerOnChoose(match);
             });
             note.appendChild(useBtn);
             note.style.display = 'block';
@@ -1751,7 +1820,7 @@ async function runAdmin() {
             await fsMod.setDoc(clientRef, record);
             await loadClients();
             document.getElementById('clientPickerOverlay').classList.remove('active');
-            openProjectDetail({ client: { id: clientRef.id, ...record } });
+            clientPickerOnChoose({ id: clientRef.id, ...record });
         } catch (err) {
             msg.textContent = '❌ Could not create client: ' + err.message;
             msg.className = 'form-msg error';
@@ -2084,13 +2153,25 @@ async function runAdmin() {
             row.innerHTML = `
                 <span class="amt">${formatRand(p.amount)}</span>
                 <span class="meta">${escapeHtml(formatDateOnly(p.date))} · ${escapeHtml(p.method || '')}${p.reference ? ' · Ref: ' + escapeHtml(p.reference) : ''}${p.notes ? ' · ' + escapeHtml(p.notes) : ''}</span>
-                <button type="button">Remove</button>
+                <button type="button" class="receipt-btn" data-act="receipt">Create Receipt</button>
+                <button type="button" data-act="remove">Remove</button>
             `;
-            row.querySelector('button').addEventListener('click', () => {
+            row.querySelector('[data-act="remove"]').addEventListener('click', () => {
                 if (!confirm('Remove this payment record?')) return;
                 cpItemsPayments.splice(idx, 1);
                 renderCpPayments();
                 renderCpFinancials();
+            });
+            row.querySelector('[data-act="receipt"]').addEventListener('click', () => {
+                const editingId = document.getElementById('cpProjectId').value;
+                const project = editingId ? allClientProjects.find(pr => pr.id === editingId) : null;
+                // A receipt snapshots a real, saved payment — never one still
+                // sitting only in this modal's unsaved local buffer.
+                if (!project || !(project.payments || []).some(sp => sp.id === p.id)) {
+                    alert('Please save this project first (so the payment is stored), then create the receipt from here.');
+                    return;
+                }
+                createReceiptForProjectPayment(project, p);
             });
             list.appendChild(row);
         });
@@ -2312,9 +2393,62 @@ async function runAdmin() {
         }
         renderCpPortfolioSection(project);
         renderCpReviewSection(project);
+        renderCpInvoicesList(project);
 
         document.getElementById('cpModalOverlay').classList.add('active');
     }
+
+    function renderCpInvoicesList(project) {
+        const list = document.getElementById('cpInvoicesList');
+        if (!project) { list.innerHTML = '<p class="empty-note">Save this project first to create invoices.</p>'; return; }
+        const projectInvoices = allInvoices.filter(inv => inv.clientProjectId === project.id);
+        if (!projectInvoices.length) { list.innerHTML = '<p class="empty-note">No invoices yet for this project.</p>'; return; }
+        list.innerHTML = '';
+        projectInvoices.forEach(inv => {
+            const disp = displayInvoiceStatus(inv);
+            const row = document.createElement('div');
+            row.className = 'invoice-row';
+            row.innerHTML = `
+                <div class="info"><strong>${escapeHtml(inv.invoiceNumber)}</strong><span>${escapeHtml(inv.title || '')}</span></div>
+                <div class="amount-col">${formatRand(inv.total)}</div>
+                <span class="status-badge status-${escapeHtml(disp)}">${escapeHtml(INVOICE_DISPLAY_LABELS[disp] || disp)}</span>
+            `;
+            row.addEventListener('click', () => {
+                document.getElementById('cpModalOverlay').classList.remove('active');
+                openInvoicePreview(inv.id);
+            });
+            list.appendChild(row);
+        });
+    }
+
+    function startInvoiceFromProject(invoiceType) {
+        const editingId = document.getElementById('cpProjectId').value;
+        const project = editingId ? allClientProjects.find(p => p.id === editingId) : null;
+        if (!project) { alert('Please save this project first, then create an invoice from here.'); return; }
+        const client = allClients.find(c => c.id === project.clientId) || null;
+        document.getElementById('cpModalOverlay').classList.remove('active');
+        const typeLabel = invoiceType.charAt(0).toUpperCase() + invoiceType.slice(1);
+        const prefill = { title: `${typeLabel} — ${project.projectName}`, paymentArrangement: project.paymentArrangement };
+        if (invoiceType === 'final') {
+            // Suggest the remaining agreed amount (contract value minus every
+            // still-active invoice already raised on this project) as a
+            // starting line item — fully editable, never forced (Part 20G).
+            const contractValue = Math.max(0, Number(project.contractValue) || 0);
+            const invoicedTotal = allInvoices
+                .filter(inv => inv.clientProjectId === project.id && inv.workflowStatus !== 'cancelled')
+                .reduce((sum, inv) => sum + (Number(inv.total) || 0), 0);
+            const remaining = Math.max(0, contractValue - invoicedTotal);
+            prefill.items = [{ description: `Final balance — ${project.projectName}`, quantity: 1, unitPrice: remaining }];
+        }
+        openInvoiceBuilder({
+            client, clientProject: project,
+            quote: project.quoteId ? { id: project.quoteId, quoteNumber: project.quoteNumber } : null,
+            invoiceType, prefill
+        });
+    }
+    document.getElementById('cpNewDepositInvoiceBtn').addEventListener('click', () => startInvoiceFromProject('deposit'));
+    document.getElementById('cpNewProgressInvoiceBtn').addEventListener('click', () => startInvoiceFromProject('progress'));
+    document.getElementById('cpNewFinalInvoiceBtn').addEventListener('click', () => startInvoiceFromProject('final'));
 
     document.getElementById('cpModalClose').addEventListener('click', () => document.getElementById('cpModalOverlay').classList.remove('active'));
     document.getElementById('cpModalOverlay').addEventListener('click', (e) => { if (e.target.id === 'cpModalOverlay') document.getElementById('cpModalOverlay').classList.remove('active'); });
@@ -2509,6 +2643,26 @@ async function runAdmin() {
         document.getElementById('quotePreviewOverlay').classList.remove('active');
         if (existing) { openProjectDetail({ project: existing }); return; }
         await startProjectFromQuote(quote);
+    });
+
+    document.getElementById('qpCreateInvoiceBtn').addEventListener('click', () => {
+        const quote = allQuotes.find(q => q.id === activeQuoteId);
+        if (!quote) return;
+        document.getElementById('quotePreviewOverlay').classList.remove('active');
+        const linkedProject = allClientProjects.find(p => p.quoteId === quote.id) || null;
+        openInvoiceBuilder({
+            quote,
+            client: quote.clientId ? (allClients.find(c => c.id === quote.clientId) || null) : null,
+            clientProject: linkedProject,
+            prefill: {
+                title: quote.title,
+                description: quote.description,
+                items: (quote.items || []).map(it => ({ description: it.description, quantity: it.quantity, unitPrice: it.unitPrice })),
+                discountType: quote.discountType,
+                discountValue: quote.discountValue,
+                paymentArrangement: quote.paymentArrangement
+            }
+        });
     });
 
     document.getElementById('lmStartProjectBtn').addEventListener('click', async () => {
@@ -2884,5 +3038,836 @@ async function runAdmin() {
         const tabBtn = document.querySelector(`.tab-btn[data-status="${tabStatus}"]`);
         if (tabBtn) tabBtn.click();
         document.getElementById('reviewList').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    /* ============================================================
+       INVOICES & RECEIPTS (Milestone 20)
+       Workflow: Quote -> Client Project -> Invoice -> Payment -> Receipt.
+       No payment gateway anywhere here — payments are always manually
+       recorded, same as the Client Project financials above. An
+       invoice's Paid/Outstanding figures are NEVER stored, only ever
+       computed live from the linked project's payments (matched by
+       payment.invoiceId) — see computeInvoiceTotals()/displayInvoiceStatus()
+       below, which is the one place that logic lives.
+       ============================================================ */
+
+    let allInvoices = [];
+    let allReceipts = [];
+    let ibItems = [];
+    let activeInvoiceId = null;
+    let activeReceiptId = null;
+
+    function getInvoicePayments(invoice) {
+        if (!invoice || !invoice.clientProjectId) return [];
+        const project = allClientProjects.find(p => p.id === invoice.clientProjectId);
+        if (!project) return [];
+        return (project.payments || []).filter(p => p.invoiceId === invoice.id);
+    }
+    function computeInvoiceTotals(invoice) {
+        const payments = getInvoicePayments(invoice);
+        const paid = payments.reduce((sum, p) => sum + Math.max(0, Number(p.amount) || 0), 0);
+        const total = Math.max(0, Number(invoice.total) || 0);
+        return { paid, total, outstanding: total - paid, payments };
+    }
+    function isInvoiceOverdue(invoice, outstanding) {
+        if (invoice.workflowStatus !== 'sent' || !invoice.dueDate || outstanding <= 0.001) return false;
+        const due = invoice.dueDate.toDate ? invoice.dueDate.toDate() : new Date(invoice.dueDate);
+        const startOfToday = new Date(); startOfToday.setHours(0, 0, 0, 0);
+        return due.getTime() < startOfToday.getTime();
+    }
+    /* Live display status — draft/sent/cancelled are the only states ever
+       WRITTEN (invoice.workflowStatus); part_paid/paid/overdue/overpaid are
+       always DERIVED here so they can never go stale relative to the
+       project's actual payments (Part 20H). */
+    function displayInvoiceStatus(invoice) {
+        if (invoice.workflowStatus === 'cancelled') return 'cancelled';
+        if (invoice.workflowStatus === 'draft') return 'draft';
+        const { paid, total, outstanding } = computeInvoiceTotals(invoice);
+        if (paid > total + 0.001) return 'overpaid';
+        if (outstanding <= 0.001) return 'paid';
+        if (isInvoiceOverdue(invoice, outstanding)) return 'overdue';
+        if (paid > 0.001) return 'part_paid';
+        return 'sent';
+    }
+
+    async function generateInvoiceNumber() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        for (let attempt = 0; attempt < 5; attempt++) {
+            const suffix = String(Math.floor(Math.random() * 900) + 100);
+            const candidate = `RMI-${year}-${mm}${dd}-${suffix}`;
+            const dupeSnap = await fsMod.getDocs(fsMod.query(fsMod.collection(db, 'invoices'), fsMod.where('invoiceNumber', '==', candidate)));
+            if (dupeSnap.empty) return candidate;
+        }
+        return `RMI-${year}-${mm}${dd}-${Date.now().toString().slice(-4)}`;
+    }
+    async function generateReceiptNumber() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        for (let attempt = 0; attempt < 5; attempt++) {
+            const suffix = String(Math.floor(Math.random() * 900) + 100);
+            const candidate = `RMR-${year}-${mm}${dd}-${suffix}`;
+            const dupeSnap = await fsMod.getDocs(fsMod.query(fsMod.collection(db, 'receipts'), fsMod.where('receiptNumber', '==', candidate)));
+            if (dupeSnap.empty) return candidate;
+        }
+        return `RMR-${year}-${mm}${dd}-${Date.now().toString().slice(-4)}`;
+    }
+
+    async function loadInvoices() {
+        const list = document.getElementById('invoiceList');
+        list.innerHTML = '<p class="empty-note">Loading invoices…</p>';
+        let snap;
+        try {
+            const q = fsMod.query(fsMod.collection(db, 'invoices'), fsMod.orderBy('createdAt', 'desc'));
+            snap = await fsMod.getDocs(q);
+        } catch (err) {
+            list.innerHTML = `<p class="empty-note">Could not load invoices: ${escapeHtml(err.message)}</p>`;
+            return;
+        }
+        allInvoices = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderInvoiceSummary();
+        renderInvoiceList();
+    }
+
+    function renderInvoiceSummary() {
+        const counts = { draft: 0, sent: 0, part_paid: 0, paid: 0, overdue: 0, cancelled: 0, overpaid: 0 };
+        let openValue = 0, overdueValue = 0;
+        allInvoices.forEach(inv => {
+            const disp = displayInvoiceStatus(inv);
+            if (counts.hasOwnProperty(disp)) counts[disp]++;
+            if (disp !== 'cancelled' && disp !== 'paid') {
+                const { outstanding } = computeInvoiceTotals(inv);
+                openValue += Math.max(0, outstanding);
+                if (disp === 'overdue') overdueValue += Math.max(0, outstanding);
+            }
+        });
+        document.getElementById('isDraft').textContent = counts.draft;
+        document.getElementById('isSent').textContent = counts.sent;
+        document.getElementById('isPartPaid').textContent = counts.part_paid;
+        document.getElementById('isPaid').textContent = counts.paid;
+        document.getElementById('isOverdue').textContent = counts.overdue;
+        document.getElementById('isTotalValue').textContent = formatRand(openValue);
+        document.getElementById('isOverdueValue').textContent = formatRand(overdueValue);
+    }
+
+    function renderInvoiceList() {
+        const list = document.getElementById('invoiceList');
+        const searchTerm = (document.getElementById('invoiceSearch').value || '').trim().toLowerCase();
+        const statusFilter = document.getElementById('invoiceFilterStatus').value;
+        const sortMode = document.getElementById('invoiceSort').value;
+
+        let filtered = allInvoices.filter(inv => {
+            const disp = displayInvoiceStatus(inv);
+            if (statusFilter !== 'all' && disp !== statusFilter) return false;
+            if (!searchTerm) return true;
+            const haystack = [inv.invoiceNumber, inv.clientName, inv.businessName, inv.title].filter(Boolean).join(' ').toLowerCase();
+            return haystack.includes(searchTerm);
+        });
+
+        if (sortMode === 'due') {
+            filtered = filtered.slice().sort((a, b) => {
+                const ad = a.dueDate ? (a.dueDate.toDate ? a.dueDate.toDate().getTime() : new Date(a.dueDate).getTime()) : Infinity;
+                const bd = b.dueDate ? (b.dueDate.toDate ? b.dueDate.toDate().getTime() : new Date(b.dueDate).getTime()) : Infinity;
+                return ad - bd;
+            });
+        } else if (sortMode === 'amount') {
+            filtered = filtered.slice().sort((a, b) => (Number(b.total) || 0) - (Number(a.total) || 0));
+        } else if (sortMode === 'status') {
+            const order = ['overdue', 'sent', 'part_paid', 'draft', 'paid', 'overpaid', 'cancelled'];
+            filtered = filtered.slice().sort((a, b) => order.indexOf(displayInvoiceStatus(a)) - order.indexOf(displayInvoiceStatus(b)));
+        }
+
+        if (allInvoices.length === 0) { list.innerHTML = '<p class="empty-note">No invoices yet. Create one from an accepted quote, a Client Project, or "New Invoice" above.</p>'; return; }
+        if (filtered.length === 0) { list.innerHTML = '<p class="empty-note">No invoices match your search/filter.</p>'; return; }
+
+        list.innerHTML = '';
+        filtered.forEach(inv => {
+            const disp = displayInvoiceStatus(inv);
+            const row = document.createElement('div');
+            row.className = 'invoice-row';
+            row.tabIndex = 0;
+            row.setAttribute('role', 'button');
+            row.innerHTML = `
+                <div class="info">
+                    <strong>${escapeHtml(inv.invoiceNumber)}</strong>
+                    <span>${escapeHtml(inv.clientName || '')}${inv.businessName ? ' · ' + escapeHtml(inv.businessName) : ''} — ${escapeHtml(inv.title || '')}</span>
+                </div>
+                <div class="meta-col">${formatDate(inv.createdAt)}</div>
+                <div class="amount-col">${formatRand(inv.total)}</div>
+                <span class="status-badge status-${escapeHtml(disp)}">${escapeHtml(INVOICE_DISPLAY_LABELS[disp] || disp)}</span>
+            `;
+            row.addEventListener('click', () => openInvoicePreview(inv.id));
+            row.addEventListener('keypress', (e) => { if (e.key === 'Enter') openInvoicePreview(inv.id); });
+            list.appendChild(row);
+        });
+    }
+    document.getElementById('invoiceSearch').addEventListener('input', renderInvoiceList);
+    document.getElementById('invoiceFilterStatus').addEventListener('change', renderInvoiceList);
+    document.getElementById('invoiceSort').addEventListener('change', renderInvoiceList);
+    document.getElementById('invoiceNewBtn').addEventListener('click', () => openClientPicker((client) => openInvoiceBuilder({ client })));
+
+    /* ── Invoice Builder ── */
+    const ibQaSelect = document.getElementById('ibQuickAdd');
+    QUICK_ADD_SERVICES.forEach((svc, i) => {
+        const opt = document.createElement('option');
+        opt.value = String(i);
+        opt.textContent = `${svc.label} — ${formatRand(svc.price)}`;
+        ibQaSelect.appendChild(opt);
+    });
+
+    function renderIbItems() {
+        const list = document.getElementById('ibItemsList');
+        const empty = document.getElementById('ibItemsEmpty');
+        list.innerHTML = '';
+        empty.style.display = ibItems.length ? 'none' : 'block';
+        ibItems.forEach((item, idx) => {
+            const qty = Math.max(0, Number(item.quantity) || 0);
+            const price = Math.max(0, Number(item.unitPrice) || 0);
+            const row = document.createElement('div');
+            row.className = 'quote-item-row';
+            row.innerHTML = `
+                <input type="text" class="item-desc" value="${escapeHtml(item.description)}" maxlength="200" placeholder="Item description" />
+                <input type="number" class="item-qty" min="0" step="1" value="${qty}" />
+                <input type="number" class="item-price" min="0" step="0.01" value="${price}" />
+                <span class="line-total">${formatRand(qty * price)}</span>
+                <button type="button" class="remove-item" aria-label="Remove line item"><i class="fas fa-times"></i></button>
+            `;
+            row.querySelector('.item-desc').addEventListener('input', (e) => { ibItems[idx].description = e.target.value; });
+            const recalcRow = () => {
+                const q2 = Math.max(0, Number(ibItems[idx].quantity) || 0);
+                const p2 = Math.max(0, Number(ibItems[idx].unitPrice) || 0);
+                row.querySelector('.line-total').textContent = formatRand(q2 * p2);
+                updateIbTotals();
+            };
+            row.querySelector('.item-qty').addEventListener('input', (e) => { ibItems[idx].quantity = e.target.value; recalcRow(); });
+            row.querySelector('.item-price').addEventListener('input', (e) => { ibItems[idx].unitPrice = e.target.value; recalcRow(); });
+            row.querySelector('.remove-item').addEventListener('click', () => { ibItems.splice(idx, 1); renderIbItems(); updateIbTotals(); });
+            list.appendChild(row);
+        });
+    }
+    function updateIbTotals() {
+        const subtotal = ibItems.reduce((sum, it) => {
+            const qty = Math.max(0, Number(it.quantity) || 0);
+            const price = Math.max(0, Number(it.unitPrice) || 0);
+            return sum + qty * price;
+        }, 0);
+        const discountType = document.getElementById('ibDiscountType').value;
+        const discountValueRaw = Math.max(0, Number(document.getElementById('ibDiscountValue').value) || 0);
+        let discountAmount = 0;
+        if (discountType === 'percent') discountAmount = subtotal * Math.min(100, discountValueRaw) / 100;
+        else if (discountType === 'fixed') discountAmount = discountValueRaw;
+        discountAmount = Math.min(discountAmount, subtotal);
+        const total = Math.max(0, subtotal - discountAmount);
+        document.getElementById('ibSubtotalOut').textContent = formatRand(subtotal);
+        document.getElementById('ibDiscountOut').textContent = formatRand(discountAmount);
+        document.getElementById('ibTotalOut').textContent = formatRand(total);
+        return { subtotal, discountAmount, total };
+    }
+    ibQaSelect.addEventListener('change', (e) => {
+        const idx = Number(e.target.value);
+        if (!Number.isNaN(idx) && QUICK_ADD_SERVICES[idx]) {
+            const svc = QUICK_ADD_SERVICES[idx];
+            ibItems.push({ description: svc.label, quantity: 1, unitPrice: svc.price });
+            renderIbItems();
+            updateIbTotals();
+        }
+        e.target.value = '';
+    });
+    document.getElementById('ibAddCustomItemBtn').addEventListener('click', () => {
+        ibItems.push({ description: '', quantity: 1, unitPrice: 0 });
+        renderIbItems();
+        updateIbTotals();
+    });
+    document.getElementById('ibDiscountType').addEventListener('change', (e) => {
+        const valueInput = document.getElementById('ibDiscountValue');
+        valueInput.disabled = e.target.value === 'none';
+        if (e.target.value === 'none') valueInput.value = 0;
+        updateIbTotals();
+    });
+    document.getElementById('ibDiscountValue').addEventListener('input', updateIbTotals);
+
+    function updateIbDepositHelperVisibility() {
+        const projectId = document.getElementById('ibClientProjectId').value;
+        const show = document.getElementById('ibInvoiceType').value === 'deposit' && !!projectId;
+        document.getElementById('ibDepositHelper').style.display = show ? 'inline-block' : 'none';
+        document.getElementById('ibDepositValue').style.display = show ? 'inline-block' : 'none';
+        document.getElementById('ibDepositApplyBtn').style.display = show ? 'inline-block' : 'none';
+    }
+    document.getElementById('ibInvoiceType').addEventListener('change', updateIbDepositHelperVisibility);
+    document.getElementById('ibDepositApplyBtn').addEventListener('click', () => {
+        const projectId = document.getElementById('ibClientProjectId').value;
+        const project = projectId ? allClientProjects.find(p => p.id === projectId) : null;
+        if (!project) { alert('No linked Client Project to calculate a deposit from.'); return; }
+        const mode = document.getElementById('ibDepositHelper').value;
+        if (mode !== 'percent' && mode !== 'fixed') { alert('Choose percentage or fixed amount first.'); return; }
+        const val = Math.max(0, Number(document.getElementById('ibDepositValue').value) || 0);
+        const contractValue = Math.max(0, Number(project.contractValue) || 0);
+        const amount = mode === 'percent' ? contractValue * Math.min(100, val) / 100 : val;
+        ibItems.push({
+            description: `Deposit (${mode === 'percent' ? val + '% of contract value' : 'fixed amount'}) — ${project.projectName}`,
+            quantity: 1, unitPrice: Math.round(amount * 100) / 100
+        });
+        renderIbItems();
+        updateIbTotals();
+    });
+
+    function openInvoiceBuilder({ invoice = null, client = null, clientProject = null, quote = null, invoiceType = null, prefill = null } = {}) {
+        document.getElementById('ibFormMsg').textContent = '';
+        document.getElementById('ibInvoiceId').value = invoice ? invoice.id : '';
+        document.getElementById('ibInvoiceNumber').value = invoice ? invoice.invoiceNumber : '';
+        document.getElementById('ibHeading').textContent = invoice ? `Edit Invoice ${invoice.invoiceNumber}` : 'New Invoice';
+
+        const resolvedClientId = invoice ? (invoice.clientId || '') : (client ? client.id : '');
+        const resolvedProjectId = invoice ? (invoice.clientProjectId || '') : (clientProject ? clientProject.id : '');
+        const resolvedQuoteId = invoice ? (invoice.quoteId || '') : (quote ? quote.id : '');
+        const resolvedQuoteNumber = invoice ? (invoice.quoteNumber || '') : (quote ? (quote.quoteNumber || '') : '');
+        document.getElementById('ibClientId').value = resolvedClientId;
+        document.getElementById('ibClientProjectId').value = resolvedProjectId;
+        document.getElementById('ibQuoteId').value = resolvedQuoteId;
+        document.getElementById('ibQuoteNumber').value = resolvedQuoteNumber;
+
+        document.getElementById('ibClientName').value = invoice ? (invoice.clientName || '') : (client ? (client.name || '') : (quote ? (quote.clientName || '') : ''));
+        document.getElementById('ibBusinessName').value = invoice ? (invoice.businessName || '') : (client ? (client.businessName || '') : (quote ? (quote.businessName || '') : ''));
+        document.getElementById('ibClientEmail').value = invoice ? (invoice.clientEmail || '') : (client ? (client.email || '') : (quote ? (quote.clientEmail || '') : ''));
+        document.getElementById('ibClientPhone').value = invoice ? (invoice.clientPhone || '') : (client ? (client.phone || '') : (quote ? (quote.clientPhone || '') : ''));
+
+        document.getElementById('ibInvoiceType').value = invoice ? (invoice.invoiceType || 'standard') : (invoiceType || 'standard');
+        document.getElementById('ibDueDate').value = invoice && invoice.dueDate ? tsToDateInput(invoice.dueDate) : defaultValidUntil();
+        document.getElementById('ibTitle').value = invoice ? (invoice.title || '') : (prefill ? (prefill.title || '') : '');
+        document.getElementById('ibDescription').value = invoice ? (invoice.description || '') : (prefill ? (prefill.description || '') : '');
+
+        ibItems = invoice ? (invoice.items || []).map(it => ({ description: it.description, quantity: it.quantity, unitPrice: it.unitPrice }))
+            : (prefill && prefill.items ? prefill.items.map(it => ({ ...it })) : []);
+        document.getElementById('ibDiscountType').value = invoice ? (invoice.discountType || 'none') : (prefill && prefill.discountType ? prefill.discountType : 'none');
+        document.getElementById('ibDiscountValue').value = invoice ? (invoice.discountValue || 0) : (prefill && prefill.discountValue ? prefill.discountValue : 0);
+        document.getElementById('ibDiscountValue').disabled = document.getElementById('ibDiscountType').value === 'none';
+
+        document.getElementById('ibPaymentArrangement').value = invoice ? (invoice.paymentArrangement || '') : (prefill ? (prefill.paymentArrangement || '') : (clientProject ? (clientProject.paymentArrangement || '') : ''));
+        document.getElementById('ibPaymentInstructions').value = invoice ? (invoice.paymentInstructions || '') : '';
+        document.getElementById('ibNotes').value = invoice ? (invoice.notes || '') : '';
+
+        updateIbDepositHelperVisibility();
+
+        // Previous-invoices / contract-value context note (Part 20E) — informs,
+        // never blocks: the admin can still raise an invoice past contract value.
+        const noteEl = document.getElementById('ibPreviousInvoicesNote');
+        const project = clientProject || (resolvedProjectId ? allClientProjects.find(p => p.id === resolvedProjectId) : null);
+        if (project) {
+            const projectInvoices = allInvoices.filter(inv => inv.clientProjectId === project.id && inv.workflowStatus !== 'cancelled' && (!invoice || inv.id !== invoice.id));
+            if (projectInvoices.length) {
+                const invoicedTotal = projectInvoices.reduce((sum, inv) => sum + (Number(inv.total) || 0), 0);
+                noteEl.textContent = `This project already has ${projectInvoices.length} active invoice(s) totalling ${formatRand(invoicedTotal)} (contract value: ${formatRand(project.contractValue || 0)}).`;
+                noteEl.style.display = 'block';
+            } else {
+                noteEl.style.display = 'none';
+            }
+        } else {
+            noteEl.style.display = 'none';
+        }
+
+        renderIbItems();
+        updateIbTotals();
+        document.getElementById('invoiceBuilderOverlay').classList.add('active');
+    }
+
+    async function saveInvoiceFromBuilder({ andPreview = false } = {}) {
+        const msg = document.getElementById('ibFormMsg');
+        const clientName = document.getElementById('ibClientName').value.trim();
+        const title = document.getElementById('ibTitle').value.trim();
+        const dueDateStr = document.getElementById('ibDueDate').value;
+        const email = document.getElementById('ibClientEmail').value.trim();
+
+        if (!clientName) { msg.textContent = '⚠️ Client name is required.'; msg.className = 'form-msg error'; return null; }
+        if (!title) { msg.textContent = '⚠️ Invoice title is required.'; msg.className = 'form-msg error'; return null; }
+        if (!dueDateStr) { msg.textContent = '⚠️ Please set a due date.'; msg.className = 'form-msg error'; return null; }
+        if (email && !isValidEmail(email)) { msg.textContent = '⚠️ That client email doesn\'t look valid.'; msg.className = 'form-msg error'; return null; }
+
+        const items = ibItems
+            .map(it => ({
+                description: (it.description || '').toString().trim(),
+                quantity: Math.max(0, Number(it.quantity) || 0),
+                unitPrice: Math.max(0, Number(it.unitPrice) || 0)
+            }))
+            .filter(it => it.description || it.quantity || it.unitPrice)
+            .map(it => ({ ...it, lineTotal: it.quantity * it.unitPrice }));
+
+        const { subtotal, discountAmount, total } = updateIbTotals();
+        const discountType = document.getElementById('ibDiscountType').value;
+        const discountValue = Math.max(0, Number(document.getElementById('ibDiscountValue').value) || 0);
+        const editingId = document.getElementById('ibInvoiceId').value;
+
+        const record = {
+            clientId: document.getElementById('ibClientId').value || null,
+            clientName,
+            businessName: document.getElementById('ibBusinessName').value.trim() || null,
+            clientEmail: email || null,
+            clientPhone: document.getElementById('ibClientPhone').value.trim() || null,
+            clientProjectId: document.getElementById('ibClientProjectId').value || null,
+            quoteId: document.getElementById('ibQuoteId').value || null,
+            quoteNumber: document.getElementById('ibQuoteNumber').value || null,
+            invoiceType: document.getElementById('ibInvoiceType').value,
+            title,
+            description: document.getElementById('ibDescription').value.trim(),
+            items, subtotal, discountType, discountValue, discountAmount, total,
+            dueDate: fsMod.Timestamp.fromDate(new Date(dueDateStr + 'T23:59:59')),
+            paymentArrangement: document.getElementById('ibPaymentArrangement').value.trim(),
+            paymentInstructions: document.getElementById('ibPaymentInstructions').value.trim(),
+            notes: document.getElementById('ibNotes').value,
+            updatedAt: fsMod.serverTimestamp()
+        };
+
+        try {
+            let invoiceId = editingId;
+            if (editingId) {
+                // invoiceNumber, workflowStatus, issueDate, createdAt and the
+                // sentAt/cancelledAt history are deliberately NOT in `record` —
+                // editing an invoice can never silently overwrite its number,
+                // status or history (same guarantee as editing a quote, Part W).
+                await fsMod.updateDoc(fsMod.doc(db, 'invoices', editingId), record);
+            } else {
+                record.invoiceNumber = await generateInvoiceNumber();
+                record.workflowStatus = 'draft';
+                record.issueDate = fsMod.serverTimestamp();
+                record.sentAt = null;
+                record.cancelledAt = null;
+                record.createdAt = fsMod.serverTimestamp();
+                record.createdBy = auth.currentUser.uid;
+                const docRef = fsMod.doc(fsMod.collection(db, 'invoices'));
+                await fsMod.setDoc(docRef, record);
+                invoiceId = docRef.id;
+            }
+            msg.textContent = '✅ Invoice saved.';
+            msg.className = 'form-msg success';
+            await loadInvoices();
+            if (andPreview) {
+                document.getElementById('invoiceBuilderOverlay').classList.remove('active');
+                openInvoicePreview(invoiceId);
+            }
+            return invoiceId;
+        } catch (err) {
+            console.error(err);
+            msg.textContent = '❌ Could not save invoice: ' + err.message;
+            msg.className = 'form-msg error';
+            return null;
+        }
+    }
+
+    document.getElementById('invoiceBuilderClose').addEventListener('click', () => document.getElementById('invoiceBuilderOverlay').classList.remove('active'));
+    document.getElementById('invoiceBuilderOverlay').addEventListener('click', (e) => { if (e.target.id === 'invoiceBuilderOverlay') document.getElementById('invoiceBuilderOverlay').classList.remove('active'); });
+    document.getElementById('ibSaveBtn').addEventListener('click', async () => {
+        const id = await saveInvoiceFromBuilder({ andPreview: false });
+        if (id) document.getElementById('invoiceBuilderOverlay').classList.remove('active');
+    });
+    document.getElementById('ibSaveAndPreviewBtn').addEventListener('click', () => saveInvoiceFromBuilder({ andPreview: true }));
+
+    /* ── Invoice Preview / print / share / status / payments ── */
+    function openInvoicePreview(id) {
+        const invoice = allInvoices.find(i => i.id === id);
+        if (!invoice) return;
+        activeInvoiceId = id;
+        const { paid, total, outstanding, payments } = computeInvoiceTotals(invoice);
+        const disp = displayInvoiceStatus(invoice);
+
+        const badge = document.getElementById('ipStatusBadge');
+        badge.textContent = INVOICE_DISPLAY_LABELS[disp] || disp;
+        badge.className = 'status-badge status-' + disp;
+        document.getElementById('ipWorkflowSelect').value = invoice.workflowStatus;
+
+        document.getElementById('ipTypeLabel').textContent = (invoice.invoiceType ? invoice.invoiceType.charAt(0).toUpperCase() + invoice.invoiceType.slice(1) : 'Standard') + ' Invoice';
+        document.getElementById('ipInvoiceNumber').textContent = invoice.invoiceNumber;
+        document.getElementById('ipIssueDate').textContent = invoice.issueDate ? formatDateOnly(invoice.issueDate) : '—';
+        document.getElementById('ipDueDate').textContent = invoice.dueDate ? formatDateOnly(invoice.dueDate) : '—';
+
+        const clientBlock = document.getElementById('ipClientBlock');
+        clientBlock.innerHTML = '';
+        [invoice.clientName, invoice.businessName, invoice.clientEmail, invoice.clientPhone].filter(Boolean).forEach(line => {
+            const p = document.createElement('div'); p.textContent = line; clientBlock.appendChild(p);
+        });
+
+        document.getElementById('ipTitle').textContent = invoice.title || '';
+        document.getElementById('ipDescription').textContent = invoice.description || '';
+
+        const tbody = document.getElementById('ipItemsBody');
+        tbody.innerHTML = '';
+        (invoice.items || []).forEach(item => {
+            const tr = document.createElement('tr');
+            const tdDesc = document.createElement('td'); tdDesc.textContent = item.description;
+            const tdQty = document.createElement('td'); tdQty.textContent = item.quantity;
+            const tdPrice = document.createElement('td'); tdPrice.textContent = formatRand(item.unitPrice);
+            const tdTotal = document.createElement('td'); tdTotal.textContent = formatRand(item.lineTotal);
+            tr.append(tdDesc, tdQty, tdPrice, tdTotal);
+            tbody.appendChild(tr);
+        });
+
+        document.getElementById('ipSubtotal').textContent = formatRand(invoice.subtotal);
+        const discountRow = document.getElementById('ipDiscountRow');
+        if (invoice.discountAmount > 0) {
+            discountRow.style.display = 'flex';
+            discountRow.querySelector('span').textContent = invoice.discountType === 'percent' ? `Discount (${invoice.discountValue}%)` : 'Discount';
+            document.getElementById('ipDiscount').textContent = '-' + formatRand(invoice.discountAmount);
+        } else {
+            discountRow.style.display = 'none';
+        }
+        document.getElementById('ipTotal').textContent = formatRand(total);
+        document.getElementById('ipPaid').textContent = formatRand(paid);
+        const outLabel = document.getElementById('ipOutstandingLabel');
+        const outEl = document.getElementById('ipOutstanding');
+        if (outstanding < -0.001) { outLabel.textContent = 'Overpaid'; outEl.textContent = formatRand(Math.abs(outstanding)); }
+        else { outLabel.textContent = 'Outstanding'; outEl.textContent = formatRand(outstanding); }
+
+        const paSection = document.getElementById('ipPaymentArrangementSection');
+        if (invoice.paymentArrangement) { paSection.style.display = 'block'; document.getElementById('ipPaymentArrangement').textContent = invoice.paymentArrangement; }
+        else paSection.style.display = 'none';
+
+        const piSection = document.getElementById('ipPaymentInstructionsSection');
+        if (invoice.paymentInstructions) { piSection.style.display = 'block'; document.getElementById('ipPaymentInstructions').textContent = invoice.paymentInstructions; }
+        else piSection.style.display = 'none'; // never fabricate banking info — blank shows nothing (Part P)
+
+        const notesSection = document.getElementById('ipNotesSection');
+        if (invoice.notes) { notesSection.style.display = 'block'; document.getElementById('ipNotes').textContent = invoice.notes; }
+        else notesSection.style.display = 'none';
+
+        const paymentsListEl = document.getElementById('ipPaymentsList');
+        paymentsListEl.innerHTML = '';
+        if (payments.length) {
+            const heading = document.createElement('h4');
+            heading.style.cssText = 'font-size:.8rem;color:var(--text-mid);margin-bottom:8px;';
+            heading.textContent = 'Payments Allocated';
+            paymentsListEl.appendChild(heading);
+            payments.forEach(p => {
+                const row = document.createElement('div');
+                row.className = 'payment-row';
+                const amt = document.createElement('span'); amt.className = 'amt'; amt.textContent = formatRand(p.amount);
+                const meta = document.createElement('span'); meta.className = 'meta';
+                meta.textContent = `${formatDateOnly(p.date)} · ${p.method || ''}${p.reference ? ' · Ref: ' + p.reference : ''}`;
+                const receiptBtn = document.createElement('button');
+                receiptBtn.type = 'button';
+                receiptBtn.className = 'receipt-btn';
+                receiptBtn.textContent = 'Create Receipt';
+                receiptBtn.addEventListener('click', () => createReceiptForPayment(invoice, p));
+                row.append(amt, meta, receiptBtn);
+                paymentsListEl.appendChild(row);
+            });
+        }
+
+        document.getElementById('invoicePreviewOverlay').classList.add('active');
+    }
+
+    document.getElementById('invoicePreviewClose').addEventListener('click', () => document.getElementById('invoicePreviewOverlay').classList.remove('active'));
+    document.getElementById('invoicePreviewOverlay').addEventListener('click', (e) => { if (e.target.id === 'invoicePreviewOverlay') document.getElementById('invoicePreviewOverlay').classList.remove('active'); });
+    document.getElementById('ipPrintBtn').addEventListener('click', () => window.print());
+
+    document.getElementById('ipEditBtn').addEventListener('click', () => {
+        const invoice = allInvoices.find(i => i.id === activeInvoiceId);
+        if (!invoice) return;
+        document.getElementById('invoicePreviewOverlay').classList.remove('active');
+        openInvoiceBuilder({ invoice });
+    });
+
+    document.getElementById('ipEmailBtn').addEventListener('click', () => {
+        const invoice = allInvoices.find(i => i.id === activeInvoiceId);
+        if (!invoice) return;
+        if (!invoice.clientEmail || !isValidEmail(invoice.clientEmail)) { alert('This invoice has no valid client email on file.'); return; }
+        const { outstanding } = computeInvoiceTotals(invoice);
+        const subject = `RM Digitals Invoice ${invoice.invoiceNumber}`;
+        const body = `Hi ${invoice.clientName || ''},\n\nYour RM Digitals invoice ${invoice.invoiceNumber} (${formatRand(invoice.total)}, ${formatRand(Math.max(0, outstanding))} outstanding) is ready. Please let me know if you have any questions.\n\nKind regards,\nAnani — RM Digitals`;
+        window.location.href = `mailto:${encodeURIComponent(invoice.clientEmail)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    });
+    document.getElementById('ipWhatsappBtn').addEventListener('click', () => {
+        const invoice = allInvoices.find(i => i.id === activeInvoiceId);
+        if (!invoice) return;
+        const digits = normalizePhoneForWa(invoice.clientPhone);
+        if (!digits) { alert('This invoice has no valid client phone number on file.'); return; }
+        const greeting = `Hi ${invoice.clientName || ''}, your RM Digitals invoice ${invoice.invoiceNumber} is ready. Please review it and let me know if you have any questions.`;
+        window.open(`https://wa.me/${digits}?text=${encodeURIComponent(greeting)}`, '_blank', 'noopener,noreferrer');
+    });
+
+    async function updateInvoiceWorkflow(newStatus) {
+        if (!activeInvoiceId) return;
+        const invoice = allInvoices.find(i => i.id === activeInvoiceId);
+        if (!invoice) return;
+        const update = { workflowStatus: newStatus, updatedAt: fsMod.serverTimestamp() };
+        if (newStatus === 'sent' && !invoice.sentAt) update.sentAt = fsMod.serverTimestamp();
+        if (newStatus === 'cancelled' && !invoice.cancelledAt) update.cancelledAt = fsMod.serverTimestamp();
+        try {
+            await fsMod.updateDoc(fsMod.doc(db, 'invoices', activeInvoiceId), update);
+            await loadInvoices();
+            openInvoicePreview(activeInvoiceId);
+        } catch (err) {
+            alert('Could not update invoice status: ' + err.message);
+        }
+    }
+    document.getElementById('ipWorkflowSelect').addEventListener('change', (e) => updateInvoiceWorkflow(e.target.value));
+
+    document.getElementById('ipDeleteBtn').addEventListener('click', async () => {
+        if (!activeInvoiceId) return;
+        if (!confirm('Delete this invoice permanently? This cannot be undone. Payments already recorded against it stay on the Client Project but become unallocated.')) return;
+        try {
+            const invoice = allInvoices.find(i => i.id === activeInvoiceId);
+            if (invoice && invoice.clientProjectId) {
+                const project = allClientProjects.find(p => p.id === invoice.clientProjectId);
+                if (project && (project.payments || []).some(p => p.invoiceId === activeInvoiceId)) {
+                    const updatedPayments = (project.payments || []).map(p => p.invoiceId === activeInvoiceId ? { ...p, invoiceId: null } : p);
+                    await fsMod.updateDoc(fsMod.doc(db, 'clientProjects', project.id), { payments: updatedPayments, updatedAt: fsMod.serverTimestamp() });
+                    await loadClientProjects();
+                }
+            }
+            await fsMod.deleteDoc(fsMod.doc(db, 'invoices', activeInvoiceId));
+            document.getElementById('invoicePreviewOverlay').classList.remove('active');
+            activeInvoiceId = null;
+            loadInvoices();
+        } catch (err) {
+            alert('Could not delete invoice: ' + err.message);
+        }
+    });
+
+    /* Keeps an already-open Client Project Detail modal's local payments
+       buffer in sync after a direct Firestore payment write below — without
+       this, an admin who then clicks "Save Project" on a stale buffer could
+       silently wipe out the payment just recorded via the invoice (Part 20). */
+    function syncOpenProjectPaymentsBuffer(projectId, updatedPayments) {
+        if (document.getElementById('cpModalOverlay').classList.contains('active') && document.getElementById('cpProjectId').value === projectId) {
+            cpItemsPayments = updatedPayments.map(p => ({ ...p }));
+            renderCpPayments();
+            renderCpFinancials();
+        }
+    }
+
+    document.getElementById('ipRecordPaymentBtn').addEventListener('click', () => {
+        const invoice = allInvoices.find(i => i.id === activeInvoiceId);
+        if (!invoice) return;
+        if (!invoice.clientProjectId) { alert('This invoice isn\'t linked to a Client Project, so a payment can\'t be recorded against it here.'); return; }
+        document.getElementById('ipoAmount').value = '';
+        document.getElementById('ipoDate').value = new Date().toISOString().slice(0, 10);
+        document.getElementById('ipoMethod').value = 'EFT';
+        document.getElementById('ipoReference').value = '';
+        document.getElementById('ipoNotes').value = '';
+        document.getElementById('ipoMsg').textContent = '';
+        document.getElementById('invoicePaymentOverlay').classList.add('active');
+    });
+    document.getElementById('invoicePaymentClose').addEventListener('click', () => document.getElementById('invoicePaymentOverlay').classList.remove('active'));
+    document.getElementById('invoicePaymentOverlay').addEventListener('click', (e) => { if (e.target.id === 'invoicePaymentOverlay') document.getElementById('invoicePaymentOverlay').classList.remove('active'); });
+
+    document.getElementById('ipoSaveBtn').addEventListener('click', async () => {
+        const msg = document.getElementById('ipoMsg');
+        const invoice = allInvoices.find(i => i.id === activeInvoiceId);
+        if (!invoice || !invoice.clientProjectId) return;
+        const amount = Number(document.getElementById('ipoAmount').value);
+        const date = document.getElementById('ipoDate').value;
+        if (!(amount > 0)) { msg.textContent = '⚠️ Enter an amount greater than 0.'; msg.className = 'form-msg error'; return; }
+        if (!date) { msg.textContent = '⚠️ Please choose a date.'; msg.className = 'form-msg error'; return; }
+        const project = allClientProjects.find(p => p.id === invoice.clientProjectId);
+        if (!project) { msg.textContent = '❌ Linked project not found.'; msg.className = 'form-msg error'; return; }
+
+        const newPayment = {
+            id: 'p' + Date.now() + Math.random().toString(36).slice(2, 7),
+            amount, date,
+            method: document.getElementById('ipoMethod').value,
+            reference: document.getElementById('ipoReference').value.trim(),
+            notes: document.getElementById('ipoNotes').value.trim(),
+            invoiceId: invoice.id
+        };
+        // Spreads the CURRENT persisted array, never a locally-cached one — an
+        // invoice-driven payment must never destroy payments recorded any
+        // other way (Part 20 payment-integration requirement).
+        const updatedPayments = [...(project.payments || []), newPayment];
+        const amountPaid = updatedPayments.reduce((sum, p) => sum + Math.max(0, Number(p.amount) || 0), 0);
+        const contractValue = Math.max(0, Number(project.contractValue) || 0);
+        const balance = contractValue - amountPaid;
+        let paymentStatus;
+        if (amountPaid <= 0.001) paymentStatus = 'not_paid';
+        else if (balance > 0.001) paymentStatus = 'partial';
+        else if (Math.abs(balance) <= 0.001) paymentStatus = 'paid';
+        else paymentStatus = 'overpaid';
+
+        try {
+            await fsMod.updateDoc(fsMod.doc(db, 'clientProjects', project.id), { payments: updatedPayments, amountPaid, balance, paymentStatus, updatedAt: fsMod.serverTimestamp() });
+            await loadClientProjects();
+            syncOpenProjectPaymentsBuffer(project.id, updatedPayments);
+            document.getElementById('invoicePaymentOverlay').classList.remove('active');
+            openInvoicePreview(invoice.id);
+        } catch (err) {
+            msg.textContent = '❌ Could not record payment: ' + err.message;
+            msg.className = 'form-msg error';
+        }
+    });
+
+    document.getElementById('ipAllocateBtn').addEventListener('click', async () => {
+        const invoice = allInvoices.find(i => i.id === activeInvoiceId);
+        if (!invoice || !invoice.clientProjectId) { alert('This invoice has no linked Client Project.'); return; }
+        const project = allClientProjects.find(p => p.id === invoice.clientProjectId);
+        if (!project) { alert('Linked project not found.'); return; }
+        const unallocated = (project.payments || []).filter(p => !p.invoiceId);
+        if (!unallocated.length) { alert('No unallocated payments on this project.'); return; }
+        const listText = unallocated.map((p, i) => `${i + 1}. ${formatRand(p.amount)} on ${formatDateOnly(p.date)} (${p.method || ''})`).join('\n');
+        const choice = prompt(`Which payment should be allocated to this invoice?\n\n${listText}`);
+        const idx = Number(choice) - 1;
+        if (!Number.isInteger(idx) || idx < 0 || idx >= unallocated.length) return;
+        const target = unallocated[idx];
+        const updatedPayments = (project.payments || []).map(p => p.id === target.id ? { ...p, invoiceId: invoice.id } : p);
+        try {
+            await fsMod.updateDoc(fsMod.doc(db, 'clientProjects', project.id), { payments: updatedPayments, updatedAt: fsMod.serverTimestamp() });
+            await loadClientProjects();
+            syncOpenProjectPaymentsBuffer(project.id, updatedPayments);
+            openInvoicePreview(invoice.id);
+        } catch (err) {
+            alert('Could not allocate payment: ' + err.message);
+        }
+    });
+
+    /* ── Receipts ── */
+    async function loadReceipts() {
+        const list = document.getElementById('receiptList');
+        list.innerHTML = '<p class="empty-note">Loading receipts…</p>';
+        let snap;
+        try {
+            const q = fsMod.query(fsMod.collection(db, 'receipts'), fsMod.orderBy('createdAt', 'desc'));
+            snap = await fsMod.getDocs(q);
+        } catch (err) {
+            list.innerHTML = `<p class="empty-note">Could not load receipts: ${escapeHtml(err.message)}</p>`;
+            return;
+        }
+        allReceipts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderReceiptList();
+    }
+    function renderReceiptList() {
+        const list = document.getElementById('receiptList');
+        const searchTerm = (document.getElementById('receiptSearch').value || '').trim().toLowerCase();
+        let filtered = allReceipts.filter(r => {
+            if (!searchTerm) return true;
+            const haystack = [r.receiptNumber, r.clientName, r.businessName].filter(Boolean).join(' ').toLowerCase();
+            return haystack.includes(searchTerm);
+        });
+        if (allReceipts.length === 0) { list.innerHTML = '<p class="empty-note">No receipts yet — create one from an invoice or a project payment.</p>'; return; }
+        if (filtered.length === 0) { list.innerHTML = '<p class="empty-note">No receipts match your search.</p>'; return; }
+        list.innerHTML = '';
+        filtered.forEach(r => {
+            const row = document.createElement('div');
+            row.className = 'receipt-row';
+            row.tabIndex = 0;
+            row.setAttribute('role', 'button');
+            row.innerHTML = `
+                <div class="info">
+                    <strong>${escapeHtml(r.receiptNumber)}</strong>
+                    <span>${escapeHtml(r.clientName || '')}${r.businessName ? ' · ' + escapeHtml(r.businessName) : ''}</span>
+                </div>
+                <div class="meta-col">${formatDateOnly(r.paymentDate)}</div>
+                <div class="amount-col">${formatRand(r.amount)}</div>
+                <span class="status-badge ${r.voided ? 'status-voided' : 'status-paid'}">${r.voided ? 'Voided' : 'Issued'}</span>
+            `;
+            row.addEventListener('click', () => openReceiptPreview(r.id));
+            row.addEventListener('keypress', (e) => { if (e.key === 'Enter') openReceiptPreview(r.id); });
+            list.appendChild(row);
+        });
+    }
+    document.getElementById('receiptSearch').addEventListener('input', renderReceiptList);
+
+    async function createReceiptForPayment(invoice, payment) {
+        if (!confirm(`Create a receipt for ${formatRand(payment.amount)} received on ${formatDateOnly(payment.date)}?`)) return;
+        try {
+            const receiptNumber = await generateReceiptNumber();
+            const record = {
+                receiptNumber,
+                clientId: invoice.clientId || null,
+                clientName: invoice.clientName || null,
+                businessName: invoice.businessName || null,
+                clientProjectId: invoice.clientProjectId || null,
+                invoiceId: invoice.id,
+                invoiceNumber: invoice.invoiceNumber,
+                paymentId: payment.id,
+                amount: Math.max(0, Number(payment.amount) || 0),
+                paymentDate: payment.date,
+                paymentMethod: payment.method || '',
+                paymentReference: payment.reference || '',
+                description: `Payment for invoice ${invoice.invoiceNumber} — ${invoice.title}`,
+                createdAt: fsMod.serverTimestamp(),
+                createdBy: auth.currentUser.uid,
+                voided: false, voidedAt: null, voidReason: null
+            };
+            const docRef = fsMod.doc(fsMod.collection(db, 'receipts'));
+            await fsMod.setDoc(docRef, record);
+            await loadReceipts();
+            openReceiptPreview(docRef.id);
+        } catch (err) {
+            alert('Could not create receipt: ' + err.message);
+        }
+    }
+
+    /* Same as createReceiptForPayment above, but for a payment that isn't
+       (yet) linked to any invoice — reachable directly from a Client
+       Project's payment list. */
+    async function createReceiptForProjectPayment(project, payment) {
+        if (!confirm(`Create a receipt for ${formatRand(payment.amount)} received on ${formatDateOnly(payment.date)}?`)) return;
+        const client = allClients.find(c => c.id === project.clientId) || null;
+        const linkedInvoice = payment.invoiceId ? allInvoices.find(i => i.id === payment.invoiceId) : null;
+        try {
+            const receiptNumber = await generateReceiptNumber();
+            const record = {
+                receiptNumber,
+                clientId: project.clientId || null,
+                clientName: client ? client.name : null,
+                businessName: client ? client.businessName : null,
+                clientProjectId: project.id,
+                invoiceId: linkedInvoice ? linkedInvoice.id : null,
+                invoiceNumber: linkedInvoice ? linkedInvoice.invoiceNumber : null,
+                paymentId: payment.id,
+                amount: Math.max(0, Number(payment.amount) || 0),
+                paymentDate: payment.date,
+                paymentMethod: payment.method || '',
+                paymentReference: payment.reference || '',
+                description: `Payment for ${project.projectName}`,
+                createdAt: fsMod.serverTimestamp(),
+                createdBy: auth.currentUser.uid,
+                voided: false, voidedAt: null, voidReason: null
+            };
+            const docRef = fsMod.doc(fsMod.collection(db, 'receipts'));
+            await fsMod.setDoc(docRef, record);
+            await loadReceipts();
+            openReceiptPreview(docRef.id);
+        } catch (err) {
+            alert('Could not create receipt: ' + err.message);
+        }
+    }
+
+    function openReceiptPreview(id) {
+        const receipt = allReceipts.find(r => r.id === id);
+        if (!receipt) return;
+        activeReceiptId = id;
+        document.getElementById('rpReceiptNumber').textContent = receipt.receiptNumber;
+        document.getElementById('rpDate').textContent = formatDateOnly(receipt.paymentDate);
+        const clientBlock = document.getElementById('rpClientBlock');
+        clientBlock.innerHTML = '';
+        [receipt.clientName, receipt.businessName].filter(Boolean).forEach(line => {
+            const p = document.createElement('div'); p.textContent = line; clientBlock.appendChild(p);
+        });
+        document.getElementById('rpInvoiceRef').textContent = receipt.invoiceNumber || 'No related invoice';
+        document.getElementById('rpAmount').textContent = formatRand(receipt.amount);
+        document.getElementById('rpMethod').textContent = receipt.paymentMethod || '—';
+        const refRow = document.getElementById('rpReferenceRow');
+        if (receipt.paymentReference) { refRow.style.display = 'flex'; document.getElementById('rpReference').textContent = receipt.paymentReference; }
+        else refRow.style.display = 'none';
+        document.getElementById('rpDescription').textContent = receipt.description || '';
+        document.getElementById('rpVoidBadgeRow').style.display = receipt.voided ? 'block' : 'none';
+        document.getElementById('rpVoidBtn').style.display = receipt.voided ? 'none' : 'inline-flex';
+        document.getElementById('receiptPreviewOverlay').classList.add('active');
+    }
+    document.getElementById('receiptPreviewClose').addEventListener('click', () => document.getElementById('receiptPreviewOverlay').classList.remove('active'));
+    document.getElementById('receiptPreviewOverlay').addEventListener('click', (e) => { if (e.target.id === 'receiptPreviewOverlay') document.getElementById('receiptPreviewOverlay').classList.remove('active'); });
+    document.getElementById('rpPrintBtn').addEventListener('click', () => window.print());
+    document.getElementById('rpVoidBtn').addEventListener('click', async () => {
+        if (!activeReceiptId) return;
+        const reason = prompt('Reason for voiding this receipt (optional):') || '';
+        if (!confirm('Void this receipt? This does not delete it and does not change the underlying payment record — prefer this over deletion so the paper trail stays intact.')) return;
+        try {
+            await fsMod.updateDoc(fsMod.doc(db, 'receipts', activeReceiptId), { voided: true, voidedAt: fsMod.serverTimestamp(), voidReason: reason });
+            await loadReceipts();
+            openReceiptPreview(activeReceiptId);
+        } catch (err) {
+            alert('Could not void receipt: ' + err.message);
+        }
     });
 }

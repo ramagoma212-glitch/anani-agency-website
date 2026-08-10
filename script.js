@@ -315,12 +315,15 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
         mobileMenu.classList.add('open');
         if (overlay) overlay.classList.add('active');
         document.body.style.overflow = 'hidden'; // stop background scrolling
+        hamburger.setAttribute('aria-expanded', 'true');
+        if (closeBtn) closeBtn.focus(); // move focus into the open menu
     }
 
     function closeMenu() {
         mobileMenu.classList.remove('open');
         if (overlay) overlay.classList.remove('active');
         document.body.style.overflow = '';
+        hamburger.setAttribute('aria-expanded', 'false');
     }
 
     hamburger.addEventListener('click', openMenu);
@@ -329,6 +332,14 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
 
     /* Close menu when any link inside it is tapped */
     mobileLinks.forEach(link => link.addEventListener('click', closeMenu));
+
+    /* Close on Escape, and return focus to the hamburger for keyboard users */
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && mobileMenu.classList.contains('open')) {
+            closeMenu();
+            hamburger.focus();
+        }
+    });
 })();
 
 
@@ -473,36 +484,74 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
 
 
 /* ─────────────────────────────────────────────────────────────
-   11b. PRICING PACKAGE CONTEXT — carries the selected package from
-   pricing.html into the contact form (e.g. pricing.html links to
-   index.html?package=Starter+Business+Website#contact). Pre-fills
-   the subject line and, where possible, the service dropdown.
+   11b. PACKAGE / SERVICE CONTEXT — carries the visitor's selection
+   from pricing.html or a service page into the contact form, e.g.:
+     index.html?package=Starter+Business+Website#contact
+     index.html?service=Ecommerce+Website#contact
+   Pre-fills the subject line and service dropdown, and shows a
+   visible "You selected: …" banner so it's obvious to the visitor
+   — who can still clear it and pick anything else manually.
+   Unknown/malformed values are ignored safely (no JS errors, no
+   arbitrary option values ever assigned to the select).
    No checkout, no payment — just pre-filled context.
 ───────────────────────────────────────────────────────────── */
-(function prefillPackageFromQuery() {
+(function prefillSelectionFromQuery() {
     const params = new URLSearchParams(window.location.search);
     const pkg = params.get('package');
-    if (!pkg) return;
+    const svc = params.get('service');
+    if (!pkg && !svc) return;
 
-    const subjectField  = document.getElementById('fsubject');
+    const subjectField = document.getElementById('fsubject');
     const serviceField  = document.getElementById('fservice');
-    if (!subjectField && !serviceField) return;
+    const banner        = document.getElementById('selectionBanner');
+    const bannerText     = document.getElementById('selectionBannerText');
+    const clearBtn        = document.getElementById('clearSelectionBtn');
 
-    if (subjectField && !subjectField.value) {
-        subjectField.value = `Quote Request: ${pkg}`;
+    // Package name -> exact <option value> already in #fservice.
+    // Only known, exact matches are ever applied.
+    const packageToService = {
+        'Landing Page': 'Landing Page',
+        'Starter Business Website': 'Business Website',
+        'Professional Business Website': 'Business Website',
+        'Business Growth Website': 'Business Website',
+        'Ecommerce Website': 'Ecommerce Website',
+        'Custom Web System': 'Custom Web System',
+        'Custom Web System / Portal': 'Custom Web System'
+    };
+
+    let selectedLabel = null; // what we show in the banner
+    let serviceValue  = null; // exact #fservice option value, if any
+
+    if (pkg && packageToService[pkg]) {
+        selectedLabel = pkg;
+        serviceValue  = packageToService[pkg];
+    } else if (svc && serviceField) {
+        // Only accept values that are an EXACT match to an existing
+        // <option> — this is the "safe handling of malformed/unknown
+        // query values" requirement, not a free-text passthrough.
+        const validValues = [...serviceField.options].map(o => o.value).filter(Boolean);
+        if (validValues.includes(svc)) {
+            selectedLabel = svc;
+            serviceValue  = svc;
+        }
     }
 
-    if (serviceField) {
-        const map = {
-            'Landing Page': 'Landing Page',
-            'Starter Business Website': 'Business Website',
-            'Professional Business Website': 'Business Website',
-            'Business Growth Website': 'Business Website',
-            'Ecommerce Website': 'Ecommerce Website',
-            'Custom Web System': 'Custom Web System'
-        };
-        const match = map[pkg];
-        if (match) serviceField.value = match;
+    if (!selectedLabel) return; // unknown/malformed value — no-op, no error
+
+    if (serviceField && serviceValue) serviceField.value = serviceValue;
+    if (subjectField && !subjectField.value) {
+        subjectField.value = `Quote Request: ${selectedLabel}`;
+    }
+    if (banner && bannerText) {
+        bannerText.textContent = selectedLabel;
+        banner.hidden = false;
+    }
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            if (banner) banner.hidden = true;
+            if (serviceField) serviceField.value = '';
+            if (subjectField) subjectField.value = '';
+        });
     }
 })();
 
@@ -512,12 +561,24 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
    Falls back to a mailto link if EmailJS is not configured.
 ───────────────────────────────────────────────────────────── */
 (function initContactForm() {
-    const form    = document.getElementById('contactForm');
-    const msgEl   = document.getElementById('formMsg');
+    const form          = document.getElementById('contactForm');
+    const msgEl         = document.getElementById('formMsg');
+    const successPanel  = document.getElementById('formSuccessPanel');
+    const continueBtn   = document.getElementById('continueBrowsingBtn');
     if (!form || !msgEl) return;
+
+    let isSubmitting = false; // guards against double-submit (double click, double Enter)
+
+    if (continueBtn) {
+        continueBtn.addEventListener('click', () => {
+            if (successPanel) successPanel.hidden = true;
+            form.hidden = false;
+        });
+    }
 
     form.addEventListener('submit', function (e) {
         e.preventDefault();
+        if (isSubmitting) return; // a send is already in flight — ignore
 
         const nameField    = document.getElementById('fname');
         const emailField   = document.getElementById('femail');
@@ -544,6 +605,8 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
         }
 
         const submitBtn = form.querySelector('.submit-btn');
+        isSubmitting = true;
+        form.setAttribute('aria-busy', 'true');
         submitBtn.disabled  = true;
         submitBtn.innerHTML = '<span>Sending…</span> <i class="fas fa-spinner fa-spin"></i>';
 
@@ -573,13 +636,25 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
 
             emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
                 .then(() => {
+                    isSubmitting = false;
+                    form.removeAttribute('aria-busy');
                     submitBtn.disabled  = false;
                     submitBtn.innerHTML = '<span>Send Message</span> <i class="fas fa-paper-plane"></i>';
                     form.reset();
-                    showMsg('✅ Message sent! I will get back to you soon.', 'success');
+                    /* Only EmailJS actually confirming success shows the rich
+                       success panel — never shown speculatively beforehand. */
+                    if (successPanel) {
+                        form.hidden = true;
+                        successPanel.hidden = false;
+                        successPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    } else {
+                        showMsg('✅ Message sent! I will get back to you soon.', 'success');
+                    }
                 })
                 .catch((err) => {
                     console.error('EmailJS error:', err);
+                    isSubmitting = false;
+                    form.removeAttribute('aria-busy');
                     submitBtn.disabled  = false;
                     submitBtn.innerHTML = '<span>Send Message</span> <i class="fas fa-paper-plane"></i>';
                     showMsg('❌ Sending failed. Please try WhatsApp or email me directly.', 'error');
@@ -602,6 +677,8 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
             window.location.href = `mailto:ramagoma212@gmail.com?subject=${subject}&body=${body}`;
 
             setTimeout(() => {
+                isSubmitting = false;
+                form.removeAttribute('aria-busy');
                 submitBtn.disabled  = false;
                 submitBtn.innerHTML = '<span>Send Message</span> <i class="fas fa-paper-plane"></i>';
                 form.reset();

@@ -771,7 +771,7 @@
             <div class="nav-right">
                 <a href="https://wa.me/27648412146?text=Hi%20Anani%2C%20I%27m%20interested%20in%20your%20website%20development%2C%20SEO%20or%20AI%20services%21"
                    target="_blank" rel="noopener noreferrer" class="nav-cta">Chat on WhatsApp</a>
-                <button class="hamburger" id="hamburger" aria-label="Open menu">
+                <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">
                     <span></span>
                     <span></span>
                     <span></span>
@@ -1075,7 +1075,7 @@
             </p>
 
             <div style="text-align:center; margin-top:24px; display:flex; gap:14px; justify-content:center; flex-wrap:wrap;">
-                <a href="index.html#contact" class="btn-primary">
+                <a href="index.html?service=Business+Website#contact" class="btn-primary">
                     <span>Request a Quote</span>
                     <i class="fas fa-arrow-right"></i>
                 </a>
@@ -1341,7 +1341,7 @@
                         <i class="fab fa-whatsapp"></i>
                         <span>WhatsApp Me Now</span>
                     </a>
-                    <a href="index.html#contact" class="btn-primary">
+                    <a href="index.html?service=Business+Website#contact" class="btn-primary">
                         <span>Send a Message</span>
                         <i class="fas fa-arrow-right"></i>
                     </a>
@@ -1451,6 +1451,28 @@
     <button id="backToTop" aria-label="Back to top">
         <i class="fas fa-chevron-up"></i>
     </button>
+
+    <!-- ============================================================
+         MOBILE STICKY CONTACT BAR — mobile only (hidden ≥768px).
+         Three actions max, per Milestone 16: Call, WhatsApp (normal
+         business number), Get Quote. Never uses the AI WhatsApp
+         assistant number here — that stays its own separately
+         labelled feature.
+    ============================================================ -->
+    <nav class="mobile-sticky-bar" aria-label="Quick contact actions">
+        <a href="tel:+27648412146" class="sticky-bar-item" aria-label="Call RM Digitals">
+            <i class="fas fa-phone"></i>
+            <span>Call</span>
+        </a>
+        <a href="https://wa.me/27648412146" target="_blank" rel="noopener noreferrer" class="sticky-bar-item" aria-label="WhatsApp RM Digitals">
+            <i class="fab fa-whatsapp"></i>
+            <span>WhatsApp</span>
+        </a>
+        <a href="index.html#contact" class="sticky-bar-item sticky-bar-cta" aria-label="Get a website quote">
+            <i class="fas fa-paper-plane"></i>
+            <span>Get Quote</span>
+        </a>
+    </nav>
 
     <!--
         ✅ SHARED SCRIPT:

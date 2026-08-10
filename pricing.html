@@ -177,6 +177,15 @@
         .budget-callout-actions .btn-secondary,
         .budget-callout-actions .btn-whatsapp { min-height: 44px; }
 
+        /* ── Value/trust strip below the package grid ── */
+        .value-strip {
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 24px;
+            max-width: 900px; margin: 32px auto 0; padding: 18px 24px;
+            border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+        }
+        .value-strip-item { display: flex; align-items: center; gap: 9px; font-size: .82rem; color: var(--text-mid); }
+        .value-strip-item i { color: var(--cyan); font-size: .9rem; flex-shrink: 0; }
+
         /* ── Maintenance plans (reuses services-grid / service-card look) ── */
         .maintenance-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
         .maintenance-card {
@@ -337,7 +346,7 @@
             <div class="nav-right">
                 <a href="https://wa.me/27648412146?text=Hi%20Anani%2C%20I%27m%20interested%20in%20your%20website%20development%2C%20SEO%20or%20AI%20services%21"
                    target="_blank" rel="noopener noreferrer" class="nav-cta">Chat on WhatsApp</a>
-                <button class="hamburger" id="hamburger" aria-label="Open menu">
+                <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">
                     <span></span>
                     <span></span>
                     <span></span>
@@ -534,6 +543,17 @@
 
             </div>
 
+            <!-- Trust/value strip — every claim here is drawn directly from
+                 the feature lists already listed in the package cards above,
+                 nothing new is promised. -->
+            <div class="value-strip reveal">
+                <div class="value-strip-item"><i class="fas fa-mobile-screen-button"></i><span>Responsive, mobile-optimised builds</span></div>
+                <div class="value-strip-item"><i class="fas fa-magnifying-glass-chart"></i><span>Essential technical SEO setup</span></div>
+                <div class="value-strip-item"><i class="fab fa-whatsapp"></i><span>WhatsApp &amp; contact integration</span></div>
+                <div class="value-strip-item"><i class="fas fa-rocket"></i><span>Professional deployment &amp; launch support</span></div>
+                <div class="value-strip-item"><i class="fas fa-arrows-rotate"></i><span>An agreed number of revisions</span></div>
+            </div>
+
             <div class="budget-callout reveal">
                 <h3>Working With A Specific Budget?</h3>
                 <p>
@@ -555,8 +575,10 @@
                 <div class="budget-callout-divider"></div>
                 <h3>Need Something Different?</h3>
                 <p>
-                    Every business is different. Tell us what you need and your estimated
-                    budget, and we'll recommend a realistic solution and quotation.
+                    Every business is different. We can adjust the scope where practical to
+                    work within your budget while keeping the project realistic and
+                    professional. Tell us what you need and your estimated budget, and
+                    we'll recommend a realistic solution and quotation.
                 </p>
                 <a href="index.html#contact" class="btn-secondary">
                     <span>Send an Enquiry</span>
@@ -973,6 +995,28 @@
     <button id="backToTop" aria-label="Back to top">
         <i class="fas fa-chevron-up"></i>
     </button>
+
+    <!-- ============================================================
+         MOBILE STICKY CONTACT BAR — mobile only (hidden ≥768px).
+         Three actions max, per Milestone 16: Call, WhatsApp (normal
+         business number), Get Quote. Never uses the AI WhatsApp
+         assistant number here — that stays its own separately
+         labelled feature.
+    ============================================================ -->
+    <nav class="mobile-sticky-bar" aria-label="Quick contact actions">
+        <a href="tel:+27648412146" class="sticky-bar-item" aria-label="Call RM Digitals">
+            <i class="fas fa-phone"></i>
+            <span>Call</span>
+        </a>
+        <a href="https://wa.me/27648412146" target="_blank" rel="noopener noreferrer" class="sticky-bar-item" aria-label="WhatsApp RM Digitals">
+            <i class="fab fa-whatsapp"></i>
+            <span>WhatsApp</span>
+        </a>
+        <a href="index.html#contact" class="sticky-bar-item sticky-bar-cta" aria-label="Get a website quote">
+            <i class="fas fa-paper-plane"></i>
+            <span>Get Quote</span>
+        </a>
+    </nav>
 
     <script src="script.js"></script>
 

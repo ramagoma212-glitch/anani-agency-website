@@ -151,7 +151,7 @@
             <div class="nav-right">
                 <a href="https://wa.me/27648412146?text=Hi%20Anani%2C%20I%27m%20interested%20in%20your%20website%20development%2C%20SEO%20or%20AI%20services%21"
                    target="_blank" rel="noopener noreferrer" class="nav-cta">Chat on WhatsApp</a>
-                <button class="hamburger" id="hamburger" aria-label="Open menu">
+                <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">
                     <span></span>
                     <span></span>
                     <span></span>
@@ -679,6 +679,14 @@
                 </div>
 
             </div><!-- /.portfolio-grid -->
+
+            <div class="portfolio-cta reveal">
+                <p>Like what you see? Let's build something similar for your business.</p>
+                <a href="#contact" class="btn-primary">
+                    <span>Get a Website Quote</span>
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
         </div>
     </section>
 
@@ -930,6 +938,21 @@
 
                 <!-- Right: Contact form — sends email to ramagoma212@gmail.com via EmailJS -->
                 <div class="contact-form-wrap reveal">
+
+                    <!-- Shown only when a package/service was carried over via
+                         ?package= or ?service= (see prefillSelectionFromQuery()
+                         in script.js). The visitor can still clear it and pick
+                         anything else in the Service dropdown below. -->
+                    <div id="selectionBanner" class="selection-banner" hidden>
+                        <i class="fas fa-check-circle"></i>
+                        <span>You selected: <strong id="selectionBannerText"></strong></span>
+                        <button type="button" id="clearSelectionBtn" aria-label="Clear selected package">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
+                    <p class="form-required-note">Name, email and message are required — everything else helps us understand your project better.</p>
+
                     <form id="contactForm" class="contact-form" novalidate>
 
                         <div class="field">
@@ -965,7 +988,7 @@
 
                         <div class="field">
                             <label for="fsubject" class="sr-only">Subject</label>
-                            <input type="text" id="fsubject" name="subject" placeholder="Subject" />
+                            <input type="text" id="fsubject" name="subject" placeholder="Subject (optional)" />
                             <div class="field-line"></div>
                         </div>
 
@@ -994,10 +1017,29 @@
                             <i class="fas fa-paper-plane"></i>
                         </button>
 
-                        <!-- Success/error message -->
+                        <!-- Error/fallback message only — success replaces the whole
+                             form with #formSuccessPanel below instead of a one-line
+                             message, so there's a clear next step. -->
                         <div id="formMsg" class="form-msg" aria-live="polite"></div>
 
                     </form>
+
+                    <!-- Stronger success state — swapped in for the form once
+                         EmailJS actually confirms the send (never before). -->
+                    <div id="formSuccessPanel" class="form-success-panel" hidden aria-live="polite">
+                        <i class="fas fa-circle-check"></i>
+                        <h3>Enquiry Sent</h3>
+                        <p>Thank you. Your website enquiry has been sent successfully. RM Digitals will review your project and get back to you.</p>
+                        <div class="form-success-actions">
+                            <a href="https://wa.me/27648412146?text=Hi%20Anani%2C%20I%20just%20sent%20an%20enquiry%20on%20your%20website." target="_blank" rel="noopener noreferrer" class="whatsapp-btn">
+                                <i class="fab fa-whatsapp"></i>
+                                <span>WhatsApp Us</span>
+                            </a>
+                            <button type="button" id="continueBrowsingBtn" class="btn-secondary">
+                                <span>Continue Browsing</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
             </div><!-- /.contact-grid -->
@@ -1138,6 +1180,28 @@
     <button id="backToTop" aria-label="Back to top">
         <i class="fas fa-chevron-up"></i>
     </button>
+
+    <!-- ============================================================
+         MOBILE STICKY CONTACT BAR — mobile only (hidden ≥768px).
+         Three actions max, per Milestone 16: Call, WhatsApp (normal
+         business number), Get Quote. Never uses the AI WhatsApp
+         assistant number here — that stays its own separately
+         labelled feature.
+    ============================================================ -->
+    <nav class="mobile-sticky-bar" aria-label="Quick contact actions">
+        <a href="tel:+27648412146" class="sticky-bar-item" aria-label="Call RM Digitals">
+            <i class="fas fa-phone"></i>
+            <span>Call</span>
+        </a>
+        <a href="https://wa.me/27648412146" target="_blank" rel="noopener noreferrer" class="sticky-bar-item" aria-label="WhatsApp RM Digitals">
+            <i class="fab fa-whatsapp"></i>
+            <span>WhatsApp</span>
+        </a>
+        <a href="#contact" class="sticky-bar-item sticky-bar-cta" aria-label="Get a website quote">
+            <i class="fas fa-paper-plane"></i>
+            <span>Get Quote</span>
+        </a>
+    </nav>
 
     <!-- ============================================================
          CLIENT LOGIN — DISABLED (kept for future use, not shown to visitors)

@@ -1893,7 +1893,7 @@ select option:checked { background: var(--bg-layer); color: var(--cyan); }
 }
 .footer-bottom p { font-size: .8rem; color: var(--text-lo); }
 
-.footer-legal { display: flex; gap: 12px; align-items: center; font-size: .8rem; color: var(--text-lo); }
+.footer-legal { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 12px; align-items: center; font-size: .8rem; color: var(--text-lo); }
 .footer-legal a { transition: var(--t); }
 .footer-legal a:hover { color: var(--cyan); }
 

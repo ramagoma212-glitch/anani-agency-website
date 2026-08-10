@@ -1369,6 +1369,16 @@
                 <div id="cmReceiptsList"><p class="empty-note">—</p></div>
             </div>
 
+            <div class="cp-section">
+                <h4>Portal Access</h4>
+                <p class="field-hint" style="margin-bottom:10px;">Lets this client sign in to <code>client-portal.html</code> and view their own project progress, invoices and receipts. Their password is chosen by them and never visible here.</p>
+                <div class="lead-status-row" style="margin-bottom:10px;">
+                    <span class="status-badge" id="cmPortalStatusBadge">Not Invited</span>
+                </div>
+                <div id="cmPortalActions" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+                <div id="cmPortalMsg" class="form-msg" role="status" aria-live="polite"></div>
+            </div>
+
             <div style="margin-top:14px; text-align:right;">
                 <button type="button" class="btn-logout" id="cmDeleteBtn" style="color:#ff7070;border-color:rgba(255,80,80,.3);">Archive Client</button>
             </div>
@@ -1622,6 +1632,21 @@
                     <label for="cpLiveWebsiteUrl">Live Website URL (optional — for handover/portfolio, not auto-published)</label>
                     <input type="url" id="cpLiveWebsiteUrl" maxlength="500" placeholder="https://…" />
                 </div>
+            </div>
+
+            <!-- ============================================================
+                 CLIENT PORTAL (Milestone 22) — explicit per-project opt-in.
+                 Off by default; only projectName/type/description/stage/
+                 dates/progress/checklists/live URL are ever synced — never
+                 internal notes, priority, payments, or CRM linkage.
+            ============================================================ -->
+            <div class="cp-section">
+                <h4>Client Portal</h4>
+                <div class="field checkbox-row">
+                    <input type="checkbox" id="cpPortalEnabled" />
+                    <label for="cpPortalEnabled">Show this project in the client's portal</label>
+                </div>
+                <p class="field-hint">Only safe fields (progress, stage, target date, content checklist, completion checklist, live site link) are ever shared — never internal notes, priority or payment details. The client also needs an active Portal Access invite (see their Client Profile) before they can sign in at all.</p>
             </div>
 
             <!-- ============================================================

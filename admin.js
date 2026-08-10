@@ -1619,6 +1619,7 @@ async function runAdmin() {
         }
 
         renderCmInvoicesAndReceipts(client);
+        renderPortalAccessSection(client);
 
         document.getElementById('clientModalOverlay').classList.add('active');
     }
@@ -2384,6 +2385,7 @@ async function runAdmin() {
         renderCpContentFolderLink();
         document.getElementById('cpLiveWebsiteUrl').value = project ? (project.liveWebsiteUrl || '') : '';
         document.getElementById('cpInternalNotes').value = project ? (project.internalNotes || '') : '';
+        document.getElementById('cpPortalEnabled').checked = project ? !!project.portalEnabled : false;
 
         // Milestone 19 additions
         cpItemsCompletion = project ? (project.completionChecklist || []).map(i => ({ ...i })) : [];
@@ -2518,6 +2520,7 @@ async function runAdmin() {
             portfolioPermission: document.getElementById('cpPortfolioPermission').value,
             portfolioPermissionNote: document.getElementById('cpPortfolioPermissionNote').value.trim(),
             publicPortfolioSummary: document.getElementById('cpPublicPortfolioSummary').value.trim(),
+            portalEnabled: document.getElementById('cpPortalEnabled').checked,
             updatedAt: fsMod.serverTimestamp()
         };
 
@@ -2562,6 +2565,8 @@ async function runAdmin() {
             await loadClientProjects();
             if (record.leadId) await loadLeads();
             if (record.quoteId) await loadQuotes();
+            const savedProject = allClientProjects.find(p => p.id === projectId);
+            if (savedProject) await syncClientPortalProject(savedProject);
             return projectId;
         } catch (err) {
             console.error(err);
@@ -4096,4 +4101,233 @@ async function runAdmin() {
     }
 
     document.getElementById('dashTimeFilter').addEventListener('change', refreshDashboard);
+
+    /* ============================================================
+       CLIENT PORTAL (Milestone 22)
+       Admin-side half only — the client-facing half lives entirely in
+       client-portal.html/.js, which this file never imports or
+       depends on. Everything here either (a) syncs the sanitised
+       clientPortalProjects mirror, or (b) manages the
+       clientAccounts/portalInvites lifecycle. No rule here is ever
+       weakened to make this easier — see 22AA in the source brief:
+       if something can't be done safely, it's reported, not shortcut.
+       ============================================================ */
+
+    /* crypto.getRandomValues(), never Date.now()/Math.random() — an
+       invite token must be unguessable, since knowing it is the only
+       thing that lets someone read that one portalInvites document
+       (see firestore.rules) or register against a specific client. */
+    function generateInviteToken() {
+        const bytes = new Uint8Array(24);
+        crypto.getRandomValues(bytes);
+        return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+    }
+    function inviteUrl(token) {
+        return PUBLIC_SITE_URL + 'client-portal.html?invite=' + encodeURIComponent(token);
+    }
+
+    /* The ONE place that writes clientPortalProjects. Only ever called
+       right after a Client Project save, with the just-saved record —
+       never destroys the private clientProject if the sync itself
+       fails; it just reports the problem, since the private save
+       already succeeded and that's what matters most (Part 22). */
+    async function syncClientPortalProject(project) {
+        if (!project) return;
+        const portalRef = fsMod.doc(db, 'clientPortalProjects', project.id);
+        if (!project.portalEnabled) {
+            try {
+                const existing = await fsMod.getDoc(portalRef);
+                if (existing.exists() && existing.data().portalVisible !== false) {
+                    await fsMod.updateDoc(portalRef, { portalVisible: false, syncedAt: fsMod.serverTimestamp() });
+                }
+            } catch (err) {
+                console.warn('Could not hide client portal project on disable:', err.message);
+            }
+            return;
+        }
+        try {
+            // Full replace (setDoc without merge) every time — a field
+            // removed on the private project (e.g. a deleted checklist
+            // item) can never linger as a stale leftover here.
+            await fsMod.setDoc(portalRef, {
+                clientId: project.clientId,
+                projectName: project.projectName,
+                projectType: project.projectType || '',
+                description: project.description || '',
+                stage: project.stage,
+                startDate: project.startDate || null,
+                targetDate: project.targetDate || null,
+                progress: clampProgress(project.progress),
+                contentChecklist: (project.contentChecklist || []).map(i => ({ id: i.id, label: i.label, received: !!i.received })),
+                completionChecklist: (project.completionChecklist || []).map(i => ({ id: i.id, label: i.label, status: i.status })),
+                liveWebsiteUrl: project.liveWebsiteUrl || null,
+                completedAt: project.completedAt || null,
+                portalVisible: true,
+                syncedAt: fsMod.serverTimestamp()
+            });
+        } catch (err) {
+            console.warn('Could not sync client portal project:', err.message);
+            alert('Note: this project could not be updated in the Client Portal (' + err.message + '). The private project itself was saved successfully — please try saving again, or check the Client Portal manually.');
+        }
+    }
+
+    /* ── Portal Access (Client Profile section) ── */
+    async function renderPortalAccessSection(client) {
+        const badge = document.getElementById('cmPortalStatusBadge');
+        const actions = document.getElementById('cmPortalActions');
+        const msg = document.getElementById('cmPortalMsg');
+        msg.textContent = '';
+        if (!client) {
+            badge.textContent = 'Not Invited';
+            badge.className = 'status-badge status-draft';
+            actions.innerHTML = '';
+            return;
+        }
+        actions.innerHTML = '<p class="empty-note">Checking…</p>';
+
+        // Precise, UID-mapping-based lookups only — never name matching
+        // (Part 22, "one account maps to exactly one clientId, never
+        // inferred by name").
+        let accountSnap, inviteSnap;
+        try {
+            accountSnap = await fsMod.getDocs(fsMod.query(fsMod.collection(db, 'clientAccounts'), fsMod.where('clientId', '==', client.id)));
+            inviteSnap = await fsMod.getDocs(fsMod.query(fsMod.collection(db, 'portalInvites'), fsMod.where('clientId', '==', client.id)));
+        } catch (err) {
+            actions.innerHTML = '';
+            badge.textContent = 'Unknown';
+            badge.className = 'status-badge status-draft';
+            msg.textContent = '❌ Could not check portal access: ' + err.message;
+            msg.className = 'form-msg error';
+            return;
+        }
+        const account = accountSnap.docs.length ? { id: accountSnap.docs[0].id, ...accountSnap.docs[0].data() } : null;
+        const invites = inviteSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const activeInvite = invites.find(i => {
+            if (!i.active) return false;
+            if (!i.expiresAt) return true;
+            const exp = i.expiresAt.toDate ? i.expiresAt.toDate() : new Date(i.expiresAt);
+            return exp.getTime() > Date.now();
+        });
+
+        function mkBtn(label, handler) {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'btn-logout';
+            b.textContent = label;
+            b.addEventListener('click', handler);
+            return b;
+        }
+
+        actions.innerHTML = '';
+        if (account && account.active) {
+            badge.textContent = 'Account Active';
+            badge.className = 'status-badge status-paid';
+            actions.appendChild(mkBtn('Revoke Access', () => revokePortalAccess(account.id, client)));
+        } else if (account && !account.active) {
+            badge.textContent = 'Access Revoked';
+            badge.className = 'status-badge status-cancelled';
+            actions.appendChild(mkBtn('Re-enable Access', () => reenablePortalAccess(account.id, client)));
+        } else if (activeInvite) {
+            badge.textContent = 'Invite Active';
+            badge.className = 'status-badge status-sent';
+            actions.appendChild(mkBtn('Copy Invite Link', () => copyInviteLink(activeInvite.id)));
+            actions.appendChild(mkBtn('Email Invite', () => emailInviteLink(activeInvite.id, client)));
+            actions.appendChild(mkBtn('WhatsApp Invite', () => whatsappInviteLink(activeInvite.id, client)));
+            actions.appendChild(mkBtn('Revoke Invite', () => revokePendingInvite(activeInvite.id, client)));
+        } else {
+            badge.textContent = 'Not Invited';
+            badge.className = 'status-badge status-draft';
+            actions.appendChild(mkBtn('Generate Invite', () => generatePortalInvite(client)));
+        }
+    }
+
+    async function generatePortalInvite(client) {
+        const msg = document.getElementById('cmPortalMsg');
+        if (!client.email || !isValidEmail(client.email)) {
+            msg.textContent = '⚠️ This client needs a valid email on file before you can generate a portal invite — registration is tied to that exact email address.';
+            msg.className = 'form-msg error';
+            return;
+        }
+        const token = generateInviteToken();
+        try {
+            await fsMod.setDoc(fsMod.doc(db, 'portalInvites', token), {
+                clientId: client.id,
+                email: client.email,
+                active: true,
+                createdAt: fsMod.serverTimestamp(),
+                expiresAt: fsMod.Timestamp.fromDate(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)),
+                redeemedAt: null,
+                redeemedBy: null,
+                createdBy: auth.currentUser.uid
+            });
+            msg.textContent = '✅ Invite created (valid 7 days). Use the buttons below to send it to the client.';
+            msg.className = 'form-msg success';
+            await renderPortalAccessSection(client);
+        } catch (err) {
+            msg.textContent = '❌ Could not create invite: ' + err.message;
+            msg.className = 'form-msg error';
+        }
+    }
+
+    async function copyInviteLink(token) {
+        const msg = document.getElementById('cmPortalMsg');
+        try {
+            await navigator.clipboard.writeText(inviteUrl(token));
+            msg.textContent = '✅ Invite link copied.';
+            msg.className = 'form-msg success';
+        } catch {
+            prompt('Copy this invite link:', inviteUrl(token));
+        }
+    }
+    function emailInviteLink(token, client) {
+        if (!client.email || !isValidEmail(client.email)) { alert('This client has no valid email on file.'); return; }
+        const subject = 'Your RM Digitals Client Portal Invite';
+        const body = `Hi ${client.name || ''},\n\nYou can now access your RM Digitals Client Portal to view your project progress, invoices and receipts.\n\nPlease register using this exact email address (${client.email}):\n${inviteUrl(token)}\n\nThis link is valid for 7 days.\n\nKind regards,\nAnani — RM Digitals`;
+        window.location.href = `mailto:${encodeURIComponent(client.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    }
+    function whatsappInviteLink(token, client) {
+        const digits = normalizePhoneForWa(client.phone);
+        if (!digits) { alert('This client has no valid phone number on file.'); return; }
+        const text = `Hi ${client.name || ''}, you can now access your RM Digitals Client Portal to view your project progress, invoices and receipts. Please register using this exact email address (${client.email || 'the one on file with us'}): ${inviteUrl(token)} (valid 7 days)`;
+        window.open(`https://wa.me/${digits}?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
+    }
+
+    async function revokePendingInvite(inviteId, client) {
+        if (!confirm('Revoke this invite? The client will no longer be able to use this link to register.')) return;
+        const msg = document.getElementById('cmPortalMsg');
+        try {
+            await fsMod.updateDoc(fsMod.doc(db, 'portalInvites', inviteId), { active: false, updatedAt: fsMod.serverTimestamp() });
+            msg.textContent = '✅ Invite revoked.';
+            msg.className = 'form-msg success';
+            await renderPortalAccessSection(client);
+        } catch (err) {
+            msg.textContent = '❌ Could not revoke invite: ' + err.message;
+            msg.className = 'form-msg error';
+        }
+    }
+    async function revokePortalAccess(accountId, client) {
+        if (!confirm(`Revoke ${client.name}'s Client Portal access? They'll be signed out and won't be able to see any of their project data until you re-enable it.`)) return;
+        const msg = document.getElementById('cmPortalMsg');
+        try {
+            await fsMod.updateDoc(fsMod.doc(db, 'clientAccounts', accountId), { active: false, updatedAt: fsMod.serverTimestamp() });
+            msg.textContent = '✅ Portal access revoked.';
+            msg.className = 'form-msg success';
+            await renderPortalAccessSection(client);
+        } catch (err) {
+            msg.textContent = '❌ Could not revoke access: ' + err.message;
+            msg.className = 'form-msg error';
+        }
+    }
+    async function reenablePortalAccess(accountId, client) {
+        const msg = document.getElementById('cmPortalMsg');
+        try {
+            await fsMod.updateDoc(fsMod.doc(db, 'clientAccounts', accountId), { active: true, updatedAt: fsMod.serverTimestamp() });
+            msg.textContent = '✅ Portal access re-enabled.';
+            msg.className = 'form-msg success';
+            await renderPortalAccessSection(client);
+        } catch (err) {
+            msg.textContent = '❌ Could not re-enable access: ' + err.message;
+            msg.className = 'form-msg error';
+        }
+    }
 }

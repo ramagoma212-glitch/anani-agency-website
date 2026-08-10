@@ -34,6 +34,21 @@ service cloud.firestore {
           && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     }
 
+    /* ── Client Portal helpers (Milestone 22) ──
+       A "real" portal client is a signed-in user with an ACTIVE
+       clientAccounts/{uid} mapping — never a client-supplied clientId
+       from a query string or request payload. myClientId() is only
+       ever called after isActiveClientAccount() has already confirmed
+       the mapping exists and is active. */
+    function isActiveClientAccount() {
+      return isSignedIn()
+          && exists(/databases/$(database)/documents/clientAccounts/$(request.auth.uid))
+          && get(/databases/$(database)/documents/clientAccounts/$(request.auth.uid)).data.active == true;
+    }
+    function myClientId() {
+      return get(/databases/$(database)/documents/clientAccounts/$(request.auth.uid)).data.clientId;
+    }
+
     /* ── Admins allow-list ──
        Nobody can create, update or delete an admin document through
        these rules — that only happens via the Firebase Console (or
@@ -129,16 +144,102 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
 
-    /* ── Invoices & Receipts (Milestone 20) ──
-       Private financial records. Admin only for now — Milestone 22
-       extends these two rules (only) with a narrow client-owner read
-       path once the clientAccounts/portalInvites infrastructure
-       exists. No client write access is ever introduced. */
+    /* ── Invoices & Receipts (Milestone 20; extended in Milestone 22) ──
+       Private financial records. Admin keeps full read/write. A
+       mapped, active portal client may additionally READ ONLY their
+       own records (resource.data.clientId must equal their mapped
+       clientId) — write access is never introduced for clients. The
+       portal's own queries must still filter on clientId themselves
+       (rules are not filters — an unconstrained list query would be
+       rejected even though every result would individually pass). */
     match /invoices/{invoiceId} {
-      allow read, write: if isAdmin();
+      allow read: if isAdmin()
+          || (isActiveClientAccount() && resource.data.clientId == myClientId());
+      allow write: if isAdmin();
     }
     match /receipts/{receiptId} {
-      allow read, write: if isAdmin();
+      allow read: if isAdmin()
+          || (isActiveClientAccount() && resource.data.clientId == myClientId());
+      allow write: if isAdmin();
+    }
+
+    /* ── Client Portal accounts (Milestone 22) ──
+       clientAccounts/{uid} maps exactly one Firebase Auth UID to
+       exactly one clientId — the ONLY thing every other portal rule
+       trusts. A client may create their OWN mapping exactly once,
+       and only by successfully redeeming a real, active, unexpired
+       invite addressed to their own VERIFIED email (email_verified
+       comes from the Auth ID token itself, not any client-supplied
+       field, so it can't be spoofed in the write payload). Clients
+       can never update or delete their own mapping afterwards — only
+       admin can revoke/re-enable/change it, which is how "Revoke
+       Access" in the admin UI works. */
+    match /clientAccounts/{uid} {
+      allow get: if isAdmin() || (isSignedIn() && request.auth.uid == uid);
+      allow list: if isAdmin();
+      allow create: if isAdmin() || (
+          isSignedIn()
+          && request.auth.uid == uid
+          && request.auth.token.email_verified == true
+          && request.resource.data.keys().hasOnly(['clientId', 'email', 'active', 'createdAt', 'inviteId'])
+          && request.resource.data.active == true
+          && request.resource.data.email is string
+          && request.resource.data.email.lower() == request.auth.token.email.lower()
+          && request.resource.data.inviteId is string
+          && exists(/databases/$(database)/documents/portalInvites/$(request.resource.data.inviteId))
+          && get(/databases/$(database)/documents/portalInvites/$(request.resource.data.inviteId)).data.active == true
+          && get(/databases/$(database)/documents/portalInvites/$(request.resource.data.inviteId)).data.expiresAt > request.time
+          && get(/databases/$(database)/documents/portalInvites/$(request.resource.data.inviteId)).data.email.lower() == request.auth.token.email.lower()
+          && get(/databases/$(database)/documents/portalInvites/$(request.resource.data.inviteId)).data.clientId == request.resource.data.clientId
+      );
+      allow update, delete: if isAdmin();
+    }
+
+    /* ── Client Portal invites (Milestone 22) ──
+       inviteId is itself the unguessable crypto-random token — the
+       ONLY thing the invite URL ever contains (never a clientId,
+       phone number, or any other identifier). Reading a single invite
+       by its exact, unguessable ID is required for a Cloud-Function-
+       free registration flow (no Cloud Functions this milestone) and
+       is the same trust model as any secret-link invite/reset flow —
+       listing the collection is never allowed to anyone but admin, so
+       there is no way to enumerate or browse invites. The narrow
+       client update path lets a client mark ONLY their own
+       just-redeemed invite as used; clientId/email/createdAt/
+       expiresAt can never be changed by a client, only
+       active/redeemedAt/redeemedBy. */
+    match /portalInvites/{inviteId} {
+      allow get: if true;
+      allow list: if isAdmin();
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || (
+          isSignedIn()
+          && request.auth.token.email_verified == true
+          && resource.data.active == true
+          && resource.data.expiresAt > request.time
+          && resource.data.email.lower() == request.auth.token.email.lower()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['active', 'redeemedAt', 'redeemedBy'])
+          && request.resource.data.active == false
+          && request.resource.data.redeemedBy == request.auth.uid
+      );
+    }
+
+    /* ── Client Portal projects (Milestone 22) ──
+       A sanitised, admin-synced MIRROR of a private clientProjects
+       document — clients are never given direct read access to
+       clientProjects itself (that collection stays admin-only,
+       unchanged above). Only fields explicitly safe for a client to
+       see live here; syncClientPortalProject() in admin.js is the
+       single place that writes this collection. portalVisible must be
+       true (belt-and-braces alongside the admin only syncing when the
+       private project's portalEnabled flag is on) and the requester's
+       mapped clientId must match the document's clientId — never a
+       client-supplied value. As with invoices/receipts, the portal's
+       own query must filter on clientId itself. */
+    match /clientPortalProjects/{projectId} {
+      allow read: if isAdmin()
+          || (isActiveClientAccount() && resource.data.clientId == myClientId() && resource.data.portalVisible == true);
+      allow write: if isAdmin();
     }
 
     /* Deny everything else by default. */

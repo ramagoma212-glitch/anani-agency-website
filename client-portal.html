@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Client Portal | RM Digitals</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="description" content="RM Digitals client portal — sign in to view your project progress, invoices and receipts." />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+
+    <style>
+        body { overflow-x: hidden; }
+        .portal-header {
+            display: flex; align-items: center; justify-content: space-between;
+            max-width: 760px; margin: 0 auto; padding: 32px 24px 0;
+        }
+        .portal-header .brand { display: flex; align-items: center; gap: 10px; font-family: var(--f-display); font-weight: 800; }
+        .portal-header img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
+        .portal-wrap { max-width: 760px; margin: 0 auto; padding: 40px 24px 100px; }
+
+        .admin-card {
+            background: var(--bg-glass); border: 1px solid var(--border); border-radius: 20px;
+            padding: 32px; margin-bottom: 28px;
+        }
+        .admin-card h2 { font-family: var(--f-display); font-size: 1.15rem; margin-bottom: 6px; }
+        .admin-card .card-sub { font-size: .8rem; color: var(--text-lo); margin: 0 0 18px; }
+
+        #authPanel { max-width: 440px; margin: 60px auto 0; }
+        #authPanel .field { margin-bottom: 16px; }
+        #authPanel label { display: block; font-size: .78rem; color: var(--text-mid); margin-bottom: 6px; }
+        .auth-switch { text-align: center; font-size: .82rem; color: var(--text-mid); margin-top: 14px; }
+        .auth-switch a, .auth-switch button.link-btn {
+            color: var(--cyan); cursor: pointer; background: none; border: none; font: inherit; padding: 0; text-decoration: underline;
+        }
+        #configWarning { display: none; }
+
+        #portalPanel { display: none; }
+        .portal-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 10px; }
+        .portal-toolbar .who { font-size: .82rem; color: var(--text-mid); }
+        .btn-logout {
+            background: none; border: 1px solid var(--border); color: var(--text-mid);
+            padding: 8px 18px; border-radius: 100px; font-size: .82rem; cursor: pointer;
+        }
+        .btn-logout:hover, .btn-logout:focus-visible { color: var(--text-hi); border-color: var(--border-glow); }
+
+        .empty-note { color: var(--text-mid); font-size: .85rem; text-align: center; padding: 20px 0; }
+        .form-msg { min-height: 20px; font-size: .85rem; margin-top: 10px; }
+
+        .status-badge {
+            display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 100px;
+            font-size: .72rem; font-weight: 700; border: 1px solid var(--border); text-transform: capitalize;
+        }
+        .status-badge.status-draft, .status-badge.status-cancelled, .status-badge.status-voided { color: var(--text-mid); border-color: var(--border); }
+        .status-badge.status-sent { color: var(--cyan); border-color: rgba(0,212,255,.3); }
+        .status-badge.status-part_paid { color: var(--gold); border-color: rgba(255,214,10,.3); }
+        .status-badge.status-paid, .status-badge.status-issued { color: var(--green); border-color: rgba(0,255,136,.3); }
+        .status-badge.status-overdue { color: #ff7070; border-color: rgba(255,80,80,.3); }
+        .status-badge.status-overpaid { color: var(--gold); border-color: rgba(255,214,10,.3); }
+
+        .portal-row {
+            display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+            border: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px; flex-wrap: wrap; cursor: pointer;
+        }
+        .portal-row:hover, .portal-row:focus-visible { border-color: var(--border-glow); }
+        .portal-row .info { flex: 1; min-width: 160px; }
+        .portal-row .info strong { display: block; font-size: .92rem; }
+        .portal-row .info span { font-size: .76rem; color: var(--text-mid); }
+        .portal-row .amount-col { font-family: var(--f-display); font-weight: 700; font-size: .9rem; }
+
+        .cp-dashboard { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 6px; }
+        @media (max-width: 480px) { .cp-dashboard { grid-template-columns: repeat(2, 1fr); } }
+        .cp-stat { border: 1px solid var(--border); border-radius: 12px; padding: 12px 8px; text-align: center; }
+        .cp-stat .num { font-family: var(--f-display); font-size: 1.1rem; font-weight: 800; display: block; word-break: break-word; }
+        .cp-stat .lbl { font-size: .62rem; color: var(--text-mid); text-transform: uppercase; letter-spacing: .4px; }
+
+        .portal-progress-bar { height: 8px; border-radius: 100px; background: rgba(255,255,255,.06); overflow: hidden; margin: 6px 0 4px; }
+        .portal-progress-bar span { display: block; height: 100%; background: linear-gradient(90deg, var(--cyan), var(--green)); }
+
+        .checklist-item {
+            display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: .85rem;
+        }
+        .checklist-item:last-child { border-bottom: none; }
+        .checklist-item i { width: 16px; text-align: center; }
+        .checklist-item.done i { color: var(--green); }
+        .checklist-item.pending i { color: var(--text-lo); }
+        .checklist-item.na { color: var(--text-lo); text-decoration: line-through; }
+
+        .contact-links { display: flex; flex-wrap: wrap; gap: 10px; }
+        .contact-links a {
+            display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 100px;
+            border: 1px solid var(--border); color: var(--text-hi); font-size: .85rem; text-decoration: none;
+        }
+        .contact-links a:hover { border-color: var(--border-glow); color: var(--cyan); }
+
+        /* ── Modals (Project detail / Invoice / Receipt preview) ── */
+        .lead-modal-overlay {
+            display: none; position: fixed; inset: 0; background: rgba(5,5,16,.85); backdrop-filter: blur(6px);
+            z-index: 200; align-items: flex-start; justify-content: center; padding: 40px 16px; overflow-y: auto;
+        }
+        .lead-modal-overlay.active { display: flex; }
+        .lead-modal-box {
+            background: var(--bg-layer); border: 1px solid var(--border); border-radius: 20px;
+            padding: 32px; max-width: 640px; width: 100%; position: relative; max-height: 90vh; overflow-y: auto;
+        }
+        .lead-modal-box h3 { font-family: var(--f-display); font-size: 1.1rem; margin-bottom: 4px; }
+        .lead-modal-close {
+            position: absolute; top: 20px; right: 20px; background: none; border: none; color: var(--text-mid);
+            font-size: 1.6rem; cursor: pointer; line-height: 1;
+        }
+        .lead-modal-close:hover { color: var(--text-hi); }
+
+        .quote-preview-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+        .quote-preview-actions button {
+            background: none; border: 1px solid var(--border); color: var(--text-mid);
+            padding: 8px 16px; border-radius: 100px; font-size: .8rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+        }
+        .quote-preview-actions button:hover { color: var(--text-hi); border-color: var(--border-glow); }
+
+        .quote-print-area { background: #fff; color: #111; border-radius: 12px; padding: 28px; }
+        .quote-print-area * { color: #111; }
+        .quote-print-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 18px; flex-wrap: wrap; gap: 10px; }
+        .quote-print-header h2 { font-family: var(--f-display); font-size: 1.3rem; }
+        .quote-meta { text-align: right; font-size: .82rem; }
+        .quote-print-section { margin-bottom: 18px; }
+        .quote-print-section h4 { font-size: .82rem; text-transform: uppercase; letter-spacing: .5px; color: #555; margin-bottom: 6px; }
+        .quote-print-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+        .quote-print-table th, .quote-print-table td { text-align: left; padding: 8px 6px; border-bottom: 1px solid #ddd; }
+        .quote-print-totals { margin-top: 10px; max-width: 300px; margin-left: auto; }
+        .quote-print-totals .row { display: flex; justify-content: space-between; padding: 4px 0; font-size: .88rem; }
+        .quote-print-totals .row.grand { font-weight: 800; border-top: 1px solid #333; margin-top: 4px; padding-top: 8px; }
+        .quote-print-noprint { }
+        .cs-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: .88rem; }
+
+        @media print {
+            body * { visibility: hidden; }
+            #projectDetailOverlay, #projectDetailOverlay *,
+            #invoicePreviewOverlay, #invoicePreviewOverlay *,
+            #receiptPreviewOverlay, #receiptPreviewOverlay * { visibility: visible; }
+            #projectDetailOverlay, #invoicePreviewOverlay, #receiptPreviewOverlay { position: absolute; inset: 0; background: #fff !important; padding: 0; }
+            #projectDetailOverlay.active, #invoicePreviewOverlay.active, #receiptPreviewOverlay.active { display: block !important; }
+            .lead-modal-box { max-width: 100%; max-height: none; box-shadow: none; border: none; padding: 0; }
+            .quote-print-area { border-radius: 0; padding: 0; }
+            .quote-preview-actions, .lead-modal-close { display: none !important; }
+        }
+
+        .portal-footer { max-width: 760px; margin: 0 auto; padding: 0 24px 40px; text-align: center; }
+        .portal-footer a { color: var(--text-mid); font-size: .82rem; }
+    </style>
+</head>
+<body>
+
+    <div class="portal-header">
+        <div class="brand">
+            <img src="images/mylog.webp" alt="RM Digitals" />
+            <span>RM<span class="accent">.</span> Client Portal</span>
+        </div>
+        <a href="index.html" style="font-size:.82rem;color:var(--text-mid);"><i class="fas fa-arrow-left"></i> Back to site</a>
+    </div>
+
+    <div id="configWarning" class="config-warning" style="display:none;max-width:600px;margin:100px auto;text-align:center;padding:40px 30px;background:rgba(255,214,10,.06);border:1px solid rgba(255,214,10,.25);border-radius:20px;">
+        <i class="fas fa-triangle-exclamation" style="font-size:2rem;color:var(--gold);margin-bottom:16px;"></i>
+        <h2>Client Portal Not Connected Yet</h2>
+        <p style="color:var(--text-mid);font-size:.9rem;margin-top:10px;">This page needs Firebase to be connected first. Please contact RM Digitals directly.</p>
+    </div>
+
+    <div class="portal-wrap">
+
+        <div id="authPanel">
+
+            <div id="signInCard" class="admin-card">
+                <h2>Sign In</h2>
+                <p class="card-sub">Access your project progress, invoices and receipts.</p>
+                <div class="field">
+                    <label for="siEmail">Email</label>
+                    <input type="email" id="siEmail" autocomplete="username" />
+                </div>
+                <div class="field">
+                    <label for="siPassword">Password</label>
+                    <input type="password" id="siPassword" autocomplete="current-password" />
+                </div>
+                <button class="btn-primary" id="siBtn" style="width:100%;justify-content:center;"><span>Sign In</span></button>
+                <div id="siMsg" class="form-msg" role="status" aria-live="polite"></div>
+                <div class="auth-switch">
+                    <button type="button" class="link-btn" id="showForgotBtn">Forgot your password?</button>
+                    &nbsp;·&nbsp;
+                    <button type="button" class="link-btn" id="showRegisterBtn">Have an invite? Register</button>
+                </div>
+            </div>
+
+            <div id="registerCard" class="admin-card" style="display:none;">
+                <h2>Register</h2>
+                <p class="card-sub">Use the exact email address RM Digitals sent your invite link to.</p>
+                <div class="field">
+                    <label for="regEmail">Email</label>
+                    <input type="email" id="regEmail" autocomplete="username" />
+                </div>
+                <div class="field">
+                    <label for="regPassword">Choose a Password</label>
+                    <input type="password" id="regPassword" autocomplete="new-password" />
+                </div>
+                <div class="field">
+                    <label for="regPasswordConfirm">Confirm Password</label>
+                    <input type="password" id="regPasswordConfirm" autocomplete="new-password" />
+                </div>
+                <button class="btn-primary" id="regBtn" style="width:100%;justify-content:center;"><span>Register</span></button>
+                <div id="regMsg" class="form-msg" role="status" aria-live="polite"></div>
+                <div class="auth-switch">
+                    <button type="button" class="link-btn" id="showSignInFromRegisterBtn">Already registered? Sign in</button>
+                </div>
+            </div>
+
+            <div id="forgotCard" class="admin-card" style="display:none;">
+                <h2>Reset Password</h2>
+                <p class="card-sub">We'll email you a link to choose a new password.</p>
+                <div class="field">
+                    <label for="fpEmail">Email</label>
+                    <input type="email" id="fpEmail" autocomplete="username" />
+                </div>
+                <button class="btn-primary" id="fpBtn" style="width:100%;justify-content:center;"><span>Send Reset Email</span></button>
+                <div id="fpMsg" class="form-msg" role="status" aria-live="polite"></div>
+                <div class="auth-switch">
+                    <button type="button" class="link-btn" id="showSignInFromForgotBtn">Back to Sign In</button>
+                </div>
+            </div>
+
+            <div id="verifyCard" class="admin-card" style="display:none;">
+                <h2>Verify Your Email</h2>
+                <p class="card-sub">We sent a verification link to <strong id="verifyEmailText"></strong>. Please click it, then sign in again.</p>
+                <button class="btn-primary" id="resendVerifyBtn" style="width:100%;justify-content:center;"><span>Resend Verification Email</span></button>
+                <div id="verifyMsg" class="form-msg" role="status" aria-live="polite"></div>
+                <div class="auth-switch">
+                    <button type="button" class="link-btn" id="verifySignOutBtn">Sign Out</button>
+                </div>
+            </div>
+
+            <div id="noAccessCard" class="admin-card" style="display:none;">
+                <h2>Account Not Linked</h2>
+                <p class="card-sub">Your account isn't linked to an RM Digitals client yet. If you have an invite link from RM Digitals, please use it directly — otherwise, contact us and we'll help.</p>
+                <div class="contact-links" style="margin-top:10px;">
+                    <a href="https://wa.me/27648412146" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i> WhatsApp Us</a>
+                    <a href="mailto:ramagoma212@gmail.com"><i class="fas fa-envelope"></i> Email Us</a>
+                </div>
+                <div class="auth-switch" style="margin-top:16px;">
+                    <button type="button" class="link-btn" id="noAccessSignOutBtn">Sign Out</button>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="portalPanel">
+            <div class="portal-toolbar">
+                <span class="who">Welcome, <strong id="whoName"></strong></span>
+                <button class="btn-logout" id="portalSignOutBtn">Sign Out</button>
+            </div>
+
+            <div class="admin-card">
+                <h2>My Projects</h2>
+                <p class="card-sub">Progress, target dates and what we still need from you.</p>
+                <div id="portalProjectsList"><p class="empty-note">Loading…</p></div>
+            </div>
+
+            <div class="admin-card">
+                <h2>Invoices</h2>
+                <p class="card-sub">Amounts billed and outstanding.</p>
+                <div id="portalInvoicesList"><p class="empty-note">Loading…</p></div>
+            </div>
+
+            <div class="admin-card">
+                <h2>Receipts</h2>
+                <p class="card-sub">Proof of payments received.</p>
+                <div id="portalReceiptsList"><p class="empty-note">Loading…</p></div>
+            </div>
+
+            <div class="admin-card">
+                <h2>Contact RM Digitals</h2>
+                <p class="card-sub">Questions about your project, an invoice, or anything else — reach out any time.</p>
+                <div class="contact-links">
+                    <a href="https://wa.me/27648412146" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+                    <a href="mailto:ramagoma212@gmail.com"><i class="fas fa-envelope"></i> Email</a>
+                    <a href="tel:+27648412146"><i class="fas fa-phone"></i> Call</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="portal-footer">
+        <a href="index.html">&larr; Back to RM Digitals</a>
+    </div>
+
+    <!-- ============================================================
+         PROJECT DETAIL (read-only — no client editing, no uploads)
+    ============================================================ -->
+    <div class="lead-modal-overlay" id="projectDetailOverlay">
+        <div class="lead-modal-box">
+            <button class="lead-modal-close" id="projectDetailClose" aria-label="Close">&times;</button>
+            <h3 id="pdProjectName"></h3>
+            <p class="card-sub" id="pdProjectType"></p>
+
+            <div class="portal-progress-bar"><span id="pdProgressBar" style="width:0%;"></span></div>
+            <p style="font-size:.8rem;color:var(--text-mid);margin-bottom:16px;"><span id="pdProgressText">0</span>% complete — <span id="pdStageText"></span></p>
+
+            <p style="font-size:.85rem;margin-bottom:4px;"><strong>Target Date:</strong> <span id="pdTargetDate">—</span></p>
+            <p style="font-size:.85rem;margin-bottom:18px;" id="pdLiveUrlRow"><strong>Live Website:</strong> <a id="pdLiveUrlLink" href="#" target="_blank" rel="noopener noreferrer">View site</a></p>
+
+            <div id="pdDescriptionSection" style="margin-bottom:18px;">
+                <h4 style="font-size:.85rem;margin-bottom:6px;">About This Project</h4>
+                <p id="pdDescription" style="font-size:.85rem;color:var(--text-mid);"></p>
+            </div>
+
+            <div id="pdChecklistSection" style="margin-bottom:18px;">
+                <h4 style="font-size:.85rem;margin-bottom:6px;">What We Still Need From You</h4>
+                <div id="pdChecklistList"></div>
+            </div>
+
+            <div id="pdCompletionSection">
+                <h4 style="font-size:.85rem;margin-bottom:6px;">Completion Checklist</h4>
+                <div id="pdCompletionList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         INVOICE PREVIEW / PRINT (read-only)
+    ============================================================ -->
+    <div class="lead-modal-overlay" id="invoicePreviewOverlay">
+        <div class="lead-modal-box">
+            <button class="lead-modal-close quote-print-noprint" id="invoicePreviewClose" aria-label="Close">&times;</button>
+            <div class="quote-preview-actions quote-print-noprint">
+                <button type="button" id="ipPrintBtn"><i class="fas fa-print"></i> Print / Save as PDF</button>
+            </div>
+            <div class="quote-print-area" id="invoicePrintArea">
+                <div class="quote-print-header">
+                    <div>
+                        <h2>RM Digitals</h2>
+                        <p style="font-size:.8rem;" id="ipTypeLabel">Invoice</p>
+                    </div>
+                    <div class="quote-meta">
+                        <div><strong id="ipInvoiceNumber"></strong></div>
+                        <div>Issue Date: <span id="ipIssueDate"></span></div>
+                        <div>Due Date: <span id="ipDueDate"></span></div>
+                        <div><span class="status-badge" id="ipStatusBadge"></span></div>
+                    </div>
+                </div>
+                <div class="quote-print-section">
+                    <h4>Invoice</h4>
+                    <div id="ipTitle" style="font-weight:700;"></div>
+                    <p id="ipDescription" style="font-size:.85rem;margin-top:4px;"></p>
+                </div>
+                <div class="quote-print-section">
+                    <table class="quote-print-table">
+                        <thead><tr><th>Description</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr></thead>
+                        <tbody id="ipItemsBody"></tbody>
+                    </table>
+                    <div class="quote-print-totals">
+                        <div class="row"><span>Subtotal</span><span id="ipSubtotal"></span></div>
+                        <div class="row" id="ipDiscountRow"><span>Discount</span><span id="ipDiscount"></span></div>
+                        <div class="row grand"><span>Total</span><span id="ipTotal"></span></div>
+                        <div class="row"><span>Paid</span><span id="ipPaid"></span></div>
+                        <div class="row grand"><span id="ipOutstandingLabel">Outstanding</span><span id="ipOutstanding"></span></div>
+                    </div>
+                </div>
+                <div class="quote-print-section" id="ipPaymentInstructionsSection">
+                    <h4>Payment Instructions</h4>
+                    <p id="ipPaymentInstructions" style="font-size:.85rem;white-space:pre-wrap;"></p>
+                </div>
+                <div class="quote-print-section" style="border-top:1px solid #ddd;padding-top:14px;">
+                    <p style="font-size:.8rem;">
+                        RM Digitals — Ramagoma Muthuhadini (Anani) · Thohoyandou, Limpopo, South Africa<br>
+                        WhatsApp/Phone: +27 64 841 2146 · Email: ramagoma212@gmail.com
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         RECEIPT PREVIEW / PRINT (read-only)
+    ============================================================ -->
+    <div class="lead-modal-overlay" id="receiptPreviewOverlay">
+        <div class="lead-modal-box">
+            <button class="lead-modal-close quote-print-noprint" id="receiptPreviewClose" aria-label="Close">&times;</button>
+            <div class="quote-preview-actions quote-print-noprint">
+                <button type="button" id="rpPrintBtn"><i class="fas fa-print"></i> Print / Save as PDF</button>
+            </div>
+            <div class="quote-print-area" id="receiptPrintArea">
+                <div class="quote-print-header">
+                    <div>
+                        <h2>RM Digitals</h2>
+                        <p style="font-size:.8rem;">Payment Receipt</p>
+                    </div>
+                    <div class="quote-meta">
+                        <div><strong id="rpReceiptNumber"></strong></div>
+                        <div>Date: <span id="rpDate"></span></div>
+                        <div id="rpVoidedRow" style="display:none;"><span class="status-badge status-voided">Voided</span></div>
+                    </div>
+                </div>
+                <div class="quote-print-section">
+                    <h4>Related Invoice</h4>
+                    <p id="rpInvoiceRef" style="font-size:.85rem;">—</p>
+                </div>
+                <div class="quote-print-section">
+                    <h4>Payment Details</h4>
+                    <div class="cs-row"><span>Amount Received</span><span id="rpAmount"></span></div>
+                    <div class="cs-row"><span>Payment Method</span><span id="rpMethod"></span></div>
+                    <p id="rpDescription" style="font-size:.85rem;margin-top:8px;"></p>
+                </div>
+                <div class="quote-print-section" style="border-top:1px solid #ddd;padding-top:14px;">
+                    <p style="font-size:.8rem;">
+                        RM Digitals — Ramagoma Muthuhadini (Anani) · Thohoyandou, Limpopo, South Africa<br>
+                        WhatsApp/Phone: +27 64 841 2146 · Email: ramagoma212@gmail.com
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="client-portal.js"></script>
+</body>
+</html>

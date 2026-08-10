@@ -4330,4 +4330,370 @@ async function runAdmin() {
             msg.className = 'form-msg error';
         }
     }
+
+    /* ============================================================
+       DATA & BACKUP (Milestone 23)
+       CSV export, a full JSON backup, a controlled "missing records
+       only" restore, and a report-only integrity check. Deliberately
+       NO bulk-delete / "wipe database" action anywhere here — every
+       destructive-adjacent action elsewhere already has its own
+       confirmation and stays exactly as it was.
+       ============================================================ */
+
+    function todayDateStamp() {
+        return new Date().toISOString().slice(0, 10);
+    }
+
+    /* OWASP CSV-injection mitigation: a cell that would otherwise open
+       with =, +, - or @ gets a leading apostrophe so Excel/Sheets never
+       interprets it as a formula, then normal CSV quoting is applied
+       on top of that. */
+    function csvCell(value) {
+        let s = value === null || value === undefined ? '' : String(value);
+        if (/^[=+\-@]/.test(s)) s = "'" + s;
+        if (/[",\n\r]/.test(s)) s = '"' + s.replace(/"/g, '""') + '"';
+        return s;
+    }
+    function toCsv(rows, columns) {
+        const header = columns.map(c => csvCell(c.label)).join(',');
+        const lines = rows.map(row => columns.map(c => csvCell(c.value(row))).join(','));
+        return [header, ...lines].join('\r\n');
+    }
+    function downloadTextFile(filename, content, mime) {
+        const blob = new Blob([content], { type: mime || 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+    function csvDate(ts) {
+        if (!ts) return '';
+        const d = ts.toDate ? ts.toDate() : new Date(ts);
+        return isNaN(d.getTime()) ? '' : d.toISOString().slice(0, 10);
+    }
+
+    async function getReviewsForExport() {
+        const snap = await fsMod.getDocs(fsMod.collection(db, 'reviews'));
+        return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    }
+
+    const EXPORT_COLUMNS = {
+        leads: [
+            { label: 'ID', value: r => r.id }, { label: 'Name', value: r => r.name },
+            { label: 'Email', value: r => r.email }, { label: 'Phone', value: r => r.phone },
+            { label: 'Status', value: r => r.status }, { label: 'Source', value: r => r.source },
+            { label: 'Budget', value: r => r.budget },
+            { label: 'Package/Service Interest', value: r => r.packageInterest || r.serviceInterest || '' },
+            { label: 'Message', value: r => r.message }, { label: 'Created', value: r => csvDate(r.createdAt) }
+        ],
+        quotes: [
+            { label: 'ID', value: r => r.id }, { label: 'Quote Number', value: r => r.quoteNumber },
+            { label: 'Client Name', value: r => r.clientName }, { label: 'Business', value: r => r.businessName },
+            { label: 'Email', value: r => r.clientEmail }, { label: 'Phone', value: r => r.clientPhone },
+            { label: 'Title', value: r => r.title }, { label: 'Status', value: r => r.status },
+            { label: 'Total', value: r => r.total }, { label: 'Valid Until', value: r => csvDate(r.validUntil) },
+            { label: 'Created', value: r => csvDate(r.createdAt) }
+        ],
+        clients: [
+            { label: 'ID', value: r => r.id }, { label: 'Name', value: r => r.name },
+            { label: 'Business', value: r => r.businessName }, { label: 'Email', value: r => r.email },
+            { label: 'Phone', value: r => r.phone }, { label: 'Alt Phone', value: r => r.alternativePhone },
+            { label: 'Website', value: r => r.website }, { label: 'Status', value: r => r.status },
+            { label: 'Created', value: r => csvDate(r.createdAt) }
+        ],
+        clientProjects: [
+            { label: 'ID', value: r => r.id }, { label: 'Project Name', value: r => r.projectName },
+            { label: 'Client ID', value: r => r.clientId }, { label: 'Type', value: r => r.projectType },
+            { label: 'Stage', value: r => r.stage }, { label: 'Priority', value: r => r.priority },
+            { label: 'Progress %', value: r => r.progress }, { label: 'Contract Value', value: r => r.contractValue },
+            { label: 'Amount Paid', value: r => r.amountPaid }, { label: 'Balance', value: r => r.balance },
+            { label: 'Payment Status', value: r => r.paymentStatus }, { label: 'Target Date', value: r => csvDate(r.targetDate) },
+            { label: 'Portal Enabled', value: r => r.portalEnabled ? 'Yes' : 'No' }, { label: 'Created', value: r => csvDate(r.createdAt) }
+        ],
+        invoices: [
+            { label: 'ID', value: r => r.id }, { label: 'Invoice Number', value: r => r.invoiceNumber },
+            { label: 'Client Name', value: r => r.clientName }, { label: 'Client ID', value: r => r.clientId },
+            { label: 'Type', value: r => r.invoiceType }, { label: 'Title', value: r => r.title },
+            { label: 'Total', value: r => r.total }, { label: 'Status', value: r => r.workflowStatus },
+            { label: 'Due Date', value: r => csvDate(r.dueDate) }, { label: 'Created', value: r => csvDate(r.createdAt) }
+        ],
+        receipts: [
+            { label: 'ID', value: r => r.id }, { label: 'Receipt Number', value: r => r.receiptNumber },
+            { label: 'Client Name', value: r => r.clientName }, { label: 'Client ID', value: r => r.clientId },
+            { label: 'Invoice Number', value: r => r.invoiceNumber }, { label: 'Amount', value: r => r.amount },
+            { label: 'Payment Date', value: r => csvDate(r.paymentDate) }, { label: 'Method', value: r => r.paymentMethod },
+            { label: 'Voided', value: r => r.voided ? 'Yes' : 'No' }, { label: 'Created', value: r => csvDate(r.createdAt) }
+        ],
+        projects: [
+            { label: 'ID', value: r => r.id }, { label: 'Slug', value: r => r.slug },
+            { label: 'Business Name', value: r => r.businessName }, { label: 'Category', value: r => r.category },
+            { label: 'Published', value: r => r.published ? 'Yes' : 'No' }, { label: 'Featured', value: r => r.featured ? 'Yes' : 'No' },
+            { label: 'Created', value: r => csvDate(r.createdAt) }
+        ],
+        reviews: [
+            { label: 'ID', value: r => r.id }, { label: 'Name', value: r => r.name },
+            { label: 'Company', value: r => r.company }, { label: 'Project', value: r => r.projectName },
+            { label: 'Rating', value: r => r.rating }, { label: 'Status', value: r => r.status },
+            { label: 'Featured', value: r => r.featured ? 'Yes' : 'No' }, { label: 'Message', value: r => r.message },
+            { label: 'Created', value: r => csvDate(r.createdAt) }
+        ]
+    };
+
+    document.querySelectorAll('[data-export]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const key = btn.dataset.export;
+            let rows;
+            try {
+                if (key === 'reviews') rows = await getReviewsForExport();
+                else {
+                    const sourceMap = {
+                        leads: allLeads, quotes: allQuotes, clients: allClients,
+                        clientProjects: allClientProjects, invoices: allInvoices,
+                        receipts: allReceipts, projects: allProjects
+                    };
+                    rows = sourceMap[key] || [];
+                }
+            } catch (err) {
+                alert('Could not export ' + key + ': ' + err.message);
+                return;
+            }
+            const csv = toCsv(rows, EXPORT_COLUMNS[key]);
+            downloadTextFile(`rm-digitals-${key}-${todayDateStamp()}.csv`, csv, 'text/csv;charset=utf-8;');
+        });
+    });
+
+    /* ── Full JSON Backup ──
+       Timestamps are wrapped as { __ts: isoString } rather than left
+       as raw Firestore {seconds,nanoseconds} objects or silently
+       stringified — this keeps the file human-readable AND lets
+       Restore convert them back into real Timestamps unambiguously
+       (a plain string field could never be told apart from a real
+       date otherwise). */
+    function serializeForBackup(value) {
+        if (value === null || value === undefined) return value;
+        if (typeof value.toDate === 'function') return { __ts: value.toDate().toISOString() };
+        if (Array.isArray(value)) return value.map(serializeForBackup);
+        if (typeof value === 'object') {
+            const out = {};
+            Object.keys(value).forEach(k => { out[k] = serializeForBackup(value[k]); });
+            return out;
+        }
+        return value;
+    }
+    function deserializeForBackup(value) {
+        if (value === null || value === undefined) return value;
+        if (typeof value === 'object' && !Array.isArray(value) && value.__ts) {
+            return fsMod.Timestamp.fromDate(new Date(value.__ts));
+        }
+        if (Array.isArray(value)) return value.map(deserializeForBackup);
+        if (typeof value === 'object') {
+            const out = {};
+            Object.keys(value).forEach(k => { out[k] = deserializeForBackup(value[k]); });
+            return out;
+        }
+        return value;
+    }
+
+    /* Exactly the 8 business collections named in the brief — never
+       clientAccounts (Firebase Auth UIDs can't be safely restored
+       anyway, per the "never restore Auth accounts" rule), never
+       portalInvites (active secrets), never the derived
+       clientPortalProjects mirror (re-created automatically the next
+       time each project is saved). */
+    const BACKUP_COLLECTIONS = ['leads', 'quotes', 'clients', 'clientProjects', 'invoices', 'receipts', 'projects', 'reviews'];
+    const BACKUP_SCHEMA_VERSION = 1;
+
+    async function buildFullBackup() {
+        const collections = {};
+        for (const name of BACKUP_COLLECTIONS) {
+            const snap = await fsMod.getDocs(fsMod.collection(db, name));
+            collections[name] = snap.docs.map(d => ({ id: d.id, ...serializeForBackup(d.data()) }));
+        }
+        return { schemaVersion: BACKUP_SCHEMA_VERSION, exportedAt: new Date().toISOString(), collections };
+    }
+
+    document.getElementById('openBackupWarningBtn').addEventListener('click', () => {
+        document.getElementById('backupAckCheckbox').checked = false;
+        document.getElementById('backupConfirmDownloadBtn').disabled = true;
+        document.getElementById('backupWarningOverlay').classList.add('active');
+    });
+    document.getElementById('backupWarningClose').addEventListener('click', () => document.getElementById('backupWarningOverlay').classList.remove('active'));
+    document.getElementById('backupWarningOverlay').addEventListener('click', (e) => { if (e.target.id === 'backupWarningOverlay') document.getElementById('backupWarningOverlay').classList.remove('active'); });
+    document.getElementById('backupAckCheckbox').addEventListener('change', (e) => {
+        document.getElementById('backupConfirmDownloadBtn').disabled = !e.target.checked;
+    });
+    document.getElementById('backupConfirmDownloadBtn').addEventListener('click', async () => {
+        const btn = document.getElementById('backupConfirmDownloadBtn');
+        btn.disabled = true; btn.textContent = 'Preparing…';
+        try {
+            const backup = await buildFullBackup();
+            downloadTextFile(`rm-digitals-backup-${todayDateStamp()}.json`, JSON.stringify(backup, null, 2), 'application/json');
+            document.getElementById('backupWarningOverlay').classList.remove('active');
+        } catch (err) {
+            alert('Could not build backup: ' + err.message);
+        } finally {
+            btn.disabled = false; btn.textContent = 'Download Backup';
+        }
+    });
+
+    /* ── Restore From Backup ──
+       Default (and only) behaviour: RESTORE MISSING RECORDS ONLY. Any
+       document ID that already exists is skipped, never overwritten —
+       there is deliberately no overwrite mode. Firebase Auth accounts
+       and anything portal-credential-related are never touched. */
+    let pendingRestoreData = null;
+    let pendingRestoreExistingIds = null;
+
+    document.getElementById('restoreFileInput').addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        const preview = document.getElementById('restorePreview');
+        const counts = document.getElementById('restorePreviewCounts');
+        const resultEl = document.getElementById('restoreResult');
+        resultEl.textContent = '';
+        preview.style.display = 'none';
+        pendingRestoreData = null;
+        pendingRestoreExistingIds = null;
+        if (!file) return;
+
+        let parsed;
+        try {
+            parsed = JSON.parse(await file.text());
+        } catch {
+            resultEl.textContent = '❌ That file is not valid JSON.';
+            resultEl.style.color = '#ff7070';
+            return;
+        }
+        if (!parsed || typeof parsed !== 'object' || !parsed.collections || typeof parsed.collections !== 'object') {
+            resultEl.textContent = '❌ This does not look like an RM Digitals backup file (missing "collections").';
+            resultEl.style.color = '#ff7070';
+            return;
+        }
+
+        counts.innerHTML = '<p class="empty-note">Checking for existing records…</p>';
+        preview.style.display = 'block';
+
+        const existingIds = {};
+        const lines = [];
+        for (const name of BACKUP_COLLECTIONS) {
+            const records = Array.isArray(parsed.collections[name]) ? parsed.collections[name] : [];
+            try {
+                const snap = await fsMod.getDocs(fsMod.collection(db, name));
+                const existingSet = new Set(snap.docs.map(d => d.id));
+                const newCount = records.filter(r => r && r.id && !existingSet.has(r.id)).length;
+                lines.push(`${name}: ${records.length} in file — ${newCount} new, ${records.length - newCount} already exist (will be skipped)`);
+                existingIds[name] = existingSet;
+            } catch (err) {
+                lines.push(`${name}: could not check existing records (${err.message})`);
+                existingIds[name] = new Set();
+            }
+        }
+        counts.innerHTML = lines.map(l => `<div>${escapeHtml(l)}</div>`).join('');
+        pendingRestoreData = parsed;
+        pendingRestoreExistingIds = existingIds;
+    });
+
+    document.getElementById('confirmRestoreBtn').addEventListener('click', async () => {
+        if (!pendingRestoreData) return;
+        if (!confirm('Restore missing records from this backup? Existing records will never be overwritten or deleted.')) return;
+        const resultEl = document.getElementById('restoreResult');
+        resultEl.style.color = '';
+        resultEl.textContent = 'Restoring…';
+
+        let restored = 0, skipped = 0, invalid = 0, failed = 0;
+        for (const name of BACKUP_COLLECTIONS) {
+            const records = Array.isArray(pendingRestoreData.collections[name]) ? pendingRestoreData.collections[name] : [];
+            const existingSet = pendingRestoreExistingIds[name] || new Set();
+            for (const rec of records) {
+                if (!rec || !rec.id || typeof rec.id !== 'string') { invalid++; continue; }
+                if (existingSet.has(rec.id)) { skipped++; continue; }
+                const { id, ...fields } = rec;
+                try {
+                    await fsMod.setDoc(fsMod.doc(db, name, id), deserializeForBackup(fields));
+                    restored++;
+                } catch {
+                    failed++;
+                }
+            }
+        }
+        resultEl.textContent = `✅ Restore complete — ${restored} restored, ${skipped} skipped (already existed), ${invalid} invalid, ${failed} failed.`;
+        document.getElementById('restorePreview').style.display = 'none';
+        document.getElementById('restoreFileInput').value = '';
+        pendingRestoreData = null;
+        pendingRestoreExistingIds = null;
+
+        loadLeads(); loadQuotes(); loadClients();
+        await loadClientProjects();
+        loadInvoices(); loadReceipts(); loadProjects();
+    });
+
+    /* ── Data Integrity Check ──
+       Report-only — never auto-fixes anything, per the brief. */
+    document.getElementById('runIntegrityCheckBtn').addEventListener('click', async () => {
+        const container = document.getElementById('integrityResults');
+        container.innerHTML = '<p class="empty-note">Checking…</p>';
+        let reviews = [];
+        try { reviews = await getReviewsForExport(); } catch { /* review-link checks below just get skipped */ }
+
+        const issues = [];
+        const clientIds = new Set(allClients.map(c => c.id));
+        const leadIds = new Set(allLeads.map(l => l.id));
+        const quoteIds = new Set(allQuotes.map(q => q.id));
+        const invoiceIds = new Set(allInvoices.map(i => i.id));
+        const portfolioIds = new Set(allProjects.map(p => p.id));
+        const reviewIds = new Set(reviews.map(r => r.id));
+
+        allQuotes.forEach(q => {
+            if (q.leadId && !leadIds.has(q.leadId)) issues.push({ text: `Quote ${q.quoteNumber} references a lead that no longer exists.`, action: () => openQuotePreview(q.id) });
+        });
+        allClientProjects.forEach(p => {
+            if (!p.clientId || !clientIds.has(p.clientId)) issues.push({ text: `Client Project "${p.projectName}" has no matching client.`, action: () => openProjectDetail({ project: p }) });
+            if (p.quoteId && !quoteIds.has(p.quoteId)) issues.push({ text: `Client Project "${p.projectName}" references a quote that no longer exists.`, action: () => openProjectDetail({ project: p }) });
+            if (p.portfolioProjectId && !portfolioIds.has(p.portfolioProjectId)) issues.push({ text: `Client Project "${p.projectName}" links to a portfolio project that no longer exists.`, action: () => openProjectDetail({ project: p }) });
+            if (p.linkedReviewId && !reviewIds.has(p.linkedReviewId)) issues.push({ text: `Client Project "${p.projectName}" links to a review that no longer exists.`, action: () => openProjectDetail({ project: p }) });
+            if (clampProgress(p.progress) !== Number(p.progress)) issues.push({ text: `Client Project "${p.projectName}" has an invalid progress value (${p.progress}).`, action: () => openProjectDetail({ project: p }) });
+            if (Number(p.contractValue) < 0 || Number(p.amountPaid) < 0) issues.push({ text: `Client Project "${p.projectName}" has a negative contract value or amount paid.`, action: () => openProjectDetail({ project: p }) });
+            if (p.contentFolderUrl && !isSafeHttpUrl(p.contentFolderUrl)) issues.push({ text: `Client Project "${p.projectName}" has an invalid Content Folder URL.`, action: () => openProjectDetail({ project: p }) });
+            if (p.liveWebsiteUrl && !isSafeHttpUrl(p.liveWebsiteUrl)) issues.push({ text: `Client Project "${p.projectName}" has an invalid Live Website URL.`, action: () => openProjectDetail({ project: p }) });
+        });
+        allInvoices.forEach(inv => {
+            if (!inv.clientId || !clientIds.has(inv.clientId)) issues.push({ text: `Invoice ${inv.invoiceNumber} has no matching client.`, action: () => openInvoicePreview(inv.id) });
+            if (inv.clientProjectId && !allClientProjects.some(p => p.id === inv.clientProjectId)) issues.push({ text: `Invoice ${inv.invoiceNumber} references a project that no longer exists.`, action: () => openInvoicePreview(inv.id) });
+            if (Number(inv.total) < 0) issues.push({ text: `Invoice ${inv.invoiceNumber} has a negative total.`, action: () => openInvoicePreview(inv.id) });
+        });
+        allReceipts.forEach(r => {
+            if (r.invoiceId && !invoiceIds.has(r.invoiceId)) issues.push({ text: `Receipt ${r.receiptNumber} references an invoice that no longer exists.`, action: () => openReceiptPreview(r.id) });
+            if (Number(r.amount) < 0) issues.push({ text: `Receipt ${r.receiptNumber} has a negative amount.`, action: () => openReceiptPreview(r.id) });
+        });
+
+        function findDuplicates(list, keyFn, label) {
+            const seen = new Map();
+            list.forEach(item => {
+                const key = keyFn(item);
+                if (!key) return;
+                if (!seen.has(key)) seen.set(key, []);
+                seen.get(key).push(item);
+            });
+            seen.forEach((items, key) => {
+                if (items.length > 1) issues.push({ text: `Duplicate ${label}: ${key} (${items.length} records)`, action: null });
+            });
+        }
+        findDuplicates(allQuotes, q => q.quoteNumber, 'quote number');
+        findDuplicates(allInvoices, i => i.invoiceNumber, 'invoice number');
+        findDuplicates(allReceipts, r => r.receiptNumber, 'receipt number');
+        findDuplicates(allClients, c => c.email ? c.email.trim().toLowerCase() : null, 'client email');
+        findDuplicates(allClients, c => normalizePhoneForWa(c.phone), 'client phone');
+
+        if (!issues.length) { container.innerHTML = '<p class="empty-note">No issues found.</p>'; return; }
+        container.innerHTML = '';
+        issues.forEach(issue => {
+            const row = document.createElement('div');
+            row.style.cssText = 'padding:10px 0;border-bottom:1px solid var(--border);font-size:.82rem;' + (issue.action ? 'cursor:pointer;color:var(--cyan);' : 'color:var(--text-mid);');
+            row.textContent = issue.text;
+            if (issue.action) row.addEventListener('click', issue.action);
+            container.appendChild(row);
+        });
+    });
 }

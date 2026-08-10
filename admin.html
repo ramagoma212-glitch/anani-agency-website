@@ -1032,6 +1032,58 @@
                 <p class="empty-note">Loading…</p>
             </div>
         </div>
+
+        <div class="admin-card">
+            <h2>Data &amp; Backup</h2>
+            <p style="font-size:.78rem;color:var(--text-lo);margin:-12px 0 16px;">Export, backup, restore and integrity tools. There is no bulk-delete or "wipe database" action anywhere in this panel — restore only ever adds missing records, never overwrites or deletes.</p>
+
+            <h4 style="font-size:.85rem;margin-bottom:10px;">CSV Export</h4>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px;">
+                <button type="button" class="btn-logout" data-export="leads">Leads</button>
+                <button type="button" class="btn-logout" data-export="quotes">Quotes</button>
+                <button type="button" class="btn-logout" data-export="clients">Clients</button>
+                <button type="button" class="btn-logout" data-export="clientProjects">Client Projects</button>
+                <button type="button" class="btn-logout" data-export="invoices">Invoices</button>
+                <button type="button" class="btn-logout" data-export="receipts">Receipts</button>
+                <button type="button" class="btn-logout" data-export="projects">Portfolio Projects</button>
+                <button type="button" class="btn-logout" data-export="reviews">Reviews</button>
+            </div>
+
+            <h4 style="font-size:.85rem;margin-bottom:10px;">Full Business Backup</h4>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+                <button type="button" class="btn-primary" id="openBackupWarningBtn"><i class="fas fa-download"></i> Download Full JSON Backup</button>
+            </div>
+            <p class="field-hint" style="margin-bottom:22px;">Never includes Firebase config, admin/client passwords, service credentials or active portal invite tokens.</p>
+
+            <h4 style="font-size:.85rem;margin-bottom:10px;">Restore From RM Digitals Backup</h4>
+            <input type="file" id="restoreFileInput" accept="application/json" style="margin-bottom:10px;" />
+            <div id="restorePreview" style="display:none;margin-bottom:14px;">
+                <div id="restorePreviewCounts" style="font-size:.82rem;color:var(--text-mid);margin-bottom:10px;"></div>
+                <p class="field-hint" style="margin-bottom:10px;">Records whose ID already exists will be <strong>skipped</strong>, never overwritten. Firebase Auth accounts, admin/client passwords and portal invites/mappings are never restored — re-invite clients to the portal manually afterwards if needed.</p>
+                <button type="button" class="btn-primary" id="confirmRestoreBtn">Restore Missing Records</button>
+            </div>
+            <div id="restoreResult" style="font-size:.85rem;margin-bottom:22px;"></div>
+
+            <h4 style="font-size:.85rem;margin-bottom:10px;">Data Integrity Check</h4>
+            <button type="button" class="btn-logout" id="runIntegrityCheckBtn" style="margin-bottom:12px;">Run Data Integrity Check</button>
+            <div id="integrityResults"><p class="empty-note">Not run yet.</p></div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         BACKUP DOWNLOAD WARNING (Milestone 23)
+    ============================================================ -->
+    <div class="lead-modal-overlay" id="backupWarningOverlay">
+        <div class="lead-modal-box">
+            <button class="lead-modal-close" id="backupWarningClose" aria-label="Close">&times;</button>
+            <h3>Download Full Business Backup</h3>
+            <p style="font-size:.85rem;color:var(--text-mid);margin:10px 0 16px;">This backup contains private client and business information. Store it securely — treat it the same way you'd treat a spreadsheet full of client contact details and financial records, because that's exactly what it is.</p>
+            <div class="field checkbox-row" style="margin-bottom:16px;">
+                <input type="checkbox" id="backupAckCheckbox" />
+                <label for="backupAckCheckbox">I understand and will store this file securely.</label>
+            </div>
+            <button type="button" class="btn-primary" id="backupConfirmDownloadBtn" disabled style="width:100%;justify-content:center;">Download Backup</button>
+        </div>
     </div>
 
     <div class="lead-modal-overlay" id="leadModalOverlay">

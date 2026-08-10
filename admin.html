@@ -186,6 +186,111 @@
             padding: 8px 12px; border-radius: 10px; background: rgba(255,255,255,.03);
             border: 1px solid var(--border); color: var(--text-hi); font-size: .85rem;
         }
+
+        /* ── Quotes (Milestone 17) ── */
+        .quote-summary { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin-bottom: 20px; }
+        @media (max-width: 900px) { .quote-summary { grid-template-columns: repeat(4, 1fr); } }
+        @media (max-width: 480px) { .quote-summary { grid-template-columns: repeat(2, 1fr); } }
+        .quote-stat { border: 1px solid var(--border); border-radius: 12px; padding: 12px 8px; text-align: center; }
+        .quote-stat .num { font-family: var(--f-display); font-size: 1.15rem; font-weight: 800; display: block; word-break: break-word; }
+        .quote-stat .lbl { font-size: .64rem; color: var(--text-mid); text-transform: uppercase; letter-spacing: .4px; }
+
+        .quote-toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+        .quote-toolbar input[type="search"] {
+            flex: 1; min-width: 160px; padding: 10px 14px; border-radius: 10px;
+            background: rgba(255,255,255,.03); border: 1px solid var(--border); color: var(--text-hi); font-size: .85rem;
+        }
+        .quote-toolbar select {
+            padding: 10px 12px; border-radius: 10px; background: rgba(255,255,255,.03);
+            border: 1px solid var(--border); color: var(--text-hi); font-size: .82rem;
+        }
+
+        .quote-row {
+            display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+            border: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px; flex-wrap: wrap; cursor: pointer;
+        }
+        .quote-row:hover, .quote-row:focus-visible { border-color: var(--border-glow); }
+        .quote-row .info { flex: 1; min-width: 180px; }
+        .quote-row .info strong { display: block; font-size: .92rem; }
+        .quote-row .info span { font-size: .76rem; color: var(--text-mid); }
+        .quote-row .meta-col { font-size: .76rem; color: var(--text-mid); min-width: 90px; }
+        .quote-row .amount-col { font-family: var(--f-display); font-weight: 700; font-size: .95rem; min-width: 90px; }
+
+        .status-badge.status-draft    { color: var(--text-mid); border-color: var(--border); }
+        .status-badge.status-sent     { color: var(--cyan); border-color: rgba(0,212,255,.3); }
+        .status-badge.status-accepted { color: var(--green); border-color: rgba(0,255,136,.3); }
+        .status-badge.status-declined { color: #ff7070; border-color: rgba(255,80,80,.3); }
+        .status-badge.status-expired  { color: var(--gold); border-color: rgba(255,214,10,.3); }
+
+        /* Quote Builder + Preview modals reuse .lead-modal-overlay but need
+           a wider box for the line-items table. */
+        .quote-modal-box { max-width: 720px; }
+
+        .quote-items-wrap { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin: 10px 0 16px; }
+        .quote-item-row {
+            display: grid; grid-template-columns: 1fr 60px 100px 100px 32px;
+            gap: 8px; align-items: center; padding: 10px 12px; border-bottom: 1px solid var(--border);
+        }
+        .quote-item-row:last-child { border-bottom: none; }
+        .quote-item-row.head { background: rgba(255,255,255,.03); font-size: .68rem; color: var(--text-lo); text-transform: uppercase; letter-spacing: .4px; }
+        .quote-item-row input {
+            width: 100%; padding: 7px 8px; border-radius: 8px; background: rgba(255,255,255,.03);
+            border: 1px solid var(--border); color: var(--text-hi); font-size: .82rem;
+        }
+        .quote-item-row .line-total { font-size: .85rem; font-weight: 700; text-align: right; padding-right: 4px; }
+        .quote-item-row .remove-item {
+            background: none; border: none; color: #ff7070; cursor: pointer; font-size: .95rem; padding: 4px;
+        }
+        @media (max-width: 560px) {
+            .quote-item-row { grid-template-columns: 1fr 1fr; grid-template-areas: "desc desc" "qty price" "total remove"; }
+            .quote-item-row.head { display: none; }
+            .quote-item-row .item-desc { grid-area: desc; }
+            .quote-item-row .item-qty { grid-area: qty; }
+            .quote-item-row .item-price { grid-area: price; }
+            .quote-item-row .line-total { grid-area: total; text-align: left; }
+            .quote-item-row .remove-item { grid-area: remove; justify-self: end; }
+        }
+
+        .quote-item-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+        .quote-item-controls select, .quote-item-controls button { flex: 1; min-width: 160px; }
+
+        .quote-totals { border-top: 1px solid var(--border); padding-top: 14px; margin: 14px 0; }
+        .quote-totals-row { display: flex; justify-content: space-between; font-size: .88rem; padding: 4px 0; color: var(--text-mid); }
+        .quote-totals-row.grand { font-size: 1.15rem; font-weight: 800; color: var(--text-hi); font-family: var(--f-display); padding-top: 8px; }
+
+        .budget-context-note {
+            background: rgba(0,212,255,.06); border: 1px solid rgba(0,212,255,.2); border-radius: 10px;
+            padding: 10px 14px; font-size: .82rem; color: var(--text-mid); margin-bottom: 16px;
+        }
+
+        /* ── Quote Preview (print-ready) ── */
+        .quote-preview-box { max-width: 720px; }
+        .quote-print-area { background: #fff; color: #111; border-radius: 12px; padding: 32px; }
+        .quote-print-area * { color: #111; }
+        .quote-print-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; border-bottom: 2px solid #111; padding-bottom: 16px; }
+        .quote-print-header h2 { font-family: var(--f-display); font-size: 1.3rem; }
+        .quote-print-header .quote-meta { text-align: right; font-size: .82rem; }
+        .quote-print-section { margin-bottom: 18px; }
+        .quote-print-section h4 { font-size: .78rem; text-transform: uppercase; letter-spacing: .5px; color: #555 !important; margin-bottom: 6px; }
+        .quote-print-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+        .quote-print-table th, .quote-print-table td { text-align: left; padding: 8px 6px; border-bottom: 1px solid #ddd; }
+        .quote-print-table th:last-child, .quote-print-table td:last-child { text-align: right; }
+        .quote-print-totals { margin-left: auto; max-width: 280px; margin-top: 10px; }
+        .quote-print-totals .row { display: flex; justify-content: space-between; padding: 4px 0; font-size: .88rem; }
+        .quote-print-totals .row.grand { font-weight: 800; font-size: 1.1rem; border-top: 2px solid #111; padding-top: 8px; margin-top: 4px; }
+        .quote-print-terms { font-size: .78rem; color: #444 !important; white-space: pre-wrap; line-height: 1.6; }
+        .quote-preview-actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 18px 0 6px; }
+
+        @media print {
+            body * { visibility: hidden; }
+            #quotePreviewOverlay, #quotePreviewOverlay * { visibility: visible; }
+            #quotePreviewOverlay { position: absolute; inset: 0; background: #fff !important; padding: 0; display: block !important; }
+            #quotePreviewOverlay .quote-preview-box { max-width: 100%; max-height: none; box-shadow: none; border: none; padding: 0; }
+            #quotePreviewOverlay .quote-print-area { border-radius: 0; padding: 0; }
+            .quote-preview-actions, .lead-modal-close, .quote-print-noprint { display: none !important; }
+            .quote-print-header, .quote-totals-block, .quote-print-totals { break-inside: avoid; }
+            @page { size: A4; margin: 16mm; }
+        }
     </style>
 </head>
 <body>
@@ -419,6 +524,43 @@
                 <p class="empty-note">Loading…</p>
             </div>
         </div>
+
+        <div class="admin-card">
+            <h2>Quotes</h2>
+
+            <div class="quote-summary" id="quoteSummary">
+                <div class="quote-stat"><span class="num" id="qsDraft">0</span><span class="lbl">Draft</span></div>
+                <div class="quote-stat"><span class="num" id="qsSent">0</span><span class="lbl">Sent</span></div>
+                <div class="quote-stat"><span class="num" id="qsAccepted">0</span><span class="lbl">Accepted</span></div>
+                <div class="quote-stat"><span class="num" id="qsDeclined">0</span><span class="lbl">Declined</span></div>
+                <div class="quote-stat"><span class="num" id="qsExpired">0</span><span class="lbl">Expired</span></div>
+                <div class="quote-stat"><span class="num" id="qsTotalValue">R0</span><span class="lbl">Total Quoted Value</span></div>
+                <div class="quote-stat"><span class="num" id="qsAcceptedValue">R0</span><span class="lbl">Accepted Quote Value</span></div>
+            </div>
+
+            <div class="quote-toolbar">
+                <input type="search" id="quoteSearch" placeholder="Search quote #, client, project…" />
+                <select id="quoteFilterStatus">
+                    <option value="all">All statuses</option>
+                    <option value="draft">Draft</option>
+                    <option value="sent">Sent</option>
+                    <option value="accepted">Accepted</option>
+                    <option value="declined">Declined</option>
+                    <option value="expired">Expired</option>
+                </select>
+                <select id="quoteSort">
+                    <option value="newest">Newest first</option>
+                    <option value="oldest">Oldest first</option>
+                    <option value="status">By status</option>
+                    <option value="amount">By amount</option>
+                </select>
+                <button type="button" class="btn-primary" id="quoteNewBtn">New Quote</button>
+            </div>
+
+            <div id="quoteList">
+                <p class="empty-note">Loading…</p>
+            </div>
+        </div>
     </div>
 
     <div class="lead-modal-overlay" id="leadModalOverlay">
@@ -450,6 +592,12 @@
 
             <div class="lead-detail-actions" id="lmContactActions"></div>
 
+            <div style="margin:14px 0;">
+                <button type="button" class="btn-primary" id="lmCreateQuoteBtn" style="width:100%;justify-content:center;">
+                    <i class="fas fa-file-invoice-dollar"></i> Create Quote
+                </button>
+            </div>
+
             <div class="field" style="margin-top:10px;">
                 <label for="lmNotes">Internal Notes (never shown publicly)</label>
                 <textarea id="lmNotes" rows="4" maxlength="4000"></textarea>
@@ -460,6 +608,211 @@
                 <button type="button" class="btn-logout" id="lmDeleteBtn" style="color:#ff7070;border-color:rgba(255,80,80,.3);">Delete Lead</button>
             </div>
             <div id="leadDetailMsg" class="form-msg" role="status" aria-live="polite"></div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         QUOTE BUILDER (Milestone 17)
+    ============================================================ -->
+    <div class="lead-modal-overlay" id="quoteBuilderOverlay">
+        <div class="lead-modal-box quote-modal-box">
+            <button class="lead-modal-close" id="quoteBuilderClose" aria-label="Close">&times;</button>
+            <h3 id="qbHeading">New Quote</h3>
+            <input type="hidden" id="qbQuoteId" value="" />
+            <input type="hidden" id="qbLeadId" value="" />
+            <input type="hidden" id="qbQuoteNumber" value="" />
+
+            <div class="budget-context-note" id="qbBudgetContext" style="display:none;">
+                <i class="fas fa-circle-info"></i> <span id="qbBudgetContextText"></span>
+            </div>
+
+            <div class="form-row-2">
+                <div class="field">
+                    <label for="qbClientName">Client Name</label>
+                    <input type="text" id="qbClientName" maxlength="150" required />
+                </div>
+                <div class="field">
+                    <label for="qbBusinessName">Business / Company (optional)</label>
+                    <input type="text" id="qbBusinessName" maxlength="150" />
+                </div>
+            </div>
+            <div class="form-row-2">
+                <div class="field">
+                    <label for="qbClientEmail">Client Email (optional)</label>
+                    <input type="text" id="qbClientEmail" maxlength="200" />
+                </div>
+                <div class="field">
+                    <label for="qbClientPhone">Client Phone (optional)</label>
+                    <input type="text" id="qbClientPhone" maxlength="40" />
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="qbQuoteTitle">Quote Title</label>
+                <input type="text" id="qbQuoteTitle" maxlength="150" placeholder="e.g. Professional Business Website" required />
+            </div>
+            <div class="field">
+                <label for="qbDescription">Project Summary (optional)</label>
+                <textarea id="qbDescription" rows="3" maxlength="2000"></textarea>
+            </div>
+
+            <label>Line Items</label>
+            <div class="quote-item-controls">
+                <select id="qbQuickAdd">
+                    <option value="">— Quick Add Service —</option>
+                </select>
+                <button type="button" class="btn-logout" id="qbAddCustomItemBtn">+ Add Custom Item</button>
+            </div>
+            <div class="quote-items-wrap">
+                <div class="quote-item-row head">
+                    <span>Description</span><span>Qty</span><span>Unit Price</span><span>Line Total</span><span></span>
+                </div>
+                <div id="qbItemsList"></div>
+            </div>
+            <p class="empty-note" id="qbItemsEmpty" style="display:none;">No line items yet — use Quick Add or "+ Add Custom Item" above.</p>
+
+            <div class="form-row-2">
+                <div class="field">
+                    <label for="qbDiscountType">Discount</label>
+                    <select id="qbDiscountType">
+                        <option value="none">No discount</option>
+                        <option value="percent">Percentage (%)</option>
+                        <option value="fixed">Fixed Amount (R)</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="qbDiscountValue">Discount Value</label>
+                    <input type="number" id="qbDiscountValue" min="0" step="0.01" value="0" disabled />
+                </div>
+            </div>
+
+            <div class="quote-totals">
+                <div class="quote-totals-row"><span>Subtotal</span><span id="qbSubtotalOut">R0.00</span></div>
+                <div class="quote-totals-row"><span>Discount</span><span id="qbDiscountOut">R0.00</span></div>
+                <div class="quote-totals-row grand"><span>Total</span><span id="qbTotalOut">R0.00</span></div>
+            </div>
+
+            <div class="form-row-2">
+                <div class="field">
+                    <label for="qbValidUntil">Valid Until</label>
+                    <input type="date" id="qbValidUntil" required />
+                </div>
+                <div class="field">
+                    <label for="qbPaymentSelect">Payment Arrangement</label>
+                    <select id="qbPaymentSelect">
+                        <option value="">— Choose or type below —</option>
+                        <option value="50% deposit, 50% before launch">50% deposit, 50% before launch</option>
+                        <option value="40% deposit, 30% at milestone, 30% before launch">40% / 30% / 30% (larger projects)</option>
+                        <option value="Full payment upfront">Full payment upfront</option>
+                    </select>
+                </div>
+            </div>
+            <div class="field">
+                <label for="qbPaymentText">Payment Arrangement (editable)</label>
+                <input type="text" id="qbPaymentText" maxlength="200" placeholder="e.g. 50% deposit, 50% before launch" />
+            </div>
+
+            <div class="field">
+                <label for="qbTerms">Terms</label>
+                <textarea id="qbTerms" rows="6" maxlength="4000"></textarea>
+            </div>
+            <div class="field">
+                <label for="qbNotes">Notes (shown on the quote — optional)</label>
+                <textarea id="qbNotes" rows="3" maxlength="2000" placeholder="Anything you want the client to see on the quote itself, e.g. what's included or a personal note."></textarea>
+            </div>
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
+                <button type="button" class="btn-primary" id="qbSaveBtn" style="flex:1;justify-content:center;">Save Quote</button>
+                <button type="button" class="btn-logout" id="qbSaveAndPreviewBtn" style="flex:1;justify-content:center;">Save &amp; Preview</button>
+            </div>
+            <div id="qbFormMsg" class="form-msg" role="status" aria-live="polite"></div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         QUOTE PREVIEW / PRINT (Milestone 17)
+    ============================================================ -->
+    <div class="lead-modal-overlay" id="quotePreviewOverlay">
+        <div class="lead-modal-box quote-preview-box">
+            <button class="lead-modal-close quote-print-noprint" id="quotePreviewClose" aria-label="Close">&times;</button>
+
+            <div class="quote-preview-actions quote-print-noprint">
+                <button type="button" class="btn-primary" id="qpPrintBtn"><i class="fas fa-print"></i> Print / Save as PDF</button>
+                <button type="button" class="btn-logout" id="qpEmailBtn"><i class="fas fa-envelope"></i> Email Client</button>
+                <button type="button" class="btn-logout" id="qpWhatsappBtn"><i class="fab fa-whatsapp"></i> WhatsApp Client</button>
+                <button type="button" class="btn-logout" id="qpEditBtn"><i class="fas fa-pen"></i> Edit</button>
+                <button type="button" class="btn-logout" id="qpDuplicateBtn"><i class="fas fa-copy"></i> Duplicate</button>
+                <button type="button" class="btn-logout" id="qpDeleteBtn" style="color:#ff7070;border-color:rgba(255,80,80,.3);"><i class="fas fa-trash"></i> Delete</button>
+            </div>
+
+            <div class="lead-status-row quote-print-noprint">
+                <span class="status-badge" id="qpStatusBadge"></span>
+                <select id="qpStatusSelect">
+                    <option value="draft">Draft</option>
+                    <option value="sent">Sent</option>
+                    <option value="accepted">Accepted</option>
+                    <option value="declined">Declined</option>
+                </select>
+            </div>
+
+            <div class="quote-print-area" id="quotePrintArea">
+                <div class="quote-print-header">
+                    <div>
+                        <h2>RM Digitals</h2>
+                        <p style="font-size:.8rem;">Professional website development for South African businesses</p>
+                    </div>
+                    <div class="quote-meta">
+                        <div><strong id="qpQuoteNumber"></strong></div>
+                        <div>Date: <span id="qpDate"></span></div>
+                        <div>Valid Until: <span id="qpValidUntil"></span></div>
+                    </div>
+                </div>
+
+                <div class="quote-print-section">
+                    <h4>Prepared For</h4>
+                    <div id="qpClientBlock"></div>
+                </div>
+
+                <div class="quote-print-section">
+                    <h4 id="qpTitleLabel">Project</h4>
+                    <div id="qpTitle" style="font-weight:700;"></div>
+                    <p id="qpDescription" style="font-size:.85rem;margin-top:4px;"></p>
+                </div>
+
+                <div class="quote-print-section">
+                    <table class="quote-print-table">
+                        <thead><tr><th>Description</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr></thead>
+                        <tbody id="qpItemsBody"></tbody>
+                    </table>
+                    <div class="quote-print-totals">
+                        <div class="row"><span>Subtotal</span><span id="qpSubtotal"></span></div>
+                        <div class="row" id="qpDiscountRow"><span>Discount</span><span id="qpDiscount"></span></div>
+                        <div class="row grand"><span>Total</span><span id="qpTotal"></span></div>
+                    </div>
+                </div>
+
+                <div class="quote-print-section" id="qpPaymentSection">
+                    <h4>Payment Arrangement</h4>
+                    <p id="qpPayment" style="font-size:.85rem;"></p>
+                </div>
+
+                <div class="quote-print-section" id="qpNotesSection">
+                    <h4>Notes</h4>
+                    <p id="qpNotes" style="font-size:.85rem;"></p>
+                </div>
+
+                <div class="quote-print-section">
+                    <h4>Terms</h4>
+                    <p class="quote-print-terms" id="qpTerms"></p>
+                </div>
+
+                <div class="quote-print-section" style="border-top:1px solid #ddd;padding-top:14px;">
+                    <p style="font-size:.8rem;">
+                        RM Digitals — Ramagoma Muthuhadini (Anani) · Thohoyandou, Limpopo, South Africa<br>
+                        WhatsApp/Phone: +27 64 841 2146 · Email: ramagoma212@gmail.com
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
 

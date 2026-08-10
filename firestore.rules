@@ -109,6 +109,14 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
 
+    /* ── Quotes (Milestone 17) ──
+       Private business records — draft/sent/accepted/declined quotes
+       built from leads. Same trust model as leads: admin only, no
+       anonymous or authenticated-non-admin access of any kind. */
+    match /quotes/{quoteId} {
+      allow read, write: if isAdmin();
+    }
+
     /* Deny everything else by default. */
     match /{document=**} {
       allow read, write: if false;

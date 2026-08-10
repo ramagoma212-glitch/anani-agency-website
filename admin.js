@@ -43,12 +43,70 @@ function formatDate(ts) {
         ' ' + d.toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' });
 }
 
+function formatDateOnly(ts) {
+    if (!ts) return '—';
+    const d = ts.toDate ? ts.toDate() : new Date(ts);
+    return d.toLocaleDateString('en-ZA', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+/* Always clamps to a finite, non-negative number before formatting — this
+   is what stops NaN or negative totals ever reaching the screen (Part G/J
+   of the quotes milestone). */
+function formatRand(n) {
+    const num = Number(n);
+    const safe = Number.isFinite(num) ? Math.max(0, num) : 0;
+    return 'R' + safe.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 const STATUS_LABELS = {
     new: 'New', contacted: 'Contacted', quote_sent: 'Quote Sent', won: 'Won', lost: 'Lost'
 };
 const SOURCE_LABELS = {
     manual: 'Manual', website_email: 'Website / Email', whatsapp: 'WhatsApp', referral: 'Referral', other: 'Other'
 };
+
+/* ── Quotes (Milestone 17) ──────────────────────────────────────── */
+const QUOTE_STATUS_LABELS = {
+    draft: 'Draft', sent: 'Sent', accepted: 'Accepted', declined: 'Declined', expired: 'Expired'
+};
+
+/* Quick Add reference prices — these mirror the CURRENT public pricing
+   exactly (pricing.html), but are only a starting point for the line
+   item: the administrator can freely edit description/price/quantity
+   or remove the row entirely. Nothing here forces the final quote. */
+const QUICK_ADD_SERVICES = [
+    { label: 'Landing Page', price: 2500 },
+    { label: 'Starter Business Website', price: 4500 },
+    { label: 'Professional Business Website', price: 6500 },
+    { label: 'Business Growth Website', price: 8500 },
+    { label: 'Ecommerce Website', price: 12500 },
+    { label: 'Custom Web System / Portal', price: 18000 },
+    { label: 'SEO Health Check', price: 750 },
+    { label: 'Website Care (maintenance, per month)', price: 499 },
+    { label: 'Business Care (maintenance, per month)', price: 899 },
+    { label: 'Priority Care (maintenance, per month)', price: 1499 },
+    { label: 'Additional webpage', price: 750 },
+    { label: 'SEO copywriting (per page)', price: 600 },
+    { label: 'Google Business Profile setup', price: 1500 },
+    { label: 'Google Search Console setup', price: 750 },
+    { label: 'Google Analytics setup', price: 750 },
+    { label: 'Basic WhatsApp click-to-chat integration', price: 350 },
+    { label: 'Advanced WhatsApp automation', price: 2500 },
+    { label: 'AI website chatbot setup', price: 2500 },
+    { label: 'Booking system', price: 2000 },
+    { label: 'Newsletter integration', price: 1500 },
+    { label: 'Payment gateway integration', price: 2500 },
+    { label: 'Blog setup', price: 1500 },
+    { label: 'Additional revision round', price: 500 }
+];
+
+const DEFAULT_QUOTE_TERMS =
+`This quote is valid until the date shown above.
+Work begins once the agreed deposit/payment arrangement is confirmed.
+Final delivery depends on receiving required content and information from the client.
+Changes outside the agreed scope may require an updated quote.
+Third-party costs such as domains, premium software, paid plugins or external services are excluded unless specifically listed.
+Final ownership/handover occurs according to the agreed payment arrangement.`;
 
 async function runAdmin() {
     const { firebaseConfig } = await import('./firebase-config.js');
@@ -93,6 +151,7 @@ async function runAdmin() {
         loadReviews('pending');
         loadProjects();
         loadLeads();
+        loadQuotes();
     }
 
     authMod.onAuthStateChanged(auth, (user) => {
@@ -703,6 +762,596 @@ async function runAdmin() {
             loadLeads();
         } catch (err) {
             alert('Could not delete lead: ' + err.message);
+        }
+    });
+
+    document.getElementById('lmCreateQuoteBtn').addEventListener('click', () => {
+        const lead = allLeads.find(l => l.id === activeLeadId);
+        if (!lead) return;
+        closeLeadModal();
+        openQuoteBuilder({ lead });
+    });
+
+    /* ============================================================
+       QUOTES (Milestone 17)
+       ============================================================
+       Design notes (mirrors the Leads CRM patterns above):
+       - Admin-only, via firestore.rules `match /quotes/{quoteId}
+         { allow read, write: if isAdmin(); }`.
+       - Fetched once per load via getDocs, ordered by createdAt desc
+         (single-field order — no composite index needed, same
+         reasoning as Leads).
+       - Client-side filter/search/sort, same as Leads — the admin-
+         only dataset is small.
+       - "Expired" is never a STORED status value — it's computed at
+         render time from validUntil when the stored status is
+         'sent', so the real status field (draft/sent/accepted/
+         declined) is never silently overwritten by a date rollover.
+       - All client/admin-entered text is rendered via escapeHtml()
+         (template-string paths) or .textContent (quote preview) —
+         never raw innerHTML of untrusted data. See openQuotePreview.
+       ============================================================ */
+
+    let allQuotes = [];
+    let qbItems = [];        // line items while the builder is open
+    let activeQuoteId = null; // quote currently shown in the preview
+
+    function isQuoteExpired(quote) {
+        if (quote.status !== 'sent' || !quote.validUntil) return false;
+        const validDate = quote.validUntil.toDate ? quote.validUntil.toDate() : new Date(quote.validUntil);
+        return validDate.getTime() < Date.now();
+    }
+    function displayQuoteStatus(quote) {
+        return isQuoteExpired(quote) ? 'expired' : quote.status;
+    }
+
+    /* Readable quote number: RMQ-YYYY-MMDD-XXX. A 3-digit random
+       suffix keeps it short and professional; a quick existence
+       check (same pattern as the project-slug uniqueness check
+       above) avoids obvious duplicates without needing a fully
+       atomic global counter, which would be unnecessary complexity
+       for this single-admin tool. */
+    async function generateQuoteNumber() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        for (let attempt = 0; attempt < 5; attempt++) {
+            const suffix = String(Math.floor(Math.random() * 900) + 100);
+            const candidate = `RMQ-${year}-${mm}${dd}-${suffix}`;
+            const dupeQuery = fsMod.query(fsMod.collection(db, 'quotes'), fsMod.where('quoteNumber', '==', candidate));
+            const dupeSnap = await fsMod.getDocs(dupeQuery);
+            if (dupeSnap.empty) return candidate;
+        }
+        return `RMQ-${year}-${mm}${dd}-${Date.now().toString().slice(-4)}`;
+    }
+
+    function defaultValidUntil() {
+        const d = new Date();
+        d.setDate(d.getDate() + 14);
+        return d.toISOString().slice(0, 10);
+    }
+    function tsToDateInput(ts) {
+        const d = ts.toDate ? ts.toDate() : new Date(ts);
+        return d.toISOString().slice(0, 10);
+    }
+
+    async function loadQuotes() {
+        const list = document.getElementById('quoteList');
+        list.innerHTML = '<p class="empty-note">Loading quotes…</p>';
+        let snap;
+        try {
+            const q = fsMod.query(fsMod.collection(db, 'quotes'), fsMod.orderBy('createdAt', 'desc'));
+            snap = await fsMod.getDocs(q);
+        } catch (err) {
+            list.innerHTML = `<p class="empty-note">Could not load quotes: ${escapeHtml(err.message)}</p>`;
+            return;
+        }
+        allQuotes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderQuoteSummary();
+        renderQuoteList();
+    }
+
+    function renderQuoteSummary() {
+        const counts = { draft: 0, sent: 0, accepted: 0, declined: 0, expired: 0 };
+        let totalValue = 0, acceptedValue = 0;
+        allQuotes.forEach(q => {
+            const disp = displayQuoteStatus(q);
+            if (counts.hasOwnProperty(disp)) counts[disp]++;
+            totalValue += Number(q.total) || 0;
+            if (q.status === 'accepted') acceptedValue += Number(q.total) || 0;
+        });
+        document.getElementById('qsDraft').textContent = counts.draft;
+        document.getElementById('qsSent').textContent = counts.sent;
+        document.getElementById('qsAccepted').textContent = counts.accepted;
+        document.getElementById('qsDeclined').textContent = counts.declined;
+        document.getElementById('qsExpired').textContent = counts.expired;
+        document.getElementById('qsTotalValue').textContent = formatRand(totalValue);
+        document.getElementById('qsAcceptedValue').textContent = formatRand(acceptedValue);
+    }
+
+    function renderQuoteList() {
+        const list = document.getElementById('quoteList');
+        const searchTerm = (document.getElementById('quoteSearch').value || '').trim().toLowerCase();
+        const statusFilter = document.getElementById('quoteFilterStatus').value;
+        const sortMode = document.getElementById('quoteSort').value;
+
+        let filtered = allQuotes.filter(q => {
+            const disp = displayQuoteStatus(q);
+            if (statusFilter !== 'all' && disp !== statusFilter) return false;
+            if (!searchTerm) return true;
+            const haystack = [q.quoteNumber, q.clientName, q.businessName, q.title].filter(Boolean).join(' ').toLowerCase();
+            return haystack.includes(searchTerm);
+        });
+
+        if (sortMode === 'oldest') {
+            filtered = filtered.slice().reverse();
+        } else if (sortMode === 'status') {
+            const order = ['draft', 'sent', 'expired', 'accepted', 'declined'];
+            filtered = filtered.slice().sort((a, b) => order.indexOf(displayQuoteStatus(a)) - order.indexOf(displayQuoteStatus(b)));
+        } else if (sortMode === 'amount') {
+            filtered = filtered.slice().sort((a, b) => (Number(b.total) || 0) - (Number(a.total) || 0));
+        }
+
+        if (allQuotes.length === 0) {
+            list.innerHTML = '<p class="empty-note">No quotes yet. Open a lead and click "Create Quote", or use "New Quote" above.</p>';
+            return;
+        }
+        if (filtered.length === 0) {
+            list.innerHTML = '<p class="empty-note">No quotes match your search/filter.</p>';
+            return;
+        }
+
+        list.innerHTML = '';
+        filtered.forEach(quote => {
+            const disp = displayQuoteStatus(quote);
+            const row = document.createElement('div');
+            row.className = 'quote-row';
+            row.tabIndex = 0;
+            row.setAttribute('role', 'button');
+            row.innerHTML = `
+                <div class="info">
+                    <strong>${escapeHtml(quote.quoteNumber)}</strong>
+                    <span>${escapeHtml(quote.clientName)}${quote.businessName ? ' · ' + escapeHtml(quote.businessName) : ''} — ${escapeHtml(quote.title)}</span>
+                </div>
+                <div class="meta-col">${formatDate(quote.createdAt)}</div>
+                <div class="amount-col">${formatRand(quote.total)}</div>
+                <span class="status-badge status-${escapeHtml(disp)}">${escapeHtml(QUOTE_STATUS_LABELS[disp] || disp)}</span>
+            `;
+            row.addEventListener('click', () => openQuotePreview(quote.id));
+            row.addEventListener('keypress', (e) => { if (e.key === 'Enter') openQuotePreview(quote.id); });
+            list.appendChild(row);
+        });
+    }
+
+    document.getElementById('quoteSearch').addEventListener('input', renderQuoteList);
+    document.getElementById('quoteFilterStatus').addEventListener('change', renderQuoteList);
+    document.getElementById('quoteSort').addEventListener('change', renderQuoteList);
+    document.getElementById('quoteNewBtn').addEventListener('click', () => openQuoteBuilder({}));
+
+    /* ── Quote Builder ── */
+    const qaSelect = document.getElementById('qbQuickAdd');
+    QUICK_ADD_SERVICES.forEach((svc, i) => {
+        const opt = document.createElement('option');
+        opt.value = String(i);
+        opt.textContent = `${svc.label} — ${formatRand(svc.price)}`;
+        qaSelect.appendChild(opt);
+    });
+
+    function renderQbItems() {
+        const list = document.getElementById('qbItemsList');
+        const empty = document.getElementById('qbItemsEmpty');
+        list.innerHTML = '';
+        empty.style.display = qbItems.length ? 'none' : 'block';
+        qbItems.forEach((item, idx) => {
+            const qty = Math.max(0, Number(item.quantity) || 0);
+            const price = Math.max(0, Number(item.unitPrice) || 0);
+            const row = document.createElement('div');
+            row.className = 'quote-item-row';
+            row.innerHTML = `
+                <input type="text" class="item-desc" value="${escapeHtml(item.description)}" maxlength="200" placeholder="Item description" />
+                <input type="number" class="item-qty" min="0" step="1" value="${qty}" />
+                <input type="number" class="item-price" min="0" step="0.01" value="${price}" />
+                <span class="line-total">${formatRand(qty * price)}</span>
+                <button type="button" class="remove-item" aria-label="Remove line item"><i class="fas fa-times"></i></button>
+            `;
+            row.querySelector('.item-desc').addEventListener('input', (e) => { qbItems[idx].description = e.target.value; });
+            const recalcRow = () => {
+                const q2 = Math.max(0, Number(qbItems[idx].quantity) || 0);
+                const p2 = Math.max(0, Number(qbItems[idx].unitPrice) || 0);
+                row.querySelector('.line-total').textContent = formatRand(q2 * p2);
+                updateQbTotals();
+            };
+            row.querySelector('.item-qty').addEventListener('input', (e) => { qbItems[idx].quantity = e.target.value; recalcRow(); });
+            row.querySelector('.item-price').addEventListener('input', (e) => { qbItems[idx].unitPrice = e.target.value; recalcRow(); });
+            row.querySelector('.remove-item').addEventListener('click', () => { qbItems.splice(idx, 1); renderQbItems(); updateQbTotals(); });
+            list.appendChild(row);
+        });
+    }
+
+    function updateQbTotals() {
+        const subtotal = qbItems.reduce((sum, it) => {
+            const qty = Math.max(0, Number(it.quantity) || 0);
+            const price = Math.max(0, Number(it.unitPrice) || 0);
+            return sum + qty * price;
+        }, 0);
+        const discountType = document.getElementById('qbDiscountType').value;
+        const discountValueRaw = Math.max(0, Number(document.getElementById('qbDiscountValue').value) || 0);
+        let discountAmount = 0;
+        if (discountType === 'percent') {
+            discountAmount = subtotal * Math.min(100, discountValueRaw) / 100;
+        } else if (discountType === 'fixed') {
+            discountAmount = discountValueRaw;
+        }
+        discountAmount = Math.min(discountAmount, subtotal); // never push total negative
+        const total = Math.max(0, subtotal - discountAmount);
+        document.getElementById('qbSubtotalOut').textContent = formatRand(subtotal);
+        document.getElementById('qbDiscountOut').textContent = formatRand(discountAmount);
+        document.getElementById('qbTotalOut').textContent = formatRand(total);
+        return { subtotal, discountAmount, total };
+    }
+
+    qaSelect.addEventListener('change', (e) => {
+        const idx = Number(e.target.value);
+        if (!Number.isNaN(idx) && QUICK_ADD_SERVICES[idx]) {
+            const svc = QUICK_ADD_SERVICES[idx];
+            qbItems.push({ description: svc.label, quantity: 1, unitPrice: svc.price });
+            renderQbItems();
+            updateQbTotals();
+        }
+        e.target.value = '';
+    });
+    document.getElementById('qbAddCustomItemBtn').addEventListener('click', () => {
+        qbItems.push({ description: '', quantity: 1, unitPrice: 0 });
+        renderQbItems();
+        updateQbTotals();
+    });
+    document.getElementById('qbDiscountType').addEventListener('change', (e) => {
+        const valueInput = document.getElementById('qbDiscountValue');
+        valueInput.disabled = e.target.value === 'none';
+        if (e.target.value === 'none') valueInput.value = 0;
+        updateQbTotals();
+    });
+    document.getElementById('qbDiscountValue').addEventListener('input', updateQbTotals);
+    document.getElementById('qbPaymentSelect').addEventListener('change', (e) => {
+        if (e.target.value) document.getElementById('qbPaymentText').value = e.target.value;
+    });
+
+    function openQuoteBuilder({ lead = null, quote = null } = {}) {
+        document.getElementById('qbFormMsg').textContent = '';
+        document.getElementById('qbQuoteId').value = quote ? quote.id : '';
+        document.getElementById('qbLeadId').value = quote ? (quote.leadId || '') : (lead ? lead.id : '');
+        document.getElementById('qbQuoteNumber').value = quote ? quote.quoteNumber : '';
+        document.getElementById('qbHeading').textContent = quote ? `Edit Quote ${quote.quoteNumber}` : 'New Quote';
+
+        const budgetNote = document.getElementById('qbBudgetContext');
+        if (!quote && lead && lead.budget) {
+            document.getElementById('qbBudgetContextText').textContent = `Client indicated budget: ${lead.budget}`;
+            budgetNote.style.display = 'flex';
+        } else {
+            budgetNote.style.display = 'none';
+        }
+
+        document.getElementById('qbClientName').value = quote ? (quote.clientName || '') : (lead ? (lead.name || '') : '');
+        document.getElementById('qbBusinessName').value = quote ? (quote.businessName || '') : '';
+        document.getElementById('qbClientEmail').value = quote ? (quote.clientEmail || '') : (lead ? (lead.email || '') : '');
+        document.getElementById('qbClientPhone').value = quote ? (quote.clientPhone || '') : (lead ? (lead.phone || '') : '');
+        document.getElementById('qbQuoteTitle').value = quote ? (quote.title || '') : (lead ? (lead.packageInterest || lead.serviceInterest || '') : '');
+        document.getElementById('qbDescription').value = quote ? (quote.description || '') : (lead ? (lead.message || '') : '');
+        qbItems = quote ? (quote.items || []).map(it => ({ description: it.description, quantity: it.quantity, unitPrice: it.unitPrice })) : [];
+        document.getElementById('qbDiscountType').value = quote ? (quote.discountType || 'none') : 'none';
+        document.getElementById('qbDiscountValue').value = quote ? (quote.discountValue || 0) : 0;
+        document.getElementById('qbDiscountValue').disabled = (quote ? (quote.discountType || 'none') : 'none') === 'none';
+        document.getElementById('qbValidUntil').value = quote && quote.validUntil ? tsToDateInput(quote.validUntil) : defaultValidUntil();
+        document.getElementById('qbPaymentSelect').value = '';
+        document.getElementById('qbPaymentText').value = quote ? (quote.paymentArrangement || '') : '';
+        document.getElementById('qbTerms').value = quote ? (quote.terms || DEFAULT_QUOTE_TERMS) : DEFAULT_QUOTE_TERMS;
+        document.getElementById('qbNotes').value = quote ? (quote.notes || '') : '';
+
+        renderQbItems();
+        updateQbTotals();
+        document.getElementById('quoteBuilderOverlay').classList.add('active');
+    }
+
+    async function saveQuoteFromBuilder({ andPreview = false } = {}) {
+        const msg = document.getElementById('qbFormMsg');
+        const clientName = document.getElementById('qbClientName').value.trim();
+        const quoteTitle = document.getElementById('qbQuoteTitle').value.trim();
+        const validUntilStr = document.getElementById('qbValidUntil').value;
+        const email = document.getElementById('qbClientEmail').value.trim();
+
+        if (!clientName) { msg.textContent = '⚠️ Client name is required.'; msg.className = 'form-msg error'; return null; }
+        if (!quoteTitle) { msg.textContent = '⚠️ Quote title is required.'; msg.className = 'form-msg error'; return null; }
+        if (!validUntilStr) { msg.textContent = '⚠️ Please set a valid-until date.'; msg.className = 'form-msg error'; return null; }
+        if (email && !isValidEmail(email)) { msg.textContent = '⚠️ That client email doesn\'t look valid.'; msg.className = 'form-msg error'; return null; }
+
+        const items = qbItems
+            .map(it => ({
+                description: (it.description || '').toString().trim(),
+                quantity: Math.max(0, Number(it.quantity) || 0),
+                unitPrice: Math.max(0, Number(it.unitPrice) || 0)
+            }))
+            .filter(it => it.description || it.quantity || it.unitPrice)
+            .map(it => ({ ...it, lineTotal: it.quantity * it.unitPrice }));
+
+        const { subtotal, discountAmount, total } = updateQbTotals();
+        const discountType = document.getElementById('qbDiscountType').value;
+        const discountValue = Math.max(0, Number(document.getElementById('qbDiscountValue').value) || 0);
+        const editingId = document.getElementById('qbQuoteId').value;
+        const leadId = document.getElementById('qbLeadId').value || null;
+
+        const record = {
+            leadId,
+            clientName,
+            clientEmail: email || null,
+            clientPhone: document.getElementById('qbClientPhone').value.trim() || null,
+            businessName: document.getElementById('qbBusinessName').value.trim() || null,
+            title: quoteTitle,
+            description: document.getElementById('qbDescription').value.trim(),
+            items,
+            subtotal,
+            discountType,
+            discountValue,
+            discountAmount,
+            total,
+            validUntil: fsMod.Timestamp.fromDate(new Date(validUntilStr + 'T23:59:59')),
+            paymentArrangement: document.getElementById('qbPaymentText').value.trim(),
+            terms: document.getElementById('qbTerms').value,
+            notes: document.getElementById('qbNotes').value,
+            updatedAt: fsMod.serverTimestamp()
+        };
+
+        try {
+            let quoteId = editingId;
+            if (editingId) {
+                // quoteNumber, status, createdAt and the sent/accepted/declined
+                // timestamps are deliberately NOT in `record` — updateDoc only
+                // touches the keys present, so editing a quote can never
+                // silently overwrite its number or history (Part W).
+                await fsMod.updateDoc(fsMod.doc(db, 'quotes', editingId), record);
+            } else {
+                record.quoteNumber = await generateQuoteNumber();
+                record.status = 'draft';
+                record.createdAt = fsMod.serverTimestamp();
+                record.sentAt = null;
+                record.acceptedAt = null;
+                record.declinedAt = null;
+                record.createdBy = auth.currentUser.uid;
+                const docRef = fsMod.doc(fsMod.collection(db, 'quotes'));
+                await fsMod.setDoc(docRef, record);
+                quoteId = docRef.id;
+            }
+            msg.textContent = '✅ Quote saved.';
+            msg.className = 'form-msg success';
+            await loadQuotes();
+            if (andPreview) {
+                document.getElementById('quoteBuilderOverlay').classList.remove('active');
+                openQuotePreview(quoteId);
+            }
+            return quoteId;
+        } catch (err) {
+            console.error(err);
+            msg.textContent = '❌ Could not save quote: ' + err.message;
+            msg.className = 'form-msg error';
+            return null;
+        }
+    }
+
+    document.getElementById('quoteBuilderClose').addEventListener('click', () => {
+        document.getElementById('quoteBuilderOverlay').classList.remove('active');
+    });
+    document.getElementById('quoteBuilderOverlay').addEventListener('click', (e) => {
+        if (e.target.id === 'quoteBuilderOverlay') document.getElementById('quoteBuilderOverlay').classList.remove('active');
+    });
+    document.getElementById('qbSaveBtn').addEventListener('click', async () => {
+        const id = await saveQuoteFromBuilder({ andPreview: false });
+        if (id) document.getElementById('quoteBuilderOverlay').classList.remove('active');
+    });
+    document.getElementById('qbSaveAndPreviewBtn').addEventListener('click', () => saveQuoteFromBuilder({ andPreview: true }));
+
+    /* ── Quote Preview / print / share / status / duplicate / delete ── */
+    function openQuotePreview(id) {
+        const quote = allQuotes.find(q => q.id === id);
+        if (!quote) return;
+        activeQuoteId = id;
+        const disp = displayQuoteStatus(quote);
+
+        const statusBadge = document.getElementById('qpStatusBadge');
+        statusBadge.textContent = QUOTE_STATUS_LABELS[disp] || disp;
+        statusBadge.className = 'status-badge status-' + disp;
+        document.getElementById('qpStatusSelect').value = quote.status;
+
+        // Everything below writes via textContent, never innerHTML, for any
+        // client/admin-entered field — the quote preview is the one place
+        // this milestone treats as fully untrusted-input-safe by construction
+        // (Part X), not just by escaping.
+        document.getElementById('qpQuoteNumber').textContent = quote.quoteNumber;
+        document.getElementById('qpDate').textContent = formatDateOnly(quote.createdAt);
+        document.getElementById('qpValidUntil').textContent = quote.validUntil ? formatDateOnly(quote.validUntil) : '—';
+
+        const clientBlock = document.getElementById('qpClientBlock');
+        clientBlock.innerHTML = '';
+        [quote.clientName, quote.businessName, quote.clientEmail, quote.clientPhone].filter(Boolean).forEach(line => {
+            const p = document.createElement('div');
+            p.textContent = line;
+            clientBlock.appendChild(p);
+        });
+
+        document.getElementById('qpTitle').textContent = quote.title || '';
+        document.getElementById('qpDescription').textContent = quote.description || '';
+
+        const tbody = document.getElementById('qpItemsBody');
+        tbody.innerHTML = '';
+        (quote.items || []).forEach(item => {
+            const tr = document.createElement('tr');
+            const tdDesc = document.createElement('td'); tdDesc.textContent = item.description;
+            const tdQty = document.createElement('td'); tdQty.textContent = item.quantity;
+            const tdPrice = document.createElement('td'); tdPrice.textContent = formatRand(item.unitPrice);
+            const tdTotal = document.createElement('td'); tdTotal.textContent = formatRand(item.lineTotal);
+            tr.append(tdDesc, tdQty, tdPrice, tdTotal);
+            tbody.appendChild(tr);
+        });
+
+        document.getElementById('qpSubtotal').textContent = formatRand(quote.subtotal);
+        const discountRow = document.getElementById('qpDiscountRow');
+        if (quote.discountAmount > 0) {
+            discountRow.style.display = 'flex';
+            discountRow.querySelector('span').textContent = quote.discountType === 'percent' ? `Discount (${quote.discountValue}%)` : 'Discount';
+            document.getElementById('qpDiscount').textContent = '-' + formatRand(quote.discountAmount);
+        } else {
+            discountRow.style.display = 'none';
+        }
+        document.getElementById('qpTotal').textContent = formatRand(quote.total);
+
+        const paymentSection = document.getElementById('qpPaymentSection');
+        if (quote.paymentArrangement) {
+            paymentSection.style.display = 'block';
+            document.getElementById('qpPayment').textContent = quote.paymentArrangement;
+        } else {
+            paymentSection.style.display = 'none';
+        }
+
+        const notesSection = document.getElementById('qpNotesSection');
+        if (quote.notes) {
+            notesSection.style.display = 'block';
+            document.getElementById('qpNotes').textContent = quote.notes;
+        } else {
+            notesSection.style.display = 'none';
+        }
+
+        document.getElementById('qpTerms').textContent = quote.terms || '';
+
+        document.getElementById('quotePreviewOverlay').classList.add('active');
+    }
+
+    document.getElementById('quotePreviewClose').addEventListener('click', () => {
+        document.getElementById('quotePreviewOverlay').classList.remove('active');
+    });
+    document.getElementById('quotePreviewOverlay').addEventListener('click', (e) => {
+        if (e.target.id === 'quotePreviewOverlay') document.getElementById('quotePreviewOverlay').classList.remove('active');
+    });
+    document.getElementById('qpPrintBtn').addEventListener('click', () => window.print());
+
+    document.getElementById('qpEditBtn').addEventListener('click', () => {
+        const quote = allQuotes.find(q => q.id === activeQuoteId);
+        if (!quote) return;
+        document.getElementById('quotePreviewOverlay').classList.remove('active');
+        openQuoteBuilder({ quote });
+    });
+
+    async function duplicateQuote(id) {
+        const quote = allQuotes.find(q => q.id === id);
+        if (!quote) return;
+        try {
+            const record = {
+                leadId: quote.leadId || null,
+                quoteNumber: await generateQuoteNumber(),
+                clientName: quote.clientName,
+                clientEmail: quote.clientEmail || null,
+                clientPhone: quote.clientPhone || null,
+                businessName: quote.businessName || null,
+                title: quote.title,
+                description: quote.description || '',
+                items: (quote.items || []).map(it => ({ ...it })),
+                subtotal: quote.subtotal,
+                discountType: quote.discountType,
+                discountValue: quote.discountValue,
+                discountAmount: quote.discountAmount,
+                total: quote.total,
+                status: 'draft',
+                validUntil: fsMod.Timestamp.fromDate(new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)),
+                paymentArrangement: quote.paymentArrangement || '',
+                terms: quote.terms || '',
+                notes: quote.notes || '',
+                createdAt: fsMod.serverTimestamp(),
+                updatedAt: fsMod.serverTimestamp(),
+                sentAt: null,
+                acceptedAt: null,
+                declinedAt: null,
+                createdBy: auth.currentUser.uid
+            };
+            const docRef = fsMod.doc(fsMod.collection(db, 'quotes'));
+            await fsMod.setDoc(docRef, record);
+            await loadQuotes();
+            document.getElementById('quotePreviewOverlay').classList.remove('active');
+            openQuotePreview(docRef.id);
+        } catch (err) {
+            alert('Could not duplicate quote: ' + err.message);
+        }
+    }
+    document.getElementById('qpDuplicateBtn').addEventListener('click', () => duplicateQuote(activeQuoteId));
+
+    document.getElementById('qpEmailBtn').addEventListener('click', () => {
+        const quote = allQuotes.find(q => q.id === activeQuoteId);
+        if (!quote) return;
+        if (!quote.clientEmail || !isValidEmail(quote.clientEmail)) {
+            alert('This quote has no valid client email on file.');
+            return;
+        }
+        const subject = `RM Digitals Quote ${quote.quoteNumber}`;
+        const body = `Hi ${quote.clientName || ''},\n\nYour RM Digitals website quote ${quote.quoteNumber} (${formatRand(quote.total)}) is ready for your review. Please let me know if you have any questions.\n\nKind regards,\nAnani — RM Digitals`;
+        window.location.href = `mailto:${encodeURIComponent(quote.clientEmail)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    });
+
+    document.getElementById('qpWhatsappBtn').addEventListener('click', () => {
+        const quote = allQuotes.find(q => q.id === activeQuoteId);
+        if (!quote || !quote.clientPhone) { alert('This quote has no client phone number on file.'); return; }
+        // Recipient is always the CLIENT's own number from the quote —
+        // never RM Digitals' own WhatsApp number (Part Q).
+        const digits = quote.clientPhone.replace(/[^\d]/g, '');
+        if (digits.length < 8) { alert('This quote has no valid client phone number on file.'); return; }
+        const greeting = `Hi ${quote.clientName || ''}, your RM Digitals website quote ${quote.quoteNumber} is ready. Please review it and let me know if you have any questions.`;
+        window.open(`https://wa.me/${digits}?text=${encodeURIComponent(greeting)}`, '_blank', 'noopener,noreferrer');
+    });
+
+    async function updateQuoteStatus(newStatus) {
+        if (!activeQuoteId) return;
+        const quote = allQuotes.find(q => q.id === activeQuoteId);
+        if (!quote) return;
+        const update = { status: newStatus, updatedAt: fsMod.serverTimestamp() };
+        if (newStatus === 'sent' && !quote.sentAt) update.sentAt = fsMod.serverTimestamp();
+        if (newStatus === 'accepted' && !quote.acceptedAt) update.acceptedAt = fsMod.serverTimestamp();
+        if (newStatus === 'declined' && !quote.declinedAt) update.declinedAt = fsMod.serverTimestamp();
+
+        try {
+            await fsMod.updateDoc(fsMod.doc(db, 'quotes', activeQuoteId), update);
+
+            // Lead status integration (Part S) — never overwrites Won/Lost,
+            // and Declined never auto-marks a lead Lost (admin decides).
+            if (quote.leadId) {
+                const leadRef = fsMod.doc(db, 'leads', quote.leadId);
+                const leadSnap = await fsMod.getDoc(leadRef);
+                if (leadSnap.exists()) {
+                    const lead = leadSnap.data();
+                    if (newStatus === 'sent' && lead.status !== 'won' && lead.status !== 'lost') {
+                        await fsMod.updateDoc(leadRef, { status: 'quote_sent', updatedAt: fsMod.serverTimestamp() });
+                    } else if (newStatus === 'accepted' && lead.status !== 'won' && lead.status !== 'lost') {
+                        if (confirm('Quote accepted! Mark the linked lead as Won?')) {
+                            await fsMod.updateDoc(leadRef, { status: 'won', updatedAt: fsMod.serverTimestamp() });
+                        }
+                    }
+                    await loadLeads();
+                }
+            }
+
+            await loadQuotes();
+            openQuotePreview(activeQuoteId);
+        } catch (err) {
+            alert('Could not update quote status: ' + err.message);
+        }
+    }
+    document.getElementById('qpStatusSelect').addEventListener('change', (e) => updateQuoteStatus(e.target.value));
+
+    document.getElementById('qpDeleteBtn').addEventListener('click', async () => {
+        if (!activeQuoteId) return;
+        if (!confirm('Delete this quote permanently? This cannot be undone.')) return;
+        try {
+            await fsMod.deleteDoc(fsMod.doc(db, 'quotes', activeQuoteId));
+            document.getElementById('quotePreviewOverlay').classList.remove('active');
+            activeQuoteId = null;
+            loadQuotes();
+        } catch (err) {
+            alert('Could not delete quote: ' + err.message);
         }
     });
 }

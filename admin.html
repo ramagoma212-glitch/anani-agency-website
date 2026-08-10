@@ -508,6 +508,13 @@
             #invoicePreviewOverlay #invoicePrintArea,
             #receiptPreviewOverlay #receiptPrintArea { border-radius: 0; padding: 0; }
         }
+
+        /* ── Business Dashboard (Milestone 21) ── */
+        .dash-group-heading { font-size: .8rem; text-transform: uppercase; letter-spacing: .5px; color: var(--text-mid); margin: 18px 0 10px; }
+        .dash-group-heading:first-of-type { margin-top: 0; }
+        .dash-toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+        .dash-toolbar select { padding: 8px 12px; border-radius: 10px; background: rgba(255,255,255,.03); border: 1px solid var(--border); color: var(--text-hi); font-size: .82rem; }
+        .dash-hint { font-size: .74rem; color: var(--text-lo); margin: -4px 0 14px; }
     </style>
 </head>
 <body>
@@ -544,6 +551,90 @@
         <div class="admin-toolbar">
             <span class="who">Logged in as <strong id="whoEmail"></strong></span>
             <button class="btn-logout" id="logoutBtn">Log Out</button>
+        </div>
+
+        <div class="admin-card">
+            <h2>Business Dashboard</h2>
+            <div class="dash-toolbar">
+                <label for="dashTimeFilter" style="font-size:.78rem;color:var(--text-mid);">Period Activity:</label>
+                <select id="dashTimeFilter">
+                    <option value="all">All Time</option>
+                    <option value="month">This Month</option>
+                    <option value="30days">Last 30 Days</option>
+                </select>
+            </div>
+            <p class="dash-hint">"Current State" figures below (totals, active counts, balances) always reflect right now, regardless of this filter — only the "Period Activity" group changes with it.</p>
+
+            <h3 class="dash-group-heading">Sales Pipeline — Current State</h3>
+            <div class="cp-dashboard" id="dashSalesState">
+                <div class="cp-stat"><span class="num" id="dashLeadsTotal">0</span><span class="lbl">Total Leads</span></div>
+                <div class="cp-stat"><span class="num" id="dashLeadsNewState">0</span><span class="lbl">New Leads</span></div>
+                <div class="cp-stat"><span class="num" id="dashLeadsContactedState">0</span><span class="lbl">Contacted Leads</span></div>
+                <div class="cp-stat"><span class="num" id="dashQuoteDraft">0</span><span class="lbl">Quote Drafts</span></div>
+                <div class="cp-stat"><span class="num" id="dashQuoteSentState">0</span><span class="lbl">Quotes Sent</span></div>
+                <div class="cp-stat"><span class="num" id="dashQuoteAccepted">0</span><span class="lbl">Quotes Accepted</span></div>
+                <div class="cp-stat"><span class="num" id="dashQuoteDeclined">0</span><span class="lbl">Quotes Declined</span></div>
+            </div>
+            <div class="cp-dashboard" id="dashRates" style="grid-template-columns:repeat(2,1fr);">
+                <div class="cp-stat"><span class="num" id="dashLeadWinRate">N/A</span><span class="lbl">Lead Win Rate (Won ÷ Won+Lost, all time)</span></div>
+                <div class="cp-stat"><span class="num" id="dashQuoteAcceptRate">N/A</span><span class="lbl">Quote Acceptance Rate (Accepted ÷ Accepted+Declined+Expired)</span></div>
+            </div>
+            <p class="dash-hint">Rates are cumulative (all time) so a single slow week can't swing them — leads/quotes still awaiting a decision are never counted as a loss.</p>
+
+            <h3 class="dash-group-heading">Period Activity</h3>
+            <div class="cp-dashboard" id="dashPeriodActivity">
+                <div class="cp-stat"><span class="num" id="dashPeriodNewLeads">0</span><span class="lbl">New Leads Added</span></div>
+                <div class="cp-stat"><span class="num" id="dashPeriodQuotesSent">0</span><span class="lbl">Quotes Sent</span></div>
+                <div class="cp-stat"><span class="num" id="dashPeriodQuotesAccepted">0</span><span class="lbl">Quotes Accepted</span></div>
+                <div class="cp-stat"><span class="num" id="dashPeriodProjectsCompleted">0</span><span class="lbl">Projects Completed</span></div>
+                <div class="cp-stat"><span class="num" id="dashPeriodPayments">R0</span><span class="lbl">Payments Recorded</span></div>
+                <div class="cp-stat"><span class="num" id="dashPeriodReceipts">0</span><span class="lbl">Receipts Issued</span></div>
+            </div>
+
+            <h3 class="dash-group-heading">Projects</h3>
+            <div class="cp-dashboard" id="dashProjects" style="grid-template-columns:repeat(5,1fr);">
+                <div class="cp-stat"><span class="num" id="dashProjActive">0</span><span class="lbl">Active</span></div>
+                <div class="cp-stat warn"><span class="num" id="dashProjOverdue">0</span><span class="lbl">Overdue</span></div>
+                <div class="cp-stat"><span class="num" id="dashProjDueSoon">0</span><span class="lbl">Due Soon</span></div>
+                <div class="cp-stat"><span class="num" id="dashProjOnHold">0</span><span class="lbl">On Hold</span></div>
+                <div class="cp-stat"><span class="num" id="dashProjCompleted">0</span><span class="lbl">Completed (All Time)</span></div>
+            </div>
+
+            <h3 class="dash-group-heading">Payments &amp; Invoices — Current State</h3>
+            <div class="financial-grid" id="dashFinancial">
+                <div class="financial-stat"><span class="num" id="dashContractValue">R0</span><span class="lbl">Total Contract Value</span></div>
+                <div class="financial-stat"><span class="num" id="dashPaymentsRecorded">R0</span><span class="lbl">Payments Recorded (All Time)</span></div>
+                <div class="financial-stat balance-due"><span class="num" id="dashOutstandingBalance">R0</span><span class="lbl">Outstanding Client Balance</span></div>
+                <div class="financial-stat"><span class="num" id="dashAcceptedQuoteValue">R0</span><span class="lbl">Accepted Quote Value</span></div>
+                <div class="financial-stat"><span class="num" id="dashOpenInvoiceValue">R0</span><span class="lbl">Open Invoice Value</span></div>
+                <div class="financial-stat balance-due"><span class="num" id="dashOverdueInvoiceValue">R0</span><span class="lbl">Overdue Invoice Value</span></div>
+                <div class="financial-stat paid-full"><span class="num" id="dashPaidInvoiceValue">R0</span><span class="lbl">Paid Invoice Value</span></div>
+            </div>
+            <p class="dash-hint">These are business records, not a bank balance — figures reflect what's been invoiced/recorded here, not verified funds in any account.</p>
+
+            <h3 class="dash-group-heading">Clients</h3>
+            <div class="cp-dashboard" id="dashClients" style="grid-template-columns:repeat(3,1fr);">
+                <div class="cp-stat"><span class="num" id="dashClientsActive">0</span><span class="lbl">Active</span></div>
+                <div class="cp-stat"><span class="num" id="dashClientsPast">0</span><span class="lbl">Past Clients</span></div>
+                <div class="cp-stat"><span class="num" id="dashClientsArchived">0</span><span class="lbl">Archived</span></div>
+            </div>
+
+            <h3 class="dash-group-heading">Post-Project Follow-Up</h3>
+            <div class="cp-dashboard" id="dashFollowUp" style="grid-template-columns:repeat(3,1fr);">
+                <div class="cp-stat"><span class="num" id="dashPortfolioPermPending">0</span><span class="lbl">Portfolio Permission Pending</span></div>
+                <div class="cp-stat"><span class="num" id="dashReviewsAwaitingRequest">0</span><span class="lbl">Reviews Not Yet Requested</span></div>
+                <div class="cp-stat"><span class="num" id="dashOutstandingFinalPayments">0</span><span class="lbl">Outstanding Final Payments</span></div>
+            </div>
+
+            <div class="cp-attention" id="dashAttentionBox">
+                <h4><i class="fas fa-triangle-exclamation"></i> Needs Attention</h4>
+                <ul id="dashAttentionList"><li class="empty-note">Loading…</li></ul>
+            </div>
+
+            <div class="cp-attention followup" id="dashActivityBox">
+                <h4><i class="fas fa-clock"></i> Recent Activity</h4>
+                <ul id="dashActivityList"><li class="empty-note">Loading…</li></ul>
+            </div>
         </div>
 
         <div class="admin-card">

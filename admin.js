@@ -606,6 +606,7 @@ async function runAdmin() {
         allLeads = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderLeadSummary();
         renderLeadList();
+        refreshDashboard();
     }
 
     function renderLeadSummary() {
@@ -957,6 +958,7 @@ async function runAdmin() {
         allQuotes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderQuoteSummary();
         renderQuoteList();
+        refreshDashboard();
     }
 
     function renderQuoteSummary() {
@@ -1489,6 +1491,7 @@ async function runAdmin() {
         }
         allClients = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderClientList();
+        refreshDashboard();
     }
 
     /* Duplicate-client detection (Part L) — fetches the small admin-only
@@ -1851,6 +1854,7 @@ async function runAdmin() {
         allClientProjects = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         await renderCpDashboard();
         renderCpList();
+        refreshDashboard();
     }
 
     /* Two lightweight, server-side-filtered counts (Milestone 19 dashboard
@@ -3131,6 +3135,7 @@ async function runAdmin() {
         allInvoices = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderInvoiceSummary();
         renderInvoiceList();
+        refreshDashboard();
     }
 
     function renderInvoiceSummary() {
@@ -3733,6 +3738,7 @@ async function runAdmin() {
         }
         allReceipts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderReceiptList();
+        refreshDashboard();
     }
     function renderReceiptList() {
         const list = document.getElementById('receiptList');
@@ -3870,4 +3876,224 @@ async function runAdmin() {
             alert('Could not void receipt: ' + err.message);
         }
     });
+
+    /* ============================================================
+       BUSINESS DASHBOARD (Milestone 21)
+       Reads only from the arrays each section already keeps in memory
+       (allLeads/allQuotes/allClients/allClientProjects/allInvoices/
+       allReceipts/allProjects) — no extra Firestore reads. Recomputed
+       every time any of those six collections reloads (see the
+       refreshDashboard() calls added at the end of each loadX()
+       above), so it can never show stale figures after an edit
+       anywhere else in the app.
+       ============================================================ */
+
+    /* "Current State" figures (totals, active counts, balances) are
+       always all-time — filtering a point-in-time balance by a date
+       range doesn't make sense. Only "Period Activity" below respects
+       this filter, and only using fields that mark exactly when that
+       specific event happened (sentAt/acceptedAt/completedAt/payment
+       date/createdAt) — never an ambiguous updatedAt (Part 21, never
+       invent or misattribute events). */
+    function isWithinDashboardPeriod(ts) {
+        const mode = document.getElementById('dashTimeFilter').value;
+        if (mode === 'all') return true;
+        if (!ts) return false;
+        const d = ts.toDate ? ts.toDate() : new Date(ts);
+        if (mode === 'month') {
+            const startOfMonth = new Date(); startOfMonth.setDate(1); startOfMonth.setHours(0, 0, 0, 0);
+            return d.getTime() >= startOfMonth.getTime();
+        }
+        if (mode === '30days') return d.getTime() >= Date.now() - 30 * 24 * 60 * 60 * 1000;
+        return true;
+    }
+    /* N/A rather than 0% or a misleading rate when nothing has been
+       decided yet either way (Part 21 — explain/guard denominators). */
+    function formatRatePercent(numerator, denominator) {
+        if (!denominator) return 'N/A';
+        return Math.round((numerator / denominator) * 100) + '%';
+    }
+
+    function refreshDashboard() {
+        if (!document.getElementById('dashTimeFilter')) return;
+
+        /* Sales Pipeline — Current State */
+        const leadCounts = { new: 0, contacted: 0, won: 0, lost: 0 };
+        allLeads.forEach(l => { if (leadCounts.hasOwnProperty(l.status)) leadCounts[l.status]++; });
+        document.getElementById('dashLeadsTotal').textContent = allLeads.length;
+        document.getElementById('dashLeadsNewState').textContent = leadCounts.new;
+        document.getElementById('dashLeadsContactedState').textContent = leadCounts.contacted;
+
+        const quoteCounts = { draft: 0, sent: 0, accepted: 0, declined: 0, expired: 0 };
+        allQuotes.forEach(q => { const disp = displayQuoteStatus(q); if (quoteCounts.hasOwnProperty(disp)) quoteCounts[disp]++; });
+        document.getElementById('dashQuoteDraft').textContent = quoteCounts.draft;
+        document.getElementById('dashQuoteSentState').textContent = quoteCounts.sent;
+        document.getElementById('dashQuoteAccepted').textContent = quoteCounts.accepted;
+        document.getElementById('dashQuoteDeclined').textContent = quoteCounts.declined;
+
+        /* Cumulative (all time), never period-filtered — a single slow
+           week can't swing these, and "undecided" is never a loss. */
+        document.getElementById('dashLeadWinRate').textContent = formatRatePercent(leadCounts.won, leadCounts.won + leadCounts.lost);
+        document.getElementById('dashQuoteAcceptRate').textContent = formatRatePercent(quoteCounts.accepted, quoteCounts.accepted + quoteCounts.declined + quoteCounts.expired);
+
+        /* Period Activity */
+        const periodNewLeads = allLeads.filter(l => isWithinDashboardPeriod(l.createdAt)).length;
+        const periodQuotesSent = allQuotes.filter(q => isWithinDashboardPeriod(q.sentAt)).length;
+        const periodQuotesAccepted = allQuotes.filter(q => isWithinDashboardPeriod(q.acceptedAt)).length;
+        const periodProjectsCompleted = allClientProjects.filter(p => p.stage === 'completed' && isWithinDashboardPeriod(p.completedAt)).length;
+        const periodReceipts = allReceipts.filter(r => isWithinDashboardPeriod(r.createdAt)).length;
+        let periodPayments = 0;
+        allClientProjects.forEach(p => {
+            (p.payments || []).forEach(pay => {
+                if (isWithinDashboardPeriod(pay.date)) periodPayments += Math.max(0, Number(pay.amount) || 0);
+            });
+        });
+        document.getElementById('dashPeriodNewLeads').textContent = periodNewLeads;
+        document.getElementById('dashPeriodQuotesSent').textContent = periodQuotesSent;
+        document.getElementById('dashPeriodQuotesAccepted').textContent = periodQuotesAccepted;
+        document.getElementById('dashPeriodProjectsCompleted').textContent = periodProjectsCompleted;
+        document.getElementById('dashPeriodPayments').textContent = formatRand(periodPayments);
+        document.getElementById('dashPeriodReceipts').textContent = periodReceipts;
+
+        /* Projects — never counts Cancelled as active (ACTIVE_STAGES
+           already excludes it, same list used by the Client Projects
+           dashboard above, so the two never disagree). */
+        let projActive = 0, projOverdue = 0, projDueSoon = 0, projOnHold = 0, projCompleted = 0;
+        allClientProjects.forEach(p => {
+            if (ACTIVE_STAGES.includes(p.stage)) projActive++;
+            if (isOverdue(p)) projOverdue++;
+            if (isDueSoon(p)) projDueSoon++;
+            if (p.stage === 'on_hold') projOnHold++;
+            if (p.stage === 'completed') projCompleted++;
+        });
+        document.getElementById('dashProjActive').textContent = projActive;
+        document.getElementById('dashProjOverdue').textContent = projOverdue;
+        document.getElementById('dashProjDueSoon').textContent = projDueSoon;
+        document.getElementById('dashProjOnHold').textContent = projOnHold;
+        document.getElementById('dashProjCompleted').textContent = projCompleted;
+
+        /* Payments & Invoices — Current State. Deliberately never
+           labelled "Bank Balance"/"Cash Available"/"Verified Revenue"
+           anywhere here — these are business records of what's been
+           invoiced/recorded, not verified funds (Part 21). */
+        let totalContract = 0, totalPaid = 0;
+        allClientProjects.forEach(p => {
+            totalContract += Math.max(0, Number(p.contractValue) || 0);
+            totalPaid += Math.max(0, Number(p.amountPaid) || 0);
+        });
+        let acceptedQuoteValue = 0;
+        allQuotes.forEach(q => { if (q.status === 'accepted') acceptedQuoteValue += Math.max(0, Number(q.total) || 0); });
+        let openInvoiceValue = 0, overdueInvoiceValue = 0, paidInvoiceValue = 0;
+        allInvoices.forEach(inv => {
+            const disp = displayInvoiceStatus(inv);
+            const { outstanding, total } = computeInvoiceTotals(inv);
+            if (disp !== 'cancelled' && disp !== 'paid') openInvoiceValue += Math.max(0, outstanding);
+            if (disp === 'overdue') overdueInvoiceValue += Math.max(0, outstanding);
+            if (disp === 'paid') paidInvoiceValue += total;
+        });
+        document.getElementById('dashContractValue').textContent = formatRand(totalContract);
+        document.getElementById('dashPaymentsRecorded').textContent = formatRand(totalPaid);
+        document.getElementById('dashOutstandingBalance').textContent = formatRand(Math.max(0, totalContract - totalPaid));
+        document.getElementById('dashAcceptedQuoteValue').textContent = formatRand(acceptedQuoteValue);
+        document.getElementById('dashOpenInvoiceValue').textContent = formatRand(openInvoiceValue);
+        document.getElementById('dashOverdueInvoiceValue').textContent = formatRand(overdueInvoiceValue);
+        document.getElementById('dashPaidInvoiceValue').textContent = formatRand(paidInvoiceValue);
+
+        /* Clients — never inflated using Leads; only real clients count. */
+        const clientCounts = { active: 0, past: 0, archived: 0 };
+        allClients.forEach(c => { if (clientCounts.hasOwnProperty(c.status)) clientCounts[c.status]++; });
+        document.getElementById('dashClientsActive').textContent = clientCounts.active;
+        document.getElementById('dashClientsPast').textContent = clientCounts.past;
+        document.getElementById('dashClientsArchived').textContent = clientCounts.archived;
+
+        /* Post-Project Follow-Up */
+        let portfolioPermPending = 0, reviewsAwaitingRequest = 0, outstandingFinalPayments = 0;
+        allClientProjects.forEach(p => {
+            if (p.stage === 'completed') {
+                if ((p.portfolioPermission || 'not_asked') === 'not_asked') portfolioPermPending++;
+                if ((p.reviewRequestStatus || 'not_requested') === 'not_requested') reviewsAwaitingRequest++;
+                if (Number(p.balance) > 0.001) outstandingFinalPayments++;
+            }
+        });
+        document.getElementById('dashPortfolioPermPending').textContent = portfolioPermPending;
+        document.getElementById('dashReviewsAwaitingRequest').textContent = reviewsAwaitingRequest;
+        document.getElementById('dashOutstandingFinalPayments').textContent = outstandingFinalPayments;
+
+        renderDashboardAttention();
+        renderDashboardActivity();
+    }
+
+    /* Deliberately non-overlapping with the Client Projects card's own
+       "Needs Attention" list above (overdue/due-soon/awaiting-content/
+       high-priority projects) — this one surfaces categories that
+       aren't shown anywhere else yet, so nothing is duplicated. */
+    function renderDashboardAttention() {
+        const list = document.getElementById('dashAttentionList');
+        const items = [];
+        allInvoices.forEach(inv => {
+            if (displayInvoiceStatus(inv) === 'overdue') {
+                const { outstanding } = computeInvoiceTotals(inv);
+                items.push({ text: `Overdue invoice: ${inv.invoiceNumber} — ${formatRand(outstanding)} outstanding (${inv.clientName || ''})`, weight: 0, action: () => openInvoicePreview(inv.id) });
+            }
+        });
+        allQuotes.forEach(q => {
+            if (q.status === 'sent' && q.validUntil) {
+                const validDate = q.validUntil.toDate ? q.validUntil.toDate() : new Date(q.validUntil);
+                const daysLeft = Math.ceil((validDate.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
+                if (daysLeft >= 0 && daysLeft <= 7) {
+                    items.push({ text: `Quote expiring in ${daysLeft} day${daysLeft === 1 ? '' : 's'}: ${q.quoteNumber} (${q.clientName || ''})`, weight: 1, action: () => openQuotePreview(q.id) });
+                }
+            }
+        });
+        allLeads.forEach(l => {
+            if (l.status === 'new') {
+                items.push({ text: `New lead awaiting first contact: ${l.name || '(no name)'}`, weight: 2, action: () => openLeadDetail(l.id) });
+            }
+        });
+        items.sort((a, b) => a.weight - b.weight);
+        if (!items.length) { list.innerHTML = '<li class="empty-note">Nothing needs attention right now.</li>'; return; }
+        list.innerHTML = '';
+        items.slice(0, 10).forEach(item => {
+            const li = document.createElement('li');
+            li.textContent = item.text; // textContent — client/lead-entered names are untrusted input
+            li.addEventListener('click', item.action);
+            list.appendChild(li);
+        });
+    }
+
+    /* Merged, reverse-chronological feed built only from fields that
+       already record exactly when something happened — never a
+       fabricated or guessed event (Part 21). */
+    function renderDashboardActivity() {
+        const list = document.getElementById('dashActivityList');
+        const events = [];
+        allLeads.forEach(l => { if (l.createdAt) events.push({ ts: l.createdAt, text: `New lead: ${l.name || '(no name)'}`, action: () => openLeadDetail(l.id) }); });
+        allQuotes.forEach(q => {
+            if (q.sentAt) events.push({ ts: q.sentAt, text: `Quote sent: ${q.quoteNumber} (${q.clientName || ''})`, action: () => openQuotePreview(q.id) });
+            if (q.acceptedAt) events.push({ ts: q.acceptedAt, text: `Quote accepted: ${q.quoteNumber} (${q.clientName || ''})`, action: () => openQuotePreview(q.id) });
+            if (q.declinedAt) events.push({ ts: q.declinedAt, text: `Quote declined: ${q.quoteNumber} (${q.clientName || ''})`, action: () => openQuotePreview(q.id) });
+        });
+        allClientProjects.forEach(p => {
+            if (p.completedAt) events.push({ ts: p.completedAt, text: `Project completed: ${p.projectName}`, action: () => openProjectDetail({ project: p }) });
+            (p.payments || []).forEach(pay => {
+                if (pay.date) events.push({ ts: pay.date, text: `Payment recorded: ${formatRand(pay.amount)} — ${p.projectName} (dated ${formatDateOnly(pay.date)})`, action: () => openProjectDetail({ project: p }) });
+            });
+        });
+        allInvoices.forEach(inv => { if (inv.sentAt) events.push({ ts: inv.sentAt, text: `Invoice sent: ${inv.invoiceNumber} (${inv.clientName || ''})`, action: () => openInvoicePreview(inv.id) }); });
+        allReceipts.forEach(r => { if (r.createdAt) events.push({ ts: r.createdAt, text: `Receipt issued: ${r.receiptNumber} (${formatRand(r.amount)})`, action: () => openReceiptPreview(r.id) }); });
+
+        events.forEach(e => { e._t = e.ts.toDate ? e.ts.toDate().getTime() : new Date(e.ts).getTime(); });
+        events.sort((a, b) => b._t - a._t);
+
+        if (!events.length) { list.innerHTML = '<li class="empty-note">No activity recorded yet.</li>'; return; }
+        list.innerHTML = '';
+        events.slice(0, 10).forEach(e => {
+            const li = document.createElement('li');
+            li.textContent = e.text;
+            li.addEventListener('click', e.action);
+            list.appendChild(li);
+        });
+    }
+
+    document.getElementById('dashTimeFilter').addEventListener('change', refreshDashboard);
 }

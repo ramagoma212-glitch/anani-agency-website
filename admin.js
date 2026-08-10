@@ -161,6 +161,27 @@ Changes outside the agreed scope may require an updated quote.
 Third-party costs such as domains, premium software, paid plugins or external services are excluded unless specifically listed.
 Final ownership/handover occurs according to the agreed payment arrangement.`;
 
+/* ── Project Completion, Portfolio & Review Workflow (Milestone 19) ── */
+const COMPLETION_STARTER_ITEMS = [
+    'Final functionality testing', 'Mobile / responsive testing', 'Forms and contact actions tested',
+    'Client review completed', 'Final revisions completed', 'Client approval received',
+    'Domain / hosting / launch completed', 'Website launched', 'Client handover completed',
+    'Final payment status reviewed'
+];
+const PORTFOLIO_PERMISSION_LABELS = { not_asked: 'Not Asked', granted: 'Granted', declined: 'Declined' };
+const REVIEW_REQUEST_LABELS = {
+    not_requested: 'Not Requested', requested: 'Requested', submitted: 'Submitted / Pending Approval',
+    approved: 'Approved', declined: 'Submitted / Not Approved'
+};
+/* Current live production URL (custom domain intentionally deferred —
+   see Milestones 15/16). Update this constant, nowhere else, if/when
+   the site moves to rmdigitals.co.za. */
+const PUBLIC_SITE_URL = 'https://ramagoma212-glitch.github.io/anani-agency-website/';
+function reviewRequestUrl() { return PUBLIC_SITE_URL + '?review=1#testimonials'; }
+function reviewRequestMessage(name) {
+    return `Hi ${name || ''}, thank you for trusting RM Digitals with your website project. We'd appreciate hearing about your experience — your feedback helps us improve and helps other businesses understand what it's like to work with us. You can share it here: ${reviewRequestUrl()}`;
+}
+
 async function runAdmin() {
     const { firebaseConfig } = await import('./firebase-config.js');
     const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js');
@@ -326,6 +347,8 @@ async function runAdmin() {
     const formTitle = document.getElementById('projectFormTitle');
     const submitBtn = document.getElementById('projectSubmitBtn');
     const cancelEditBtn = document.getElementById('projectCancelEditBtn');
+    let allProjects = []; // cached after each loadProjects() — used by the Milestone 19 portfolio-status check
+    let pendingPortfolioSourceProjectId = null; // set by "Prepare Portfolio Draft" (Milestone 19), consumed on next new-project save
 
     function resetForm() {
         form.reset();
@@ -412,6 +435,24 @@ async function runAdmin() {
             } else {
                 record.createdAt = fsMod.serverTimestamp();
                 await fsMod.setDoc(docRef, record);
+
+                // Milestone 19: if this new portfolio project was created via
+                // "Prepare Portfolio Draft" from a Client Project, link them —
+                // private -> public relationship only, the public `projects`
+                // document itself gains no new fields.
+                if (pendingPortfolioSourceProjectId) {
+                    try {
+                        await fsMod.updateDoc(fsMod.doc(db, 'clientProjects', pendingPortfolioSourceProjectId), {
+                            portfolioProjectId: docRef.id,
+                            portfolioPreparedAt: fsMod.serverTimestamp(),
+                            updatedAt: fsMod.serverTimestamp()
+                        });
+                    } catch (linkErr) {
+                        console.warn('Portfolio draft saved, but could not link back to the client project:', linkErr.message);
+                    }
+                    pendingPortfolioSourceProjectId = null;
+                    if (typeof loadClientProjects === 'function') loadClientProjects();
+                }
             }
 
             resetForm();
@@ -437,6 +478,7 @@ async function runAdmin() {
             list.innerHTML = `<p class="empty-note">Could not load projects: ${escapeHtml(err.message)}</p>`;
             return;
         }
+        allProjects = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         if (snap.empty) {
             list.innerHTML = '<p class="empty-note">No projects added yet.</p>';
             return;
@@ -1724,6 +1766,7 @@ async function runAdmin() {
     let cpItemsPayments = [];
     let cpItemsChecklist = [];
     let cpItemsTasks = [];
+    let cpItemsCompletion = [];
 
     async function loadClientProjects() {
         const list = document.getElementById('cpList');
@@ -1737,11 +1780,25 @@ async function runAdmin() {
             return;
         }
         allClientProjects = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        renderCpDashboard();
+        await renderCpDashboard();
         renderCpList();
     }
 
-    function renderCpDashboard() {
+    /* Two lightweight, server-side-filtered counts (Milestone 19 dashboard
+       only) — not cached, since Reviews already has its own live admin
+       section; this just needs the numbers, not the records. */
+    async function loadReviewCountsForDashboard() {
+        try {
+            const pendingSnap = await fsMod.getDocs(fsMod.query(fsMod.collection(db, 'reviews'), fsMod.where('status', '==', 'pending')));
+            const approvedSnap = await fsMod.getDocs(fsMod.query(fsMod.collection(db, 'reviews'), fsMod.where('status', '==', 'approved')));
+            return { pending: pendingSnap.size, approved: approvedSnap.size };
+        } catch (err) {
+            console.warn('Could not load review counts:', err.message);
+            return { pending: 0, approved: 0 };
+        }
+    }
+
+    async function renderCpDashboard() {
         const counts = { active: 0, awaiting_content: 0, development: 0, client_review: 0, ready_to_launch: 0, completed: 0, overdue: 0 };
         let totalContract = 0, totalPaid = 0;
         allClientProjects.forEach(p => {
@@ -1764,7 +1821,67 @@ async function runAdmin() {
         document.getElementById('cpfOutstanding').textContent = formatRand(Math.max(0, totalContract - totalPaid));
         document.getElementById('cpfAccepted').textContent = formatRand(totalContract);
 
+        /* Milestone 19: completion/marketing summary — secondary to the
+           pipeline dashboard above, per Part Z ("do not overload"). */
+        const startOfMonth = new Date(); startOfMonth.setDate(1); startOfMonth.setHours(0, 0, 0, 0);
+        let completedTotal = 0, completedThisMonth = 0, permissionPending = 0, readyForPortfolio = 0, portfolioDrafts = 0, portfolioPublished = 0, reviewsRequested = 0;
+        allClientProjects.forEach(p => {
+            if (p.stage === 'completed') {
+                completedTotal++;
+                if (p.completedAt) {
+                    const d = p.completedAt.toDate ? p.completedAt.toDate() : new Date(p.completedAt);
+                    if (d.getTime() >= startOfMonth.getTime()) completedThisMonth++;
+                }
+                const permission = p.portfolioPermission || 'not_asked';
+                if (permission === 'not_asked') permissionPending++;
+                if (permission === 'granted' && !p.portfolioProjectId) readyForPortfolio++;
+            }
+            if (p.portfolioProjectId) {
+                portfolioDrafts++;
+                const linked = allProjects.find(pp => pp.id === p.portfolioProjectId);
+                if (linked && linked.published) portfolioPublished++;
+            }
+            if (p.reviewRequestStatus && p.reviewRequestStatus !== 'not_requested') reviewsRequested++;
+        });
+        document.getElementById('cpmCompletedTotal').textContent = completedTotal;
+        document.getElementById('cpmCompletedThisMonth').textContent = completedThisMonth;
+        document.getElementById('cpmPermissionPending').textContent = permissionPending;
+        document.getElementById('cpmReadyForPortfolio').textContent = readyForPortfolio;
+        document.getElementById('cpmPortfolioDrafts').textContent = portfolioDrafts;
+        document.getElementById('cpmPortfolioPublished').textContent = portfolioPublished;
+        document.getElementById('cpmReviewsRequested').textContent = reviewsRequested;
+
+        const reviewCounts = await loadReviewCountsForDashboard();
+        document.getElementById('cpmReviewsAwaiting').textContent = reviewCounts.pending;
+        document.getElementById('cpmReviewsApproved').textContent = reviewCounts.approved;
+
         renderCpAttention();
+        renderCpFollowUp();
+    }
+
+    function renderCpFollowUp() {
+        const list = document.getElementById('cpFollowUpList');
+        const items = [];
+        allClientProjects.filter(p => p.stage === 'completed').forEach(p => {
+            const permission = p.portfolioPermission || 'not_asked';
+            const reviewStatus = p.reviewRequestStatus || 'not_requested';
+            if (permission === 'not_asked') items.push({ id: p.id, text: `Portfolio permission not asked: ${p.projectName}` });
+            else if (permission === 'granted' && !p.portfolioProjectId) items.push({ id: p.id, text: `Portfolio granted, no draft prepared yet: ${p.projectName}` });
+            if (reviewStatus === 'not_requested') items.push({ id: p.id, text: `Review not requested: ${p.projectName}` });
+            else if (reviewStatus === 'requested' && !p.linkedReviewId) items.push({ id: p.id, text: `Review requested, not yet linked: ${p.projectName}` });
+            if (Number(p.balance) > 0.001) items.push({ id: p.id, text: `Outstanding final payment (${formatRand(p.balance)}): ${p.projectName}` });
+        });
+        if (!items.length) { list.innerHTML = '<li class="empty-note">No completed projects need follow-up right now.</li>'; return; }
+        list.innerHTML = '';
+        items.slice(0, 12).forEach(item => {
+            const li = document.createElement('li');
+            li.textContent = item.text;
+            li.addEventListener('click', () => {
+                const project = allClientProjects.find(p => p.id === item.id);
+                if (project) openProjectDetail({ project });
+            });
+            list.appendChild(li);
+        });
     }
 
     function renderCpAttention() {
@@ -1794,12 +1911,23 @@ async function runAdmin() {
         const searchTerm = (document.getElementById('cpSearch').value || '').trim().toLowerCase();
         const stageFilter = document.getElementById('cpFilterStage').value;
         const priorityFilter = document.getElementById('cpFilterPriority').value;
+        const workflowFilter = document.getElementById('cpFilterWorkflow').value;
         const sortMode = document.getElementById('cpSort').value;
 
         let filtered = allClientProjects.filter(p => {
             if (stageFilter === 'active') { if (!ACTIVE_STAGES.includes(p.stage)) return false; }
             else if (stageFilter !== 'all' && p.stage !== stageFilter) return false;
             if (priorityFilter !== 'all' && p.priority !== priorityFilter) return false;
+            if (workflowFilter !== 'all') {
+                const permission = p.portfolioPermission || 'not_asked';
+                const reviewStatus = p.reviewRequestStatus || 'not_requested';
+                if (workflowFilter === 'permission_pending' && permission !== 'not_asked') return false;
+                if (workflowFilter === 'ready_for_portfolio' && !(permission === 'granted' && !p.portfolioProjectId)) return false;
+                if (workflowFilter === 'review_not_requested' && reviewStatus !== 'not_requested') return false;
+                if (workflowFilter === 'review_requested' && reviewStatus !== 'requested') return false;
+                if (workflowFilter === 'review_submitted' && reviewStatus !== 'submitted') return false;
+                if (workflowFilter === 'review_approved' && reviewStatus !== 'approved') return false;
+            }
             if (!searchTerm) return true;
             const client = allClients.find(c => c.id === p.clientId);
             const haystack = [p.projectName, client ? client.name : '', client ? client.businessName : ''].filter(Boolean).join(' ').toLowerCase();
@@ -1859,6 +1987,7 @@ async function runAdmin() {
     document.getElementById('cpSearch').addEventListener('input', renderCpList);
     document.getElementById('cpFilterStage').addEventListener('change', renderCpList);
     document.getElementById('cpFilterPriority').addEventListener('change', renderCpList);
+    document.getElementById('cpFilterWorkflow').addEventListener('change', renderCpList);
     document.getElementById('cpSort').addEventListener('change', renderCpList);
     document.getElementById('cpNewBtn').addEventListener('click', () => openClientPicker());
 
@@ -1905,16 +2034,44 @@ async function runAdmin() {
         }
     }
     document.getElementById('cpTargetDate').addEventListener('change', renderCpDeadlineWarningFromForm);
+
+    let cpPreviousStageValue = 'awaiting_content'; // tracked so a cancelled "mark Completed" can revert the select
+
     document.getElementById('cpStage').addEventListener('change', (e) => {
-        const suggested = STAGE_SUGGESTED_PROGRESS[e.target.value];
+        const newValue = e.target.value;
+
+        /* Completion readiness check (Milestone 19, Part E) — a warning,
+           never an absolute block. The admin always has the final say. */
+        if (newValue === 'completed' && cpPreviousStageValue !== 'completed') {
+            const issues = [];
+            const unresolvedCompletion = cpItemsCompletion.filter(i => i.status === 'pending').length;
+            if (unresolvedCompletion > 0) issues.push(`${unresolvedCompletion} completion checklist item(s) still pending`);
+            const openTasks = cpItemsTasks.filter(t => !t.completed).length;
+            if (openTasks > 0) issues.push(`${openTasks} open task(s)`);
+            const outstandingContent = cpItemsChecklist.filter(i => !i.received).length;
+            if (outstandingContent > 0) issues.push(`${outstandingContent} content item(s) still outstanding`);
+            const { balance } = renderCpFinancials();
+            if (balance > 0.001) issues.push(`an outstanding balance of ${formatRand(balance)}`);
+            if (cpItemsCompletion.length && !cpItemsCompletion.some(i => /client approval/i.test(i.label) && i.status === 'completed')) {
+                issues.push('client approval not yet confirmed on the completion checklist');
+            }
+            if (issues.length) {
+                const proceed = confirm(`This project still has outstanding items:\n\n${issues.map(i => '• ' + i).join('\n')}\n\nAre you sure you want to mark it completed?`);
+                if (!proceed) { e.target.value = cpPreviousStageValue; return; }
+            }
+        }
+        cpPreviousStageValue = newValue;
+
+        const suggested = STAGE_SUGGESTED_PROGRESS[newValue];
         if (suggested != null) {
             const current = clampProgress(document.getElementById('cpProgress').value);
-            if (current !== suggested && confirm(`Update progress to ${suggested}% to match the "${STAGE_LABELS[e.target.value]}" stage? (Cancel to leave progress unchanged)`)) {
+            if (current !== suggested && confirm(`Update progress to ${suggested}% to match the "${STAGE_LABELS[newValue]}" stage? (Cancel to leave progress unchanged)`)) {
                 document.getElementById('cpProgress').value = suggested;
                 updateCpProgressBar();
             }
         }
         renderCpDeadlineWarningFromForm();
+        renderCpReviewSection(allClientProjects.find(p => p.id === document.getElementById('cpProjectId').value) || { stage: newValue });
     });
 
     function renderCpPayments() {
@@ -2076,7 +2233,12 @@ async function runAdmin() {
         if (url && isSafeHttpUrl(url)) window.open(url, '_blank', 'noopener,noreferrer');
     });
 
-    function openProjectDetail({ project = null, client = null, lead = null, quote = null, prefill = null, duplicateNote = '' } = {}) {
+    async function openProjectDetail({ project = null, client = null, lead = null, quote = null, prefill = null, duplicateNote = '' } = {}) {
+        // Sync any linked review's live status first (Part X) — only writes
+        // when the status genuinely changed, so this can never loop.
+        if (project && project.linkedReviewId) {
+            project = await syncLinkedReviewStatus(project);
+        }
         document.getElementById('cpFormMsg').textContent = '';
         const dupNoteEl = document.getElementById('cpDuplicateConversionNote');
         if (duplicateNote) { dupNoteEl.textContent = duplicateNote; dupNoteEl.style.display = 'block'; }
@@ -2116,6 +2278,7 @@ async function runAdmin() {
         document.getElementById('cpStartDate').value = project && project.startDate ? tsToDateInput(project.startDate) : '';
         document.getElementById('cpTargetDate').value = project && project.targetDate ? tsToDateInput(project.targetDate) : '';
         document.getElementById('cpStage').value = project ? (project.stage || 'awaiting_content') : 'awaiting_content';
+        cpPreviousStageValue = document.getElementById('cpStage').value;
         document.getElementById('cpProgress').value = project ? clampProgress(project.progress) : 0;
         updateCpProgressBar();
         renderCpDeadlineWarningFromForm();
@@ -2134,7 +2297,21 @@ async function runAdmin() {
 
         document.getElementById('cpContentFolderUrl').value = project ? (project.contentFolderUrl || '') : '';
         renderCpContentFolderLink();
+        document.getElementById('cpLiveWebsiteUrl').value = project ? (project.liveWebsiteUrl || '') : '';
         document.getElementById('cpInternalNotes').value = project ? (project.internalNotes || '') : '';
+
+        // Milestone 19 additions
+        cpItemsCompletion = project ? (project.completionChecklist || []).map(i => ({ ...i })) : [];
+        renderCpCompletion();
+        const completedAtRow = document.getElementById('cpCompletedAtRow');
+        if (project && project.completedAt) {
+            document.getElementById('cpCompletedAtText').textContent = formatDateOnly(project.completedAt);
+            completedAtRow.style.display = 'block';
+        } else {
+            completedAtRow.style.display = 'none';
+        }
+        renderCpPortfolioSection(project);
+        renderCpReviewSection(project);
 
         document.getElementById('cpModalOverlay').classList.add('active');
     }
@@ -2163,6 +2340,8 @@ async function runAdmin() {
 
         const folderUrl = document.getElementById('cpContentFolderUrl').value.trim();
         if (folderUrl && !isSafeHttpUrl(folderUrl)) { msg.textContent = '⚠️ Content Folder URL must start with http:// or https://'; msg.className = 'form-msg error'; return null; }
+        const liveWebsiteUrl = document.getElementById('cpLiveWebsiteUrl').value.trim();
+        if (liveWebsiteUrl && !isSafeHttpUrl(liveWebsiteUrl)) { msg.textContent = '⚠️ Live Website URL must start with http:// or https://'; msg.className = 'form-msg error'; return null; }
 
         const { contractValue, depositRequired, amountPaid, balance } = renderCpFinancials();
         let paymentStatus;
@@ -2195,9 +2374,20 @@ async function runAdmin() {
             contentChecklist: cpItemsChecklist,
             tasks: cpItemsTasks,
             contentFolderUrl: folderUrl || null,
+            liveWebsiteUrl: liveWebsiteUrl || null,
             internalNotes: document.getElementById('cpInternalNotes').value,
+            completionChecklist: cpItemsCompletion,
+            portfolioPermission: document.getElementById('cpPortfolioPermission').value,
+            portfolioPermissionNote: document.getElementById('cpPortfolioPermissionNote').value.trim(),
+            publicPortfolioSummary: document.getElementById('cpPublicPortfolioSummary').value.trim(),
             updatedAt: fsMod.serverTimestamp()
         };
+
+        // portfolioPermissionUpdatedAt only bumps when the permission value
+        // actually changed — never on every unrelated save.
+        if (!existingProject || existingProject.portfolioPermission !== record.portfolioPermission) {
+            record.portfolioPermissionUpdatedAt = fsMod.serverTimestamp();
+        }
 
         // completedAt recorded once, never silently lost if the stage later
         // moves away from Completed (Part E/AJ).
@@ -2328,5 +2518,371 @@ async function runAdmin() {
         closeLeadModal();
         if (existing) { openProjectDetail({ project: existing }); return; }
         await startProjectFromLead(lead);
+    });
+
+    /* ============================================================
+       COMPLETION CHECKLIST (Milestone 19, Part D)
+       Separate from contentChecklist/tasks. 3-state: pending / completed
+       / not_applicable — "Not Applicable" counts as resolved.
+       ============================================================ */
+
+    function renderCpCompletion() {
+        const list = document.getElementById('cpCompletionList');
+        const resolved = cpItemsCompletion.filter(i => i.status === 'completed' || i.status === 'na').length;
+        document.getElementById('cpCompletionProgress').textContent = `${resolved} of ${cpItemsCompletion.length} resolved`;
+        if (!cpItemsCompletion.length) { list.innerHTML = '<p class="empty-note">No completion checklist items yet.</p>'; return; }
+        list.innerHTML = '';
+        cpItemsCompletion.forEach((item, idx) => {
+            const row = document.createElement('div');
+            row.className = 'completion-item' + (item.status === 'completed' ? ' completed' : item.status === 'na' ? ' na' : '');
+
+            const label = document.createElement('span');
+            label.className = 'label';
+            label.textContent = item.label;
+            row.appendChild(label);
+
+            const select = document.createElement('select');
+            [['pending', 'Pending'], ['completed', 'Completed'], ['na', 'Not Applicable']].forEach(([value, text]) => {
+                const opt = document.createElement('option');
+                opt.value = value; opt.textContent = text;
+                if (item.status === value) opt.selected = true;
+                select.appendChild(opt);
+            });
+            select.addEventListener('change', (e) => { cpItemsCompletion[idx].status = e.target.value; renderCpCompletion(); });
+            row.appendChild(select);
+
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button'; removeBtn.textContent = 'Remove';
+            removeBtn.addEventListener('click', () => { cpItemsCompletion.splice(idx, 1); renderCpCompletion(); });
+            row.appendChild(removeBtn);
+
+            const noteInput = document.createElement('input');
+            noteInput.type = 'text'; noteInput.className = 'note-input'; noteInput.maxLength = 200;
+            noteInput.placeholder = 'Optional note…';
+            noteInput.value = item.note || '';
+            noteInput.addEventListener('input', (e) => { cpItemsCompletion[idx].note = e.target.value; });
+            row.appendChild(noteInput);
+
+            list.appendChild(row);
+        });
+    }
+    document.getElementById('cpCompletionAddBtn').addEventListener('click', () => {
+        const input = document.getElementById('cpCompletionNewItem');
+        const label = input.value.trim();
+        if (!label) return;
+        cpItemsCompletion.push({ id: 'k' + Date.now() + Math.random().toString(36).slice(2, 7), label, status: 'pending', note: '', custom: true });
+        input.value = '';
+        renderCpCompletion();
+    });
+    document.getElementById('cpCompletionStarterBtn').addEventListener('click', () => {
+        const existingLabels = new Set(cpItemsCompletion.map(i => i.label.toLowerCase()));
+        COMPLETION_STARTER_ITEMS.forEach((label, i) => {
+            if (!existingLabels.has(label.toLowerCase())) {
+                cpItemsCompletion.push({ id: 'k' + Date.now() + i, label, status: 'pending', note: '', custom: false });
+            }
+        });
+        renderCpCompletion();
+    });
+
+    /* ============================================================
+       COMPLETION SUMMARY — preview + print (Milestone 19, Parts G/H)
+       Deliberately excludes: internal notes, payment amounts/refs,
+       Firebase document IDs, lead IDs, admin UID — see Part H.
+       ============================================================ */
+
+    function openCompletionSummary() {
+        const editingId = document.getElementById('cpProjectId').value;
+        const project = editingId ? allClientProjects.find(p => p.id === editingId) : null;
+        if (!project) { alert('Please save this project first.'); return; }
+        const client = allClients.find(c => c.id === project.clientId);
+
+        const completedText = project.completedAt ? formatDateOnly(project.completedAt) : 'Not yet completed';
+        document.getElementById('csCompletedDate').textContent = completedText;
+        document.getElementById('csCompletedDate2').textContent = completedText;
+
+        const clientBlock = document.getElementById('csClientBlock');
+        clientBlock.innerHTML = '';
+        [client ? client.name : null, client ? client.businessName : null].filter(Boolean).forEach(line => {
+            const p = document.createElement('div'); p.textContent = line; clientBlock.appendChild(p);
+        });
+        if (!client) { const p = document.createElement('div'); p.textContent = '—'; clientBlock.appendChild(p); }
+
+        document.getElementById('csProjectName').textContent = project.projectName || '';
+        document.getElementById('csProjectMeta').textContent = project.projectType || '';
+        // Prefer the explicitly-reviewed public summary over the private
+        // working description — the private one may contain internal
+        // shorthand not meant for a client-facing handover document.
+        document.getElementById('csDescription').textContent = project.publicPortfolioSummary || project.description || '';
+
+        document.getElementById('csStartDate').textContent = project.startDate ? formatDateOnly(project.startDate) : '—';
+        document.getElementById('csTargetDate').textContent = project.targetDate ? formatDateOnly(project.targetDate) : '—';
+        document.getElementById('csStage').textContent = STAGE_LABELS[project.stage] || project.stage;
+
+        const checklistList = document.getElementById('csChecklistList');
+        checklistList.innerHTML = '';
+        const items = project.completionChecklist || [];
+        if (!items.length) {
+            const li = document.createElement('li'); li.textContent = 'No completion checklist recorded.'; checklistList.appendChild(li);
+        } else {
+            items.forEach(item => {
+                const li = document.createElement('li');
+                const mark = item.status === 'completed' ? '✅' : item.status === 'na' ? '➖ N/A' : '⬜';
+                li.textContent = `${mark} ${item.label}`;
+                checklistList.appendChild(li);
+            });
+        }
+
+        document.getElementById('completionSummaryOverlay').classList.add('active');
+    }
+    document.getElementById('cpPreviewSummaryBtn').addEventListener('click', openCompletionSummary);
+    document.getElementById('completionSummaryClose').addEventListener('click', () => document.getElementById('completionSummaryOverlay').classList.remove('active'));
+    document.getElementById('completionSummaryOverlay').addEventListener('click', (e) => { if (e.target.id === 'completionSummaryOverlay') document.getElementById('completionSummaryOverlay').classList.remove('active'); });
+    document.getElementById('csPrintBtn').addEventListener('click', () => window.print());
+
+    /* ============================================================
+       PORTFOLIO WORKFLOW (Milestone 19, Parts I–P)
+       Never automatic. Reuses the EXISTING Portfolio Project editor
+       (#projectForm) rather than building a second portfolio system.
+       New drafts always start unpublished — enforced here regardless
+       of permission state.
+       ============================================================ */
+
+    function renderCpPortfolioSection(project) {
+        document.getElementById('cpPortfolioPermission').value = project ? (project.portfolioPermission || 'not_asked') : 'not_asked';
+        document.getElementById('cpPortfolioPermissionNote').value = project ? (project.portfolioPermissionNote || '') : '';
+        document.getElementById('cpPublicPortfolioSummary').value = project ? (project.publicPortfolioSummary || '') : '';
+
+        const badge = document.getElementById('cpPortfolioStatusBadge');
+        const draftLinkRow = document.getElementById('cpPortfolioDraftLinkRow');
+        const prepareBtn = document.getElementById('cpPreparePortfolioBtn');
+        const permission = project ? (project.portfolioPermission || 'not_asked') : 'not_asked';
+
+        if (!project || !project.portfolioProjectId) {
+            draftLinkRow.style.display = 'none';
+            if (permission === 'declined') {
+                badge.textContent = 'Permission Declined'; badge.className = 'workflow-status-badge declined';
+                prepareBtn.style.display = 'none'; // not offered as a normal primary action (Part AH)
+            } else if (permission === 'granted') {
+                badge.textContent = 'Ready to Prepare'; badge.className = 'workflow-status-badge ok';
+                prepareBtn.style.display = 'inline-flex';
+            } else {
+                badge.textContent = 'Permission Not Asked'; badge.className = 'workflow-status-badge neutral';
+                prepareBtn.style.display = 'inline-flex';
+            }
+        } else {
+            prepareBtn.style.display = 'none';
+            draftLinkRow.style.display = 'block';
+            const linked = allProjects.find(p => p.id === project.portfolioProjectId);
+            if (!linked) {
+                badge.textContent = 'Draft Prepared (link may be stale)'; badge.className = 'workflow-status-badge pending';
+            } else if (linked.published) {
+                badge.textContent = 'Published'; badge.className = 'workflow-status-badge ok';
+            } else {
+                badge.textContent = 'Draft Prepared'; badge.className = 'workflow-status-badge pending';
+            }
+        }
+    }
+
+    document.getElementById('cpPreparePortfolioBtn').addEventListener('click', () => {
+        const editingId = document.getElementById('cpProjectId').value;
+        const project = editingId ? allClientProjects.find(p => p.id === editingId) : null;
+        if (!project) { alert('Please save this client project first.'); return; }
+        if (project.portfolioProjectId) {
+            alert('Portfolio Draft Already Prepared — use "Open Portfolio Project" to edit it.');
+            return;
+        }
+        const permission = document.getElementById('cpPortfolioPermission').value;
+        if (permission !== 'granted') {
+            alert('Portfolio Permission must be set to "Granted" before preparing a draft.');
+            return;
+        }
+        if (!confirm('THIS INFORMATION MAY BECOME PUBLIC once you review and deliberately publish it below. Continue to the Portfolio Project editor?')) return;
+
+        const client = allClients.find(c => c.id === project.clientId);
+        pendingPortfolioSourceProjectId = project.id;
+        resetForm();
+        document.getElementById('pBusiness').value = (client && (client.businessName || client.name)) || project.projectName;
+        document.getElementById('pSlug').value = '';
+        const catSelect = document.getElementById('pCategory');
+        const validCats = [...catSelect.options].map(o => o.value);
+        catSelect.value = validCats.includes(project.projectType) ? project.projectType : 'Business Website';
+        document.getElementById('pDescription').value = document.getElementById('cpPublicPortfolioSummary').value.trim();
+        document.getElementById('pServices').value = '';
+        document.getElementById('pLiveUrl').value = document.getElementById('cpLiveWebsiteUrl').value.trim();
+        document.getElementById('pCaseStudyUrl').value = '';
+        document.getElementById('pPublished').checked = false; // ALWAYS false — Part L
+        document.getElementById('pFeatured').checked = false;
+
+        document.getElementById('cpModalOverlay').classList.remove('active');
+        formTitle.textContent = 'Add a Project (Portfolio Draft — review before publishing)';
+        form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    document.getElementById('cpOpenPortfolioDraft').addEventListener('click', () => {
+        const editingId = document.getElementById('cpProjectId').value;
+        const project = editingId ? allClientProjects.find(p => p.id === editingId) : null;
+        if (!project || !project.portfolioProjectId) return;
+        const linked = allProjects.find(p => p.id === project.portfolioProjectId);
+        if (!linked) {
+            if (confirm('The linked portfolio project could not be found — it may have been deleted. Clear the stale link so you can prepare a new draft?')) {
+                fsMod.updateDoc(fsMod.doc(db, 'clientProjects', project.id), { portfolioProjectId: null, updatedAt: fsMod.serverTimestamp() }).then(() => {
+                    loadClientProjects();
+                    document.getElementById('cpModalOverlay').classList.remove('active');
+                });
+            }
+            return;
+        }
+        document.getElementById('cpModalOverlay').classList.remove('active');
+        document.getElementById('pId').value = linked.id;
+        document.getElementById('pBusiness').value = linked.businessName || '';
+        document.getElementById('pSlug').value = linked.slug || '';
+        document.getElementById('pCategory').value = linked.category || 'Business Website';
+        document.getElementById('pSortOrder').value = linked.sortOrder ?? 0;
+        document.getElementById('pDescription').value = linked.description || '';
+        document.getElementById('pServices').value = (linked.services || []).join(', ');
+        document.getElementById('pLiveUrl').value = linked.liveUrl || '';
+        document.getElementById('pCaseStudyUrl').value = linked.caseStudyUrl || '';
+        document.getElementById('pPublished').checked = !!linked.published;
+        document.getElementById('pFeatured').checked = !!linked.featured;
+        formTitle.textContent = 'Edit Project';
+        document.getElementById('projectSubmitBtn').textContent = 'Save Changes';
+        document.getElementById('projectCancelEditBtn').style.display = 'block';
+        form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    /* ============================================================
+       CLIENT REVIEW REQUEST (Milestone 19, Parts Q–X)
+       Never creates or approves a review directly — only the existing
+       public review form + existing admin Reviews approval process can
+       do that (Part AL).
+       ============================================================ */
+
+    function cpCurrentClientForReview() {
+        const clientId = document.getElementById('cpClientId').value;
+        return allClients.find(c => c.id === clientId) || null;
+    }
+
+    function renderCpReviewSection(project) {
+        const status = project ? (project.reviewRequestStatus || 'not_requested') : 'not_requested';
+        const badge = document.getElementById('cpReviewStatusBadge');
+        const cls = status === 'approved' ? 'ok' : status === 'declined' ? 'declined' : (status === 'requested' || status === 'submitted') ? 'pending' : 'neutral';
+        badge.textContent = REVIEW_REQUEST_LABELS[status] || status;
+        badge.className = 'workflow-status-badge ' + cls;
+
+        document.getElementById('cpReviewTimingHint').style.display = (project && project.stage === 'completed') ? 'none' : 'block';
+        document.getElementById('cpLinkedReviewRow').style.display = (project && project.linkedReviewId) ? 'block' : 'none';
+        document.getElementById('cpReviewMarkRequestedBtn').style.display = (status === 'approved') ? 'none' : 'inline-flex';
+    }
+
+    /* Reads the linked review's live status and syncs reviewRequestStatus
+       only when it genuinely changed — comparing before writing is what
+       prevents any circular-update loop (Part X). */
+    async function syncLinkedReviewStatus(project) {
+        if (!project || !project.linkedReviewId) return project;
+        try {
+            const reviewSnap = await fsMod.getDoc(fsMod.doc(db, 'reviews', project.linkedReviewId));
+            if (!reviewSnap.exists()) return project;
+            const review = reviewSnap.data();
+            const update = {};
+            if (review.status === 'approved' && project.reviewRequestStatus !== 'approved') {
+                update.reviewRequestStatus = 'approved';
+                if (!project.reviewApprovedAt) update.reviewApprovedAt = fsMod.serverTimestamp();
+            } else if (review.status === 'rejected' && project.reviewRequestStatus !== 'declined') {
+                update.reviewRequestStatus = 'declined';
+            } else if (review.status === 'pending' && project.reviewRequestStatus !== 'submitted' && project.reviewRequestStatus !== 'approved') {
+                update.reviewRequestStatus = 'submitted';
+                if (!project.reviewSubmittedAt) update.reviewSubmittedAt = fsMod.serverTimestamp();
+            }
+            if (Object.keys(update).length) {
+                update.updatedAt = fsMod.serverTimestamp();
+                await fsMod.updateDoc(fsMod.doc(db, 'clientProjects', project.id), update);
+                const merged = { ...project, ...update };
+                const idx = allClientProjects.findIndex(p => p.id === project.id);
+                if (idx !== -1) allClientProjects[idx] = merged;
+                return merged;
+            }
+        } catch (err) {
+            console.warn('Could not sync linked review status:', err.message);
+        }
+        return project;
+    }
+
+    document.getElementById('cpReviewWhatsappBtn').addEventListener('click', () => {
+        const client = cpCurrentClientForReview();
+        const digits = client ? normalizePhoneForWa(client.phone) : null;
+        if (!digits) { alert('This client has no valid phone number on file.'); return; }
+        window.open(`https://wa.me/${digits}?text=${encodeURIComponent(reviewRequestMessage(client.name))}`, '_blank', 'noopener,noreferrer');
+    });
+    document.getElementById('cpReviewEmailBtn').addEventListener('click', () => {
+        const client = cpCurrentClientForReview();
+        if (!client || !client.email || !isValidEmail(client.email)) { alert('This client has no valid email on file.'); return; }
+        const subject = 'Your experience with RM Digitals';
+        window.location.href = `mailto:${encodeURIComponent(client.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(reviewRequestMessage(client.name))}`;
+    });
+    document.getElementById('cpReviewCopyLinkBtn').addEventListener('click', async () => {
+        try {
+            await navigator.clipboard.writeText(reviewRequestUrl());
+            alert('Review link copied to clipboard.');
+        } catch {
+            prompt('Copy this review link:', reviewRequestUrl());
+        }
+    });
+    document.getElementById('cpReviewMarkRequestedBtn').addEventListener('click', async () => {
+        const editingId = document.getElementById('cpProjectId').value;
+        if (!editingId) { alert('Please save this project first.'); return; }
+        if (!confirm('Mark this project as having a review request sent? (This only records that you sent it — use WhatsApp/Email above to actually contact the client first.)')) return;
+        try {
+            await fsMod.updateDoc(fsMod.doc(db, 'clientProjects', editingId), { reviewRequestStatus: 'requested', reviewRequestedAt: fsMod.serverTimestamp(), updatedAt: fsMod.serverTimestamp() });
+            await loadClientProjects();
+            renderCpReviewSection(allClientProjects.find(p => p.id === editingId));
+        } catch (err) {
+            alert('Could not update review status: ' + err.message);
+        }
+    });
+    document.getElementById('cpReviewLinkSubmittedBtn').addEventListener('click', async () => {
+        const editingId = document.getElementById('cpProjectId').value;
+        if (!editingId) { alert('Please save this project first.'); return; }
+        let snap;
+        try {
+            const q = fsMod.query(fsMod.collection(db, 'reviews'), fsMod.orderBy('createdAt', 'desc'), fsMod.limit(20));
+            snap = await fsMod.getDocs(q);
+        } catch (err) {
+            alert('Could not load reviews: ' + err.message);
+            return;
+        }
+        const candidates = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        if (!candidates.length) { alert('No review records found yet.'); return; }
+        const listText = candidates.map((r, i) => {
+            const preview = (r.message || '').slice(0, 40) + ((r.message || '').length > 40 ? '…' : '');
+            return `${i + 1}. ${r.name || '(no name)'} — ${r.status} — "${preview}"`;
+        }).join('\n');
+        const choice = prompt(`Which review matches this client? Enter a number:\n\n${listText}`);
+        const idx = Number(choice) - 1;
+        if (!Number.isInteger(idx) || idx < 0 || idx >= candidates.length) return;
+        const selected = candidates[idx];
+        try {
+            const update = { linkedReviewId: selected.id, updatedAt: fsMod.serverTimestamp() };
+            if (selected.status === 'pending') update.reviewRequestStatus = 'submitted';
+            if (selected.status === 'approved') { update.reviewRequestStatus = 'approved'; update.reviewApprovedAt = fsMod.serverTimestamp(); }
+            if (selected.status === 'rejected') update.reviewRequestStatus = 'declined';
+            await fsMod.updateDoc(fsMod.doc(db, 'clientProjects', editingId), update);
+            await loadClientProjects();
+            renderCpReviewSection(allClientProjects.find(p => p.id === editingId));
+        } catch (err) {
+            alert('Could not link review: ' + err.message);
+        }
+    });
+    document.getElementById('cpViewLinkedReview').addEventListener('click', () => {
+        const editingId = document.getElementById('cpProjectId').value;
+        const project = editingId ? allClientProjects.find(p => p.id === editingId) : null;
+        document.getElementById('cpModalOverlay').classList.remove('active');
+        let tabStatus = 'pending';
+        if (project) {
+            if (project.reviewRequestStatus === 'approved') tabStatus = 'approved';
+            else if (project.reviewRequestStatus === 'declined') tabStatus = 'rejected';
+        }
+        const tabBtn = document.querySelector(`.tab-btn[data-status="${tabStatus}"]`);
+        if (tabBtn) tabBtn.click();
+        document.getElementById('reviewList').scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 }

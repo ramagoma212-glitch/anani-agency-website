@@ -283,12 +283,19 @@
 
         @media print {
             body * { visibility: hidden; }
-            #quotePreviewOverlay, #quotePreviewOverlay * { visibility: visible; }
-            #quotePreviewOverlay { position: absolute; inset: 0; background: #fff !important; padding: 0; display: block !important; }
-            #quotePreviewOverlay .quote-preview-box { max-width: 100%; max-height: none; box-shadow: none; border: none; padding: 0; }
-            #quotePreviewOverlay .quote-print-area { border-radius: 0; padding: 0; }
-            .quote-preview-actions, .lead-modal-close, .quote-print-noprint { display: none !important; }
-            .quote-print-header, .quote-totals-block, .quote-print-totals { break-inside: avoid; }
+            #quotePreviewOverlay, #quotePreviewOverlay *,
+            #completionSummaryOverlay, #completionSummaryOverlay * { visibility: visible; }
+            #quotePreviewOverlay, #completionSummaryOverlay { position: absolute; inset: 0; background: #fff !important; padding: 0; }
+            /* Force-display only the overlay that is actually open (.active) —
+               without this guard, a CLOSED overlay would still render as an
+               empty forced-visible box during print. */
+            #quotePreviewOverlay.active, #completionSummaryOverlay.active { display: block !important; }
+            #quotePreviewOverlay .quote-preview-box,
+            #completionSummaryOverlay .completion-summary-box { max-width: 100%; max-height: none; box-shadow: none; border: none; padding: 0; }
+            #quotePreviewOverlay .quote-print-area,
+            #completionSummaryOverlay #completionPrintArea { border-radius: 0; padding: 0; }
+            .quote-preview-actions, .completion-summary-actions, .lead-modal-close, .quote-print-noprint { display: none !important; }
+            .quote-print-header, .quote-totals-block, .quote-print-totals, #completionPrintArea h4 { break-inside: avoid; }
             @page { size: A4; margin: 16mm; }
         }
 
@@ -409,6 +416,50 @@
             padding: 10px 14px; font-size: .82rem; color: var(--text-mid); margin-bottom: 16px;
         }
         .duplicate-client-note button { margin-top: 6px; }
+
+        /* ============================================================
+           PROJECT COMPLETION, PORTFOLIO & REVIEW WORKFLOW (Milestone 19)
+           ============================================================ */
+        .completion-item {
+            display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); flex-wrap: wrap;
+        }
+        .completion-item:last-child { border-bottom: none; }
+        .completion-item .label { flex: 1; min-width: 140px; font-size: .85rem; word-break: break-word; }
+        .completion-item.completed .label { color: var(--green); }
+        .completion-item.na .label { color: var(--text-lo); text-decoration: line-through; }
+        .completion-item select {
+            padding: 5px 8px; border-radius: 8px; background: rgba(255,255,255,.03); border: 1px solid var(--border);
+            color: var(--text-hi); font-size: .76rem;
+        }
+        .completion-item input.note-input {
+            flex-basis: 100%; margin-top: 4px; padding: 6px 10px; border-radius: 8px; background: rgba(255,255,255,.03);
+            border: 1px solid var(--border); color: var(--text-mid); font-size: .78rem;
+        }
+        .completion-item button { background: none; border: 1px solid var(--border); color: var(--text-mid); padding: 5px 10px; border-radius: 8px; cursor: pointer; font-size: .72rem; }
+
+        .workflow-status-badge {
+            display: inline-block; font-size: .7rem; padding: 4px 12px; border-radius: 100px; border: 1px solid var(--border);
+            color: var(--text-mid); font-weight: 700; margin-bottom: 10px;
+        }
+        .workflow-status-badge.ok       { color: var(--green); border-color: rgba(0,255,136,.3); }
+        .workflow-status-badge.pending  { color: var(--gold); border-color: rgba(255,214,10,.3); }
+        .workflow-status-badge.declined { color: #ff7070; border-color: rgba(255,80,80,.3); }
+        .workflow-status-badge.neutral  { color: var(--text-mid); }
+
+        .cp-attention.followup { border-color: rgba(0,212,255,.25); background: rgba(0,212,255,.05); }
+        .cp-attention.followup h4 { color: var(--cyan); }
+
+        .marketing-dashboard { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+        @media (max-width: 700px) { .marketing-dashboard { grid-template-columns: repeat(2, 1fr); } }
+
+        .completion-summary-box { max-width: 720px; }
+        #completionPrintArea { background: #fff; color: #111; border-radius: 12px; padding: 32px; }
+        #completionPrintArea * { color: #111; }
+        #completionPrintArea h2 { font-family: var(--f-display); font-size: 1.2rem; }
+        #completionPrintArea h4 { font-size: .78rem; text-transform: uppercase; letter-spacing: .5px; color: #555 !important; margin: 16px 0 6px; }
+        #completionPrintArea .cs-row { display: flex; justify-content: space-between; font-size: .85rem; padding: 4px 0; border-bottom: 1px solid #eee; }
+        #completionPrintArea ul { list-style: none; }
+        #completionPrintArea ul li { font-size: .84rem; padding: 3px 0; }
     </style>
 </head>
 <body>
@@ -726,6 +777,25 @@
                 <ul id="cpAttentionList"><li class="empty-note">Loading…</li></ul>
             </div>
 
+            <!-- Milestone 19: completion/marketing summary — compact, secondary
+                 to the main pipeline dashboard above. -->
+            <div class="marketing-dashboard" id="cpMarketingDashboard">
+                <div class="cp-stat"><span class="num" id="cpmCompletedTotal">0</span><span class="lbl">Completed Total</span></div>
+                <div class="cp-stat"><span class="num" id="cpmCompletedThisMonth">0</span><span class="lbl">Completed This Month</span></div>
+                <div class="cp-stat"><span class="num" id="cpmPermissionPending">0</span><span class="lbl">Portfolio Permission Pending</span></div>
+                <div class="cp-stat"><span class="num" id="cpmReadyForPortfolio">0</span><span class="lbl">Portfolio Ready</span></div>
+                <div class="cp-stat"><span class="num" id="cpmPortfolioDrafts">0</span><span class="lbl">Portfolio Drafts</span></div>
+                <div class="cp-stat"><span class="num" id="cpmPortfolioPublished">0</span><span class="lbl">Published Portfolio</span></div>
+                <div class="cp-stat"><span class="num" id="cpmReviewsRequested">0</span><span class="lbl">Reviews Requested</span></div>
+                <div class="cp-stat"><span class="num" id="cpmReviewsAwaiting">0</span><span class="lbl">Reviews Awaiting Approval</span></div>
+                <div class="cp-stat"><span class="num" id="cpmReviewsApproved">0</span><span class="lbl">Approved Reviews</span></div>
+            </div>
+
+            <div class="cp-attention followup" id="cpFollowUpBox">
+                <h4><i class="fas fa-comments"></i> Post-Project Follow-Up</h4>
+                <ul id="cpFollowUpList"><li class="empty-note">Loading…</li></ul>
+            </div>
+
             <div class="quote-toolbar">
                 <input type="search" id="cpSearch" placeholder="Search project, client, business…" />
                 <select id="cpFilterStage">
@@ -748,6 +818,15 @@
                     <option value="high">High</option>
                     <option value="normal">Normal</option>
                     <option value="low">Low</option>
+                </select>
+                <select id="cpFilterWorkflow">
+                    <option value="all">All (no workflow filter)</option>
+                    <option value="permission_pending">Portfolio Permission Pending</option>
+                    <option value="ready_for_portfolio">Ready for Portfolio</option>
+                    <option value="review_not_requested">Review Not Requested</option>
+                    <option value="review_requested">Review Requested</option>
+                    <option value="review_submitted">Review Submitted</option>
+                    <option value="review_approved">Review Approved</option>
                 </select>
                 <select id="cpSort">
                     <option value="newest">Newest first</option>
@@ -1328,6 +1407,92 @@
                 <div id="cpContentFolderLinkRow" style="display:none;">
                     <span class="cp-quick-link" id="cpOpenContentFolder">Open shared folder →</span>
                 </div>
+                <div class="field" style="margin-top:12px;">
+                    <label for="cpLiveWebsiteUrl">Live Website URL (optional — for handover/portfolio, not auto-published)</label>
+                    <input type="url" id="cpLiveWebsiteUrl" maxlength="500" placeholder="https://…" />
+                </div>
+            </div>
+
+            <!-- ============================================================
+                 PROJECT COMPLETION (Milestone 19) — separate from Content
+                 Checklist / Tasks above. Marking "Completed" is still done
+                 via the Stage select; this is a readiness check, not a
+                 second way to complete the project.
+            ============================================================ -->
+            <div class="cp-section">
+                <h4>Completion Checklist</h4>
+                <p class="field-hint" id="cpCompletionProgress" style="margin:-4px 0 10px;">0 of 0 resolved</p>
+                <div id="cpCompletionList"><p class="empty-note">No completion checklist items yet.</p></div>
+                <div class="quote-item-controls" style="margin-top:10px;">
+                    <input type="text" id="cpCompletionNewItem" placeholder="Add completion item…" maxlength="150" style="flex:2;min-width:160px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid var(--border);color:var(--text-hi);" />
+                    <button type="button" class="btn-logout" id="cpCompletionAddBtn">+ Add Item</button>
+                    <button type="button" class="btn-logout" id="cpCompletionStarterBtn">+ Add Standard Checklist</button>
+                </div>
+
+                <div id="cpCompletedAtRow" style="margin-top:14px;display:none;">
+                    <span class="workflow-status-badge ok"><i class="fas fa-circle-check"></i> Completed <span id="cpCompletedAtText"></span></span>
+                </div>
+
+                <button type="button" class="btn-logout" id="cpPreviewSummaryBtn" style="width:100%;justify-content:center;margin-top:10px;">
+                    <i class="fas fa-file-lines"></i> Preview Completion Summary
+                </button>
+            </div>
+
+            <!-- ============================================================
+                 PORTFOLIO WORKFLOW (Milestone 19) — never automatic. Prepares
+                 the EXISTING Portfolio Project editor (below, in the main
+                 admin page) rather than building a second portfolio system.
+                 New drafts always start unpublished.
+            ============================================================ -->
+            <div class="cp-section">
+                <h4>Portfolio</h4>
+                <span class="workflow-status-badge neutral" id="cpPortfolioStatusBadge">Permission Not Asked</span>
+                <div class="field">
+                    <label for="cpPortfolioPermission">Portfolio Permission Status</label>
+                    <select id="cpPortfolioPermission">
+                        <option value="not_asked">Not Asked</option>
+                        <option value="granted">Granted</option>
+                        <option value="declined">Declined</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="cpPortfolioPermissionNote">How/when permission was recorded (optional)</label>
+                    <input type="text" id="cpPortfolioPermissionNote" maxlength="300" placeholder="e.g. Client confirmed by WhatsApp on 10 Aug 2026" />
+                </div>
+                <div class="field">
+                    <label for="cpPublicPortfolioSummary">Public Portfolio Summary (optional — public-facing text only, reviewed before use)</label>
+                    <textarea id="cpPublicPortfolioSummary" rows="3" maxlength="500" placeholder="A short, safe, marketing-appropriate description — no private details."></textarea>
+                </div>
+                <p class="field-hint" style="margin-bottom:10px;">⚠️ Only the fields above (plus business name, category and live URL) are ever used to prepare a portfolio draft — nothing private is copied automatically.</p>
+                <button type="button" class="btn-primary" id="cpPreparePortfolioBtn" style="width:100%;justify-content:center;">
+                    <i class="fas fa-briefcase"></i> Prepare Portfolio Draft
+                </button>
+                <div id="cpPortfolioDraftLinkRow" style="margin-top:8px;display:none;">
+                    <span class="cp-quick-link" id="cpOpenPortfolioDraft">Open Portfolio Project →</span>
+                </div>
+            </div>
+
+            <!-- ============================================================
+                 CLIENT REVIEW REQUEST (Milestone 19) — never creates or
+                 approves a review directly; only the existing public review
+                 form + existing admin Reviews approval process can do that.
+            ============================================================ -->
+            <div class="cp-section">
+                <h4>Client Review</h4>
+                <span class="workflow-status-badge neutral" id="cpReviewStatusBadge">Not Requested</span>
+                <p class="field-hint" id="cpReviewTimingHint" style="display:none;margin:4px 0 10px;">This project isn't marked Completed yet — you can still request a review if appropriate.</p>
+                <div class="quote-item-controls">
+                    <button type="button" class="btn-logout" id="cpReviewWhatsappBtn"><i class="fab fa-whatsapp"></i> Request by WhatsApp</button>
+                    <button type="button" class="btn-logout" id="cpReviewEmailBtn"><i class="fas fa-envelope"></i> Request by Email</button>
+                    <button type="button" class="btn-logout" id="cpReviewCopyLinkBtn"><i class="fas fa-link"></i> Copy Review Link</button>
+                </div>
+                <div class="quote-item-controls">
+                    <button type="button" class="btn-logout" id="cpReviewMarkRequestedBtn">Mark Review Requested</button>
+                    <button type="button" class="btn-logout" id="cpReviewLinkSubmittedBtn">Link Submitted Review</button>
+                </div>
+                <div id="cpLinkedReviewRow" style="display:none;margin-top:8px;">
+                    <span class="cp-quick-link" id="cpViewLinkedReview">View in Reviews admin →</span>
+                </div>
             </div>
 
             <div class="cp-section">
@@ -1341,6 +1506,52 @@
                 <button type="button" class="btn-logout" id="cpDeleteBtn" style="color:#ff7070;border-color:rgba(255,80,80,.3);">Delete</button>
             </div>
             <div id="cpFormMsg" class="form-msg" role="status" aria-live="polite"></div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         COMPLETION SUMMARY PREVIEW / PRINT (Milestone 19)
+    ============================================================ -->
+    <div class="lead-modal-overlay" id="completionSummaryOverlay">
+        <div class="lead-modal-box completion-summary-box">
+            <button class="lead-modal-close quote-print-noprint" id="completionSummaryClose" aria-label="Close">&times;</button>
+            <div class="completion-summary-actions quote-print-noprint" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+                <button type="button" class="btn-primary" id="csPrintBtn"><i class="fas fa-print"></i> Print / Save as PDF</button>
+            </div>
+            <div id="completionPrintArea">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #111;padding-bottom:16px;margin-bottom:16px;">
+                    <div>
+                        <h2>RM Digitals</h2>
+                        <p style="font-size:.8rem;">Project Completion Summary</p>
+                    </div>
+                    <div style="text-align:right;font-size:.82rem;">
+                        <div>Completed: <span id="csCompletedDate"></span></div>
+                    </div>
+                </div>
+
+                <h4>Client</h4>
+                <div id="csClientBlock"></div>
+
+                <h4>Project</h4>
+                <div id="csProjectName" style="font-weight:700;"></div>
+                <div id="csProjectMeta" style="font-size:.85rem;margin-top:4px;"></div>
+                <p id="csDescription" style="font-size:.85rem;margin-top:6px;"></p>
+
+                <h4>Timeline</h4>
+                <div class="cs-row"><span>Start Date</span><span id="csStartDate"></span></div>
+                <div class="cs-row"><span>Target Date</span><span id="csTargetDate"></span></div>
+                <div class="cs-row"><span>Completed Date</span><span id="csCompletedDate2"></span></div>
+                <div class="cs-row"><span>Final Stage</span><span id="csStage"></span></div>
+
+                <h4>Completion Checklist</h4>
+                <ul id="csChecklistList"></ul>
+
+                <h4>RM Digitals</h4>
+                <p style="font-size:.8rem;">
+                    Ramagoma Muthuhadini (Anani) · Thohoyandou, Limpopo, South Africa<br>
+                    WhatsApp/Phone: +27 64 841 2146 · Email: ramagoma212@gmail.com
+                </p>
+            </div>
         </div>
     </div>
 

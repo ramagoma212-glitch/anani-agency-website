@@ -2352,6 +2352,25 @@ select option:checked { background: var(--bg-layer); color: var(--cyan); }
     /* Lift the back-to-top button and AI WhatsApp FAB clear of the bar. */
     #backToTop { bottom: 90px; }
     .wa-autoreply-badge { bottom: 154px; }
+
+    /* Chatbase widget (embed.min.js, index.html) positions itself via
+       inline styles it sets directly — confirmed by inspecting the live
+       rendered DOM (#chatbase-bubble-button / #chatbase-message-bubbles),
+       not guessed. Its native mobile position (bottom:16px, left:1rem)
+       sits on top of our fixed .mobile-sticky-bar and covers the Call
+       button. Left offset is already fine (1rem, within 12-16px); only
+       the vertical position needs lifting clear of the bar. !important
+       is required to win over Chatbase's own inline (non-!important)
+       styles. The chat window itself is already full-screen/responsive
+       on mobile natively, so it isn't touched here — only the closed
+       launcher button and its message-preview bubble. Desktop has no
+       sticky bar, so desktop positioning is intentionally left alone. */
+    #chatbase-bubble-button {
+        bottom: calc(88px + env(safe-area-inset-bottom, 0px)) !important;
+    }
+    #chatbase-message-bubbles {
+        bottom: calc(157px + env(safe-area-inset-bottom, 0px)) !important;
+    }
 }
 
 /* ── Extra-small phones (≤ 380px) ────────────────────────── */

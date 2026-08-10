@@ -209,6 +209,19 @@ function initReviewToggle() {
             wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
         });
     }
+
+    // Milestone 19: a safe review-request deep link (?review=1) that opens
+    // this exact same form — used when the admin shares a review link with
+    // a real client after their project completes. Carries no identifying
+    // information (no client/project/quote IDs), reuses the existing form
+    // and Firestore write path unchanged, and never auto-submits anything.
+    try {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('review') === '1') {
+            openForm();
+            wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    } catch { /* malformed query string — safe no-op */ }
 }
 
 /* ── "Leave a Review" form submission ──

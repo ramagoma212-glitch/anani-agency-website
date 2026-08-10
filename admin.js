@@ -100,6 +100,59 @@ const QUICK_ADD_SERVICES = [
     { label: 'Additional revision round', price: 500 }
 ];
 
+/* ── Clients & Client Projects (Milestone 18) ────────────────────── */
+const CLIENT_STATUS_LABELS = { active: 'Active', past: 'Past Client', archived: 'Archived' };
+const STAGE_LABELS = {
+    awaiting_content: 'Awaiting Content', planning: 'Planning', design: 'Design',
+    development: 'Development', client_review: 'Client Review', revisions: 'Revisions',
+    ready_to_launch: 'Ready to Launch', completed: 'Completed', on_hold: 'On Hold', cancelled: 'Cancelled'
+};
+const PRIORITY_LABELS = { low: 'Low', normal: 'Normal', high: 'High', urgent: 'Urgent' };
+const ACTIVE_STAGES = ['awaiting_content', 'planning', 'design', 'development', 'client_review', 'revisions', 'ready_to_launch', 'on_hold'];
+const STARTER_CHECKLIST_ITEMS = [
+    'Business/company information', 'Logo', 'Services or product information',
+    'Website text/copy', 'Images', 'Contact details', 'Social media links'
+];
+/* Optional nudge only — never applied without the admin confirming
+   (Part G: "never overwrite admin choice without confirmation"). */
+const STAGE_SUGGESTED_PROGRESS = {
+    awaiting_content: 5, planning: 15, design: 30, development: 55,
+    client_review: 75, revisions: 85, ready_to_launch: 95, completed: 100
+};
+
+function clampProgress(val) {
+    const n = Number(val);
+    if (!Number.isFinite(n)) return 0;
+    return Math.max(0, Math.min(100, Math.round(n)));
+}
+
+/* South African-friendly normalisation for WhatsApp/duplicate-matching:
+   a leading 0 becomes 27 (075 123 4567 -> 27751234567); anything already
+   starting with a country code (or otherwise) is left as-is. Returns null
+   when there aren't enough digits to be a real number. */
+function normalizePhoneForWa(phone) {
+    if (!phone) return null;
+    let digits = String(phone).replace(/\D/g, '');
+    if (digits.startsWith('0')) digits = '27' + digits.slice(1);
+    if (digits.length < 8) return null;
+    return digits;
+}
+
+function isOverdue(project) {
+    if (!project || !project.targetDate) return false;
+    if (project.stage === 'completed' || project.stage === 'cancelled') return false;
+    const target = project.targetDate.toDate ? project.targetDate.toDate() : new Date(project.targetDate);
+    const startOfToday = new Date(); startOfToday.setHours(0, 0, 0, 0);
+    return target.getTime() < startOfToday.getTime();
+}
+function isDueSoon(project) {
+    if (!project || !project.targetDate) return false;
+    if (project.stage === 'completed' || project.stage === 'cancelled') return false;
+    if (isOverdue(project)) return false;
+    const target = project.targetDate.toDate ? project.targetDate.toDate() : new Date(project.targetDate);
+    return target.getTime() <= Date.now() + 7 * 24 * 60 * 60 * 1000;
+}
+
 const DEFAULT_QUOTE_TERMS =
 `This quote is valid until the date shown above.
 Work begins once the agreed deposit/payment arrangement is confirmed.
@@ -152,6 +205,8 @@ async function runAdmin() {
         loadProjects();
         loadLeads();
         loadQuotes();
+        loadClients();
+        loadClientProjects();
     }
 
     authMod.onAuthStateChanged(auth, (user) => {
@@ -718,6 +773,7 @@ async function runAdmin() {
         }
 
         document.getElementById('leadDetailMsg').textContent = '';
+        document.getElementById('lmStartProjectWrap').style.display = lead.status === 'won' ? 'block' : 'none';
         leadModalOverlay.classList.add('active');
     }
 
@@ -1221,6 +1277,8 @@ async function runAdmin() {
 
         document.getElementById('qpTerms').textContent = quote.terms || '';
 
+        document.getElementById('qpStartProjectBtn').style.display = quote.status === 'accepted' ? 'inline-flex' : 'none';
+
         document.getElementById('quotePreviewOverlay').classList.add('active');
     }
 
@@ -1353,5 +1411,922 @@ async function runAdmin() {
         } catch (err) {
             alert('Could not delete quote: ' + err.message);
         }
+    });
+
+    /* ============================================================
+       CLIENTS (Milestone 18)
+       ============================================================
+       Same admin-only, getDocs-once, client-side filter/search
+       pattern as Leads/Quotes above — see those sections' design
+       notes for the full reasoning (no composite indexes needed).
+       ============================================================ */
+
+    let allClients = [];
+    let activeClientId = null;
+
+    async function loadClients() {
+        const list = document.getElementById('clientList');
+        list.innerHTML = '<p class="empty-note">Loading clients…</p>';
+        let snap;
+        try {
+            const q = fsMod.query(fsMod.collection(db, 'clients'), fsMod.orderBy('createdAt', 'desc'));
+            snap = await fsMod.getDocs(q);
+        } catch (err) {
+            list.innerHTML = `<p class="empty-note">Could not load clients: ${escapeHtml(err.message)}</p>`;
+            return;
+        }
+        allClients = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderClientList();
+    }
+
+    /* Duplicate-client detection (Part L) — fetches the small admin-only
+       client list once and matches client-side on normalised email/phone,
+       rather than adding Firestore query complexity for an OR-style
+       match. Never merges or auto-creates on a match; callers decide. */
+    async function findMatchingClient(email, phone) {
+        const normEmail = email ? String(email).trim().toLowerCase() : null;
+        const normPhone = normalizePhoneForWa(phone);
+        if (!normEmail && !normPhone) return null;
+        if (!allClients.length) await loadClients();
+        return allClients.find(c => {
+            const cEmail = c.email ? String(c.email).trim().toLowerCase() : null;
+            const cPhone = normalizePhoneForWa(c.phone);
+            return (normEmail && cEmail && cEmail === normEmail) || (normPhone && cPhone && cPhone === normPhone);
+        }) || null;
+    }
+
+    function renderClientList() {
+        const list = document.getElementById('clientList');
+        const searchTerm = (document.getElementById('clientSearch').value || '').trim().toLowerCase();
+        const statusFilter = document.getElementById('clientFilterStatus').value;
+
+        let filtered = allClients.filter(c => {
+            if (statusFilter !== 'all' && c.status !== statusFilter) return false;
+            if (!searchTerm) return true;
+            const haystack = [c.name, c.businessName, c.email, c.phone].filter(Boolean).join(' ').toLowerCase();
+            return haystack.includes(searchTerm);
+        });
+
+        if (allClients.length === 0) {
+            list.innerHTML = '<p class="empty-note">No clients yet. Clients are created automatically when you Start a Client Project from an accepted quote or a Won lead, or manually via "New Client".</p>';
+            return;
+        }
+        if (filtered.length === 0) {
+            list.innerHTML = '<p class="empty-note">No clients match your search/filter.</p>';
+            return;
+        }
+
+        list.innerHTML = '';
+        filtered.forEach(client => {
+            const projectCount = allClientProjects.filter(p => p.clientId === client.id).length;
+            const row = document.createElement('div');
+            row.className = 'client-row';
+            row.tabIndex = 0;
+            row.setAttribute('role', 'button');
+            row.innerHTML = `
+                <div class="info">
+                    <strong>${escapeHtml(client.name)}</strong>
+                    <span>${escapeHtml([client.businessName, client.email || client.phone].filter(Boolean).join(' · '))}</span>
+                </div>
+                <div class="meta-col">${projectCount} project${projectCount === 1 ? '' : 's'}</div>
+                <span class="status-badge status-${escapeHtml(client.status)}">${escapeHtml(CLIENT_STATUS_LABELS[client.status] || client.status)}</span>
+            `;
+            row.addEventListener('click', () => openClientProfile(client.id));
+            row.addEventListener('keypress', (e) => { if (e.key === 'Enter') openClientProfile(client.id); });
+            list.appendChild(row);
+        });
+    }
+    document.getElementById('clientSearch').addEventListener('input', renderClientList);
+    document.getElementById('clientFilterStatus').addEventListener('change', renderClientList);
+    document.getElementById('clientNewBtn').addEventListener('click', () => openClientProfile(null));
+
+    function renderCmContactActions(client) {
+        const actions = document.getElementById('cmContactActions');
+        actions.innerHTML = '';
+        if (!client) return;
+        const mailtoUrl = safeMailto(client.email, `RM Digitals — ${client.name}`);
+        if (mailtoUrl) { const a = document.createElement('a'); a.href = mailtoUrl; a.innerHTML = '<i class="fas fa-envelope"></i> Email'; actions.appendChild(a); }
+        const telUrl = safeTel(client.phone);
+        if (telUrl) { const a = document.createElement('a'); a.href = telUrl; a.innerHTML = '<i class="fas fa-phone"></i> Call'; actions.appendChild(a); }
+        const waDigits = normalizePhoneForWa(client.phone);
+        if (waDigits) {
+            const a = document.createElement('a');
+            a.href = `https://wa.me/${waDigits}?text=${encodeURIComponent('Hi ' + (client.name || '') + ', this is RM Digitals.')}`;
+            a.target = '_blank'; a.rel = 'noopener noreferrer';
+            a.innerHTML = '<i class="fab fa-whatsapp"></i> WhatsApp';
+            actions.appendChild(a);
+        }
+    }
+
+    function openClientProfile(id) {
+        activeClientId = id;
+        const client = id ? allClients.find(c => c.id === id) : null;
+        document.getElementById('clientDetailMsg').textContent = '';
+        document.getElementById('cmClientId').value = client ? client.id : '';
+        document.getElementById('cmHeading').textContent = client ? client.name : 'New Client';
+
+        const status = client ? (client.status || 'active') : 'active';
+        const badge = document.getElementById('cmStatusBadge');
+        badge.textContent = CLIENT_STATUS_LABELS[status] || status;
+        badge.className = 'status-badge status-' + status;
+        document.getElementById('cmStatusSelect').value = status;
+
+        document.getElementById('cmName').value = client ? (client.name || '') : '';
+        document.getElementById('cmBusinessName').value = client ? (client.businessName || '') : '';
+        document.getElementById('cmEmail').value = client ? (client.email || '') : '';
+        document.getElementById('cmPhone').value = client ? (client.phone || '') : '';
+        document.getElementById('cmAltPhone').value = client ? (client.alternativePhone || '') : '';
+        document.getElementById('cmWebsite').value = client ? (client.website || '') : '';
+        document.getElementById('cmNotes').value = client ? (client.notes || '') : '';
+
+        renderCmContactActions(client);
+
+        const projectsList = document.getElementById('cmProjectsList');
+        if (client) {
+            const projects = allClientProjects.filter(p => p.clientId === client.id);
+            if (!projects.length) {
+                projectsList.innerHTML = '<p class="empty-note">No projects yet.</p>';
+            } else {
+                projectsList.innerHTML = '';
+                projects.forEach(p => {
+                    const row = document.createElement('div');
+                    row.className = 'cp-row';
+                    row.innerHTML = `<div class="info"><strong>${escapeHtml(p.projectName)}</strong></div><span class="stage-badge stage-${escapeHtml(p.stage)}">${escapeHtml(STAGE_LABELS[p.stage] || p.stage)}</span>`;
+                    row.addEventListener('click', () => {
+                        document.getElementById('clientModalOverlay').classList.remove('active');
+                        openProjectDetail({ project: p });
+                    });
+                    projectsList.appendChild(row);
+                });
+            }
+        } else {
+            projectsList.innerHTML = '<p class="empty-note">Save this client first.</p>';
+        }
+
+        document.getElementById('clientModalOverlay').classList.add('active');
+    }
+    document.getElementById('clientModalClose').addEventListener('click', () => document.getElementById('clientModalOverlay').classList.remove('active'));
+    document.getElementById('clientModalOverlay').addEventListener('click', (e) => { if (e.target.id === 'clientModalOverlay') document.getElementById('clientModalOverlay').classList.remove('active'); });
+
+    document.getElementById('cmSaveBtn').addEventListener('click', async () => {
+        const msg = document.getElementById('clientDetailMsg');
+        const name = document.getElementById('cmName').value.trim();
+        const email = document.getElementById('cmEmail').value.trim();
+        const website = document.getElementById('cmWebsite').value.trim();
+        if (!name) { msg.textContent = '⚠️ Name is required.'; msg.className = 'form-msg error'; return; }
+        if (email && !isValidEmail(email)) { msg.textContent = '⚠️ That email doesn\'t look valid.'; msg.className = 'form-msg error'; return; }
+        if (website && !isSafeHttpUrl(website)) { msg.textContent = '⚠️ Website must start with http:// or https://'; msg.className = 'form-msg error'; return; }
+
+        const record = {
+            name,
+            businessName: document.getElementById('cmBusinessName').value.trim() || null,
+            email: email || null,
+            phone: document.getElementById('cmPhone').value.trim() || null,
+            alternativePhone: document.getElementById('cmAltPhone').value.trim() || null,
+            website: website || null,
+            status: document.getElementById('cmStatusSelect').value,
+            notes: document.getElementById('cmNotes').value,
+            updatedAt: fsMod.serverTimestamp()
+        };
+
+        try {
+            const editingId = document.getElementById('cmClientId').value;
+            if (editingId) {
+                await fsMod.updateDoc(fsMod.doc(db, 'clients', editingId), record);
+            } else {
+                record.sourceLeadId = null;
+                record.createdFromQuoteId = null;
+                record.createdAt = fsMod.serverTimestamp();
+                record.createdBy = auth.currentUser.uid;
+                const docRef = fsMod.doc(fsMod.collection(db, 'clients'));
+                await fsMod.setDoc(docRef, record);
+                document.getElementById('cmClientId').value = docRef.id;
+                activeClientId = docRef.id;
+            }
+            msg.textContent = '✅ Client saved.';
+            msg.className = 'form-msg success';
+            await loadClients();
+            openClientProfile(activeClientId);
+        } catch (err) {
+            msg.textContent = '❌ Could not save client: ' + err.message;
+            msg.className = 'form-msg error';
+        }
+    });
+
+    /* "Archive" is the only destructive-adjacent action offered (Part P) —
+       there is no true delete path, so a client with linked quotes/leads/
+       projects can never be permanently removed by mistake. */
+    document.getElementById('cmDeleteBtn').addEventListener('click', async () => {
+        if (!activeClientId) { document.getElementById('clientModalOverlay').classList.remove('active'); return; }
+        const activeProjects = allClientProjects.filter(p => p.clientId === activeClientId && ACTIVE_STAGES.includes(p.stage));
+        const warning = activeProjects.length
+            ? `This client has ${activeProjects.length} active project(s). Archive anyway? Their quotes/leads/project history is preserved.`
+            : 'Archive this client? Their quotes/leads/project history is preserved.';
+        if (!confirm(warning)) return;
+        try {
+            await fsMod.updateDoc(fsMod.doc(db, 'clients', activeClientId), { status: 'archived', updatedAt: fsMod.serverTimestamp() });
+            document.getElementById('clientModalOverlay').classList.remove('active');
+            await loadClients();
+        } catch (err) {
+            alert('Could not archive client: ' + err.message);
+        }
+    });
+
+    document.getElementById('cmNewProjectBtn').addEventListener('click', () => {
+        const client = allClients.find(c => c.id === activeClientId);
+        if (!client) { alert('Please save this client first.'); return; }
+        document.getElementById('clientModalOverlay').classList.remove('active');
+        openProjectDetail({ client });
+    });
+
+    /* ── Client Picker — standalone "New Project" with no quote/lead/client context ── */
+    function renderCpkResults(term) {
+        const results = document.getElementById('cpkResults');
+        const t = term.trim().toLowerCase();
+        const matches = !t ? allClients.slice(0, 8) : allClients.filter(c => {
+            const haystack = [c.name, c.businessName, c.email, c.phone].filter(Boolean).join(' ').toLowerCase();
+            return haystack.includes(t);
+        }).slice(0, 8);
+        if (!matches.length) { results.innerHTML = '<p class="empty-note">No matching clients.</p>'; return; }
+        results.innerHTML = '';
+        matches.forEach(c => {
+            const row = document.createElement('div');
+            row.className = 'client-row';
+            row.innerHTML = `<div class="info"><strong>${escapeHtml(c.name)}</strong><span>${escapeHtml(c.businessName || '')}</span></div>`;
+            row.addEventListener('click', () => {
+                document.getElementById('clientPickerOverlay').classList.remove('active');
+                openProjectDetail({ client: c });
+            });
+            results.appendChild(row);
+        });
+    }
+    function openClientPicker() {
+        document.getElementById('cpkSearch').value = '';
+        document.getElementById('cpkName').value = '';
+        document.getElementById('cpkBusiness').value = '';
+        document.getElementById('cpkEmail').value = '';
+        document.getElementById('cpkPhone').value = '';
+        document.getElementById('cpkDuplicateNote').style.display = 'none';
+        document.getElementById('cpkMsg').textContent = '';
+        renderCpkResults('');
+        document.getElementById('clientPickerOverlay').classList.add('active');
+    }
+    document.getElementById('cpkSearch').addEventListener('input', (e) => renderCpkResults(e.target.value));
+    document.getElementById('clientPickerClose').addEventListener('click', () => document.getElementById('clientPickerOverlay').classList.remove('active'));
+    document.getElementById('clientPickerOverlay').addEventListener('click', (e) => { if (e.target.id === 'clientPickerOverlay') document.getElementById('clientPickerOverlay').classList.remove('active'); });
+
+    document.getElementById('cpkCreateBtn').addEventListener('click', async () => {
+        const msg = document.getElementById('cpkMsg');
+        const name = document.getElementById('cpkName').value.trim();
+        const email = document.getElementById('cpkEmail').value.trim();
+        const phone = document.getElementById('cpkPhone').value.trim();
+        if (!name) { msg.textContent = '⚠️ Name is required.'; msg.className = 'form-msg error'; return; }
+        if (email && !isValidEmail(email)) { msg.textContent = '⚠️ That email doesn\'t look valid.'; msg.className = 'form-msg error'; return; }
+
+        const match = await findMatchingClient(email, phone);
+        if (match) {
+            const note = document.getElementById('cpkDuplicateNote');
+            note.innerHTML = `Existing client found: <strong>${escapeHtml(match.name)}</strong>${match.businessName ? ' (' + escapeHtml(match.businessName) + ')' : ''}. `;
+            const useBtn = document.createElement('button');
+            useBtn.type = 'button'; useBtn.className = 'btn-logout'; useBtn.textContent = 'Use This Client';
+            useBtn.addEventListener('click', () => {
+                document.getElementById('clientPickerOverlay').classList.remove('active');
+                openProjectDetail({ client: match });
+            });
+            note.appendChild(useBtn);
+            note.style.display = 'block';
+            return;
+        }
+
+        try {
+            const clientRef = fsMod.doc(fsMod.collection(db, 'clients'));
+            const record = {
+                name, businessName: document.getElementById('cpkBusiness').value.trim() || null,
+                email: email || null, phone: phone || null, alternativePhone: null, website: null,
+                status: 'active', sourceLeadId: null, createdFromQuoteId: null, notes: '',
+                createdAt: fsMod.serverTimestamp(), updatedAt: fsMod.serverTimestamp(), createdBy: auth.currentUser.uid
+            };
+            await fsMod.setDoc(clientRef, record);
+            await loadClients();
+            document.getElementById('clientPickerOverlay').classList.remove('active');
+            openProjectDetail({ client: { id: clientRef.id, ...record } });
+        } catch (err) {
+            msg.textContent = '❌ Could not create client: ' + err.message;
+            msg.className = 'form-msg error';
+        }
+    });
+
+    /* ============================================================
+       CLIENT PROJECTS (Milestone 18)
+       ============================================================ */
+
+    let allClientProjects = [];
+    let cpItemsPayments = [];
+    let cpItemsChecklist = [];
+    let cpItemsTasks = [];
+
+    async function loadClientProjects() {
+        const list = document.getElementById('cpList');
+        list.innerHTML = '<p class="empty-note">Loading projects…</p>';
+        let snap;
+        try {
+            const q = fsMod.query(fsMod.collection(db, 'clientProjects'), fsMod.orderBy('createdAt', 'desc'));
+            snap = await fsMod.getDocs(q);
+        } catch (err) {
+            list.innerHTML = `<p class="empty-note">Could not load client projects: ${escapeHtml(err.message)}</p>`;
+            return;
+        }
+        allClientProjects = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderCpDashboard();
+        renderCpList();
+    }
+
+    function renderCpDashboard() {
+        const counts = { active: 0, awaiting_content: 0, development: 0, client_review: 0, ready_to_launch: 0, completed: 0, overdue: 0 };
+        let totalContract = 0, totalPaid = 0;
+        allClientProjects.forEach(p => {
+            if (ACTIVE_STAGES.includes(p.stage)) counts.active++;
+            if (counts.hasOwnProperty(p.stage)) counts[p.stage]++;
+            if (isOverdue(p)) counts.overdue++;
+            totalContract += Math.max(0, Number(p.contractValue) || 0);
+            totalPaid += Math.max(0, Number(p.amountPaid) || 0);
+        });
+        document.getElementById('cpsActive').textContent = counts.active;
+        document.getElementById('cpsAwaitingContent').textContent = counts.awaiting_content;
+        document.getElementById('cpsDevelopment').textContent = counts.development;
+        document.getElementById('cpsClientReview').textContent = counts.client_review;
+        document.getElementById('cpsReadyToLaunch').textContent = counts.ready_to_launch;
+        document.getElementById('cpsOverdue').textContent = counts.overdue;
+        document.getElementById('cpsCompleted').textContent = counts.completed;
+
+        document.getElementById('cpfContractValue').textContent = formatRand(totalContract);
+        document.getElementById('cpfPaymentsRecorded').textContent = formatRand(totalPaid);
+        document.getElementById('cpfOutstanding').textContent = formatRand(Math.max(0, totalContract - totalPaid));
+        document.getElementById('cpfAccepted').textContent = formatRand(totalContract);
+
+        renderCpAttention();
+    }
+
+    function renderCpAttention() {
+        const list = document.getElementById('cpAttentionList');
+        const items = [];
+        allClientProjects.forEach(p => { if (isOverdue(p)) items.push({ id: p.id, text: `Overdue: ${p.projectName} (target ${formatDateOnly(p.targetDate)})`, weight: 0 }); });
+        allClientProjects.forEach(p => { if (isDueSoon(p)) items.push({ id: p.id, text: `Due soon: ${p.projectName} (target ${formatDateOnly(p.targetDate)})`, weight: 1 }); });
+        allClientProjects.forEach(p => { if (p.stage === 'awaiting_content') items.push({ id: p.id, text: `Awaiting content: ${p.projectName}`, weight: 2 }); });
+        allClientProjects.forEach(p => { if ((p.priority === 'urgent' || p.priority === 'high') && ACTIVE_STAGES.includes(p.stage)) items.push({ id: p.id, text: `${PRIORITY_LABELS[p.priority]} priority: ${p.projectName}`, weight: 3 }); });
+        items.sort((a, b) => a.weight - b.weight);
+
+        if (!items.length) { list.innerHTML = '<li class="empty-note">Nothing needs attention right now.</li>'; return; }
+        list.innerHTML = '';
+        items.slice(0, 10).forEach(item => {
+            const li = document.createElement('li');
+            li.textContent = item.text; // textContent — project names are untrusted input
+            li.addEventListener('click', () => {
+                const project = allClientProjects.find(p => p.id === item.id);
+                if (project) openProjectDetail({ project });
+            });
+            list.appendChild(li);
+        });
+    }
+
+    function renderCpList() {
+        const list = document.getElementById('cpList');
+        const searchTerm = (document.getElementById('cpSearch').value || '').trim().toLowerCase();
+        const stageFilter = document.getElementById('cpFilterStage').value;
+        const priorityFilter = document.getElementById('cpFilterPriority').value;
+        const sortMode = document.getElementById('cpSort').value;
+
+        let filtered = allClientProjects.filter(p => {
+            if (stageFilter === 'active') { if (!ACTIVE_STAGES.includes(p.stage)) return false; }
+            else if (stageFilter !== 'all' && p.stage !== stageFilter) return false;
+            if (priorityFilter !== 'all' && p.priority !== priorityFilter) return false;
+            if (!searchTerm) return true;
+            const client = allClients.find(c => c.id === p.clientId);
+            const haystack = [p.projectName, client ? client.name : '', client ? client.businessName : ''].filter(Boolean).join(' ').toLowerCase();
+            return haystack.includes(searchTerm);
+        });
+
+        if (sortMode === 'target') {
+            filtered = filtered.slice().sort((a, b) => {
+                const at = a.targetDate ? (a.targetDate.toDate ? a.targetDate.toDate().getTime() : new Date(a.targetDate).getTime()) : Infinity;
+                const bt = b.targetDate ? (b.targetDate.toDate ? b.targetDate.toDate().getTime() : new Date(b.targetDate).getTime()) : Infinity;
+                return at - bt;
+            });
+        } else if (sortMode === 'priority') {
+            const order = ['urgent', 'high', 'normal', 'low'];
+            filtered = filtered.slice().sort((a, b) => order.indexOf(a.priority) - order.indexOf(b.priority));
+        } else if (sortMode === 'stage') {
+            const order = ['awaiting_content', 'planning', 'design', 'development', 'client_review', 'revisions', 'ready_to_launch', 'on_hold', 'completed', 'cancelled'];
+            filtered = filtered.slice().sort((a, b) => order.indexOf(a.stage) - order.indexOf(b.stage));
+        }
+
+        if (allClientProjects.length === 0) {
+            list.innerHTML = '<p class="empty-note">No client projects yet. Convert an accepted quote or a Won lead, or use "New Project" above.</p>';
+            return;
+        }
+        if (filtered.length === 0) {
+            list.innerHTML = '<p class="empty-note">No projects match your search/filter.</p>';
+            return;
+        }
+
+        list.innerHTML = '';
+        filtered.forEach(p => {
+            const client = allClients.find(c => c.id === p.clientId);
+            const row = document.createElement('div');
+            row.className = 'cp-row';
+            row.tabIndex = 0;
+            row.setAttribute('role', 'button');
+            const dueTag = isOverdue(p) ? ' <span style="color:#ff7070;">· Overdue</span>' : (isDueSoon(p) ? ' <span style="color:var(--gold);">· Due Soon</span>' : '');
+            const progress = clampProgress(p.progress);
+            row.innerHTML = `
+                <div class="info">
+                    <strong>${escapeHtml(p.projectName)}</strong>
+                    <span>${escapeHtml(client ? client.name : 'No client')}${dueTag}</span>
+                </div>
+                <div class="progress-wrap">
+                    <div class="progress-bar"><div class="fill" style="width:${progress}%;"></div></div>
+                    <div class="progress-label">${progress}%</div>
+                </div>
+                <div class="amount-col">${formatRand(p.contractValue)}</div>
+                <span class="priority-badge priority-${escapeHtml(p.priority || 'normal')}">${escapeHtml(PRIORITY_LABELS[p.priority] || 'Normal')}</span>
+                <span class="stage-badge stage-${escapeHtml(p.stage)}">${escapeHtml(STAGE_LABELS[p.stage] || p.stage)}</span>
+            `;
+            row.addEventListener('click', () => openProjectDetail({ project: p }));
+            row.addEventListener('keypress', (e) => { if (e.key === 'Enter') openProjectDetail({ project: p }); });
+            list.appendChild(row);
+        });
+    }
+    document.getElementById('cpSearch').addEventListener('input', renderCpList);
+    document.getElementById('cpFilterStage').addEventListener('change', renderCpList);
+    document.getElementById('cpFilterPriority').addEventListener('change', renderCpList);
+    document.getElementById('cpSort').addEventListener('change', renderCpList);
+    document.getElementById('cpNewBtn').addEventListener('click', () => openClientPicker());
+
+    /* ── Project Detail (create + edit combined — Part V) ── */
+
+    function renderCpContactActions(client) {
+        const actions = document.getElementById('cpContactActions');
+        actions.innerHTML = '';
+        if (!client) return;
+        const mailtoUrl = safeMailto(client.email, `RM Digitals — ${client.name}`);
+        if (mailtoUrl) { const a = document.createElement('a'); a.href = mailtoUrl; a.innerHTML = '<i class="fas fa-envelope"></i> Email'; actions.appendChild(a); }
+        const telUrl = safeTel(client.phone);
+        if (telUrl) { const a = document.createElement('a'); a.href = telUrl; a.innerHTML = '<i class="fas fa-phone"></i> Call'; actions.appendChild(a); }
+        const waDigits = normalizePhoneForWa(client.phone);
+        if (waDigits) {
+            const a = document.createElement('a');
+            a.href = `https://wa.me/${waDigits}?text=${encodeURIComponent('Hi ' + (client.name || '') + ', this is RM Digitals regarding your website project.')}`;
+            a.target = '_blank'; a.rel = 'noopener noreferrer';
+            a.innerHTML = '<i class="fab fa-whatsapp"></i> WhatsApp';
+            actions.appendChild(a);
+        }
+    }
+
+    function updateCpProgressBar() {
+        const val = clampProgress(document.getElementById('cpProgress').value);
+        document.getElementById('cpProgress').value = val;
+        document.getElementById('cpProgressFill').style.width = val + '%';
+    }
+    document.getElementById('cpProgress').addEventListener('input', updateCpProgressBar);
+
+    function renderCpDeadlineWarningFromForm() {
+        const el = document.getElementById('cpDeadlineWarning');
+        const stage = document.getElementById('cpStage').value;
+        const targetStr = document.getElementById('cpTargetDate').value;
+        if (!targetStr || stage === 'completed' || stage === 'cancelled') { el.style.display = 'none'; return; }
+        const target = new Date(targetStr + 'T23:59:59');
+        const startOfToday = new Date(); startOfToday.setHours(0, 0, 0, 0);
+        if (target.getTime() < startOfToday.getTime()) {
+            el.textContent = '⚠️ This project is overdue.'; el.style.color = '#ff7070'; el.style.display = 'block';
+        } else if (target.getTime() <= Date.now() + 7 * 24 * 60 * 60 * 1000) {
+            el.textContent = '⏳ Target date is within the next 7 days.'; el.style.color = 'var(--gold)'; el.style.display = 'block';
+        } else {
+            el.style.display = 'none';
+        }
+    }
+    document.getElementById('cpTargetDate').addEventListener('change', renderCpDeadlineWarningFromForm);
+    document.getElementById('cpStage').addEventListener('change', (e) => {
+        const suggested = STAGE_SUGGESTED_PROGRESS[e.target.value];
+        if (suggested != null) {
+            const current = clampProgress(document.getElementById('cpProgress').value);
+            if (current !== suggested && confirm(`Update progress to ${suggested}% to match the "${STAGE_LABELS[e.target.value]}" stage? (Cancel to leave progress unchanged)`)) {
+                document.getElementById('cpProgress').value = suggested;
+                updateCpProgressBar();
+            }
+        }
+        renderCpDeadlineWarningFromForm();
+    });
+
+    function renderCpPayments() {
+        const list = document.getElementById('cpPaymentsList');
+        if (!cpItemsPayments.length) { list.innerHTML = '<p class="empty-note">No payments recorded yet.</p>'; return; }
+        list.innerHTML = '';
+        cpItemsPayments.forEach((p, idx) => {
+            const row = document.createElement('div');
+            row.className = 'payment-row';
+            row.innerHTML = `
+                <span class="amt">${formatRand(p.amount)}</span>
+                <span class="meta">${escapeHtml(formatDateOnly(p.date))} · ${escapeHtml(p.method || '')}${p.reference ? ' · Ref: ' + escapeHtml(p.reference) : ''}${p.notes ? ' · ' + escapeHtml(p.notes) : ''}</span>
+                <button type="button">Remove</button>
+            `;
+            row.querySelector('button').addEventListener('click', () => {
+                if (!confirm('Remove this payment record?')) return;
+                cpItemsPayments.splice(idx, 1);
+                renderCpPayments();
+                renderCpFinancials();
+            });
+            list.appendChild(row);
+        });
+    }
+
+    function renderCpFinancials() {
+        const contractValue = Math.max(0, Number(document.getElementById('cpContractValue').value) || 0);
+        const depositRequired = Math.max(0, Number(document.getElementById('cpDepositRequired').value) || 0);
+        const amountPaid = cpItemsPayments.reduce((sum, p) => sum + Math.max(0, Number(p.amount) || 0), 0);
+        const balance = contractValue - amountPaid;
+
+        document.getElementById('cpAmountPaidOut').textContent = formatRand(amountPaid);
+        const balanceStat = document.getElementById('cpBalanceStat');
+        const balanceOut = document.getElementById('cpBalanceOut');
+        if (balance < -0.001) {
+            balanceOut.textContent = 'Overpaid by ' + formatRand(Math.abs(balance));
+            balanceStat.className = 'financial-stat overpaid';
+            balanceStat.querySelector('.lbl').textContent = 'Overpayment';
+        } else {
+            balanceOut.textContent = formatRand(balance);
+            balanceStat.className = 'financial-stat' + (balance > 0.001 ? ' balance-due' : ' paid-full');
+            balanceStat.querySelector('.lbl').textContent = 'Outstanding Balance';
+        }
+
+        let status;
+        if (amountPaid <= 0.001) status = 'Not Paid';
+        else if (balance > 0.001) status = 'Deposit / Part Payment';
+        else if (Math.abs(balance) <= 0.001) status = 'Paid';
+        else status = 'Overpaid';
+        document.getElementById('cpPaymentStatusOut').textContent = status;
+
+        const depositOut = document.getElementById('cpDepositStatusOut');
+        depositOut.textContent = depositRequired > 0
+            ? (amountPaid >= depositRequired ? 'Received' : `${formatRand(amountPaid)} of ${formatRand(depositRequired)}`)
+            : '—';
+
+        return { contractValue, depositRequired, amountPaid, balance, status };
+    }
+    document.getElementById('cpContractValue').addEventListener('input', renderCpFinancials);
+    document.getElementById('cpDepositRequired').addEventListener('input', renderCpFinancials);
+
+    document.getElementById('cpAddPaymentBtn').addEventListener('click', () => {
+        const amount = Number(document.getElementById('cpPayAmount').value);
+        const date = document.getElementById('cpPayDate').value;
+        if (!(amount > 0)) { alert('Enter a payment amount greater than 0.'); return; }
+        if (!date) { alert('Please choose a payment date.'); return; }
+        cpItemsPayments.push({
+            id: 'p' + Date.now() + Math.random().toString(36).slice(2, 7),
+            amount, date,
+            method: document.getElementById('cpPayMethod').value,
+            reference: document.getElementById('cpPayReference').value.trim(),
+            notes: document.getElementById('cpPayNotes').value.trim()
+        });
+        document.getElementById('cpPayAmount').value = '';
+        document.getElementById('cpPayReference').value = '';
+        document.getElementById('cpPayNotes').value = '';
+        renderCpPayments();
+        renderCpFinancials();
+    });
+
+    function renderCpChecklist() {
+        const list = document.getElementById('cpChecklistList');
+        const received = cpItemsChecklist.filter(i => i.received).length;
+        document.getElementById('cpChecklistProgress').textContent = `${received} of ${cpItemsChecklist.length} received`;
+        if (!cpItemsChecklist.length) { list.innerHTML = '<p class="empty-note">No checklist items yet.</p>'; return; }
+        list.innerHTML = '';
+        cpItemsChecklist.forEach((item, idx) => {
+            const row = document.createElement('div');
+            row.className = 'checklist-item' + (item.received ? ' received' : '');
+            row.innerHTML = `
+                <span class="label">${escapeHtml(item.label)}</span>
+                <button type="button" data-act="toggle">${item.received ? 'Mark Outstanding' : 'Mark Received'}</button>
+                <button type="button" data-act="remove">Remove</button>
+            `;
+            row.querySelector('[data-act="toggle"]').addEventListener('click', () => { cpItemsChecklist[idx].received = !cpItemsChecklist[idx].received; renderCpChecklist(); });
+            row.querySelector('[data-act="remove"]').addEventListener('click', () => { cpItemsChecklist.splice(idx, 1); renderCpChecklist(); });
+            list.appendChild(row);
+        });
+    }
+    document.getElementById('cpChecklistAddBtn').addEventListener('click', () => {
+        const input = document.getElementById('cpChecklistNewItem');
+        const label = input.value.trim();
+        if (!label) return;
+        cpItemsChecklist.push({ id: 'c' + Date.now() + Math.random().toString(36).slice(2, 7), label, received: false, custom: true });
+        input.value = '';
+        renderCpChecklist();
+    });
+    document.getElementById('cpChecklistStarterBtn').addEventListener('click', () => {
+        const existingLabels = new Set(cpItemsChecklist.map(i => i.label.toLowerCase()));
+        STARTER_CHECKLIST_ITEMS.forEach((label, i) => {
+            if (!existingLabels.has(label.toLowerCase())) {
+                cpItemsChecklist.push({ id: 'c' + Date.now() + i, label, received: false, custom: false });
+            }
+        });
+        renderCpChecklist();
+    });
+
+    function renderCpTasks() {
+        const list = document.getElementById('cpTasksList');
+        if (!cpItemsTasks.length) { list.innerHTML = '<p class="empty-note">No tasks yet.</p>'; return; }
+        list.innerHTML = '';
+        cpItemsTasks.forEach((task, idx) => {
+            const row = document.createElement('div');
+            row.className = 'task-item' + (task.completed ? ' completed' : '');
+            const dueSpan = document.createElement('span');
+            dueSpan.className = 'label';
+            dueSpan.textContent = task.title + (task.dueDate ? ` (due ${formatDateOnly(task.dueDate)})` : '');
+            row.appendChild(dueSpan);
+            const toggleBtn = document.createElement('button');
+            toggleBtn.type = 'button';
+            toggleBtn.textContent = task.completed ? 'Reopen' : 'Complete';
+            toggleBtn.addEventListener('click', () => { cpItemsTasks[idx].completed = !cpItemsTasks[idx].completed; renderCpTasks(); });
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.textContent = 'Remove';
+            removeBtn.addEventListener('click', () => { cpItemsTasks.splice(idx, 1); renderCpTasks(); });
+            row.appendChild(toggleBtn);
+            row.appendChild(removeBtn);
+            list.appendChild(row);
+        });
+    }
+    document.getElementById('cpTaskAddBtn').addEventListener('click', () => {
+        const titleInput = document.getElementById('cpTaskNewTitle');
+        const dueInput = document.getElementById('cpTaskNewDue');
+        const title = titleInput.value.trim();
+        if (!title) return;
+        cpItemsTasks.push({ id: 't' + Date.now() + Math.random().toString(36).slice(2, 7), title, completed: false, dueDate: dueInput.value || null, priority: 'normal' });
+        titleInput.value = ''; dueInput.value = '';
+        renderCpTasks();
+    });
+
+    function renderCpContentFolderLink() {
+        const url = document.getElementById('cpContentFolderUrl').value.trim();
+        const row = document.getElementById('cpContentFolderLinkRow');
+        if (url && isSafeHttpUrl(url)) { row.style.display = 'block'; } else { row.style.display = 'none'; }
+    }
+    document.getElementById('cpContentFolderUrl').addEventListener('input', renderCpContentFolderLink);
+    document.getElementById('cpOpenContentFolder').addEventListener('click', () => {
+        const url = document.getElementById('cpContentFolderUrl').value.trim();
+        if (url && isSafeHttpUrl(url)) window.open(url, '_blank', 'noopener,noreferrer');
+    });
+
+    function openProjectDetail({ project = null, client = null, lead = null, quote = null, prefill = null, duplicateNote = '' } = {}) {
+        document.getElementById('cpFormMsg').textContent = '';
+        const dupNoteEl = document.getElementById('cpDuplicateConversionNote');
+        if (duplicateNote) { dupNoteEl.textContent = duplicateNote; dupNoteEl.style.display = 'block'; }
+        else { dupNoteEl.style.display = 'none'; }
+
+        document.getElementById('cpProjectId').value = project ? project.id : '';
+        document.getElementById('cpHeading').textContent = project ? `Edit: ${project.projectName}` : 'New Client Project';
+
+        const resolvedClientId = project ? project.clientId : (client ? client.id : '');
+        const resolvedClient = project ? (allClients.find(c => c.id === project.clientId) || null) : client;
+        document.getElementById('cpClientId').value = resolvedClientId || '';
+
+        const clientDisplay = document.getElementById('cpClientDisplay');
+        clientDisplay.innerHTML = resolvedClient
+            ? `<strong>${escapeHtml(resolvedClient.name)}</strong>${resolvedClient.businessName ? ' — ' + escapeHtml(resolvedClient.businessName) : ''}`
+            : '<span style="color:var(--text-lo);">No client linked yet.</span>';
+        renderCpContactActions(resolvedClient);
+
+        const resolvedLeadId = project ? (project.leadId || '') : (lead ? lead.id : '');
+        const resolvedQuoteId = project ? (project.quoteId || '') : (quote ? quote.id : '');
+        const resolvedQuoteNumber = project ? (project.quoteNumber || '') : (quote ? quote.quoteNumber : '');
+        document.getElementById('cpLeadId').value = resolvedLeadId;
+        document.getElementById('cpQuoteId').value = resolvedQuoteId;
+        document.getElementById('cpQuoteNumber').value = resolvedQuoteNumber;
+        document.getElementById('cpQuoteLinkRow').style.display = resolvedQuoteId ? 'block' : 'none';
+        document.getElementById('cpViewQuoteLink').textContent = resolvedQuoteNumber ? `View related quote (${resolvedQuoteNumber}) →` : 'View related quote →';
+        document.getElementById('cpLeadLinkRow').style.display = resolvedLeadId ? 'block' : 'none';
+
+        document.getElementById('cpProjectName').value = project ? (project.projectName || '') : (prefill ? (prefill.projectName || '') : '');
+        const typeSelect = document.getElementById('cpProjectType');
+        const prefillType = project ? (project.projectType || '') : (prefill ? (prefill.projectName || '') : '');
+        const validTypes = [...typeSelect.options].map(o => o.value);
+        typeSelect.value = validTypes.includes(prefillType) ? prefillType : 'Other';
+        document.getElementById('cpDescription').value = project ? (project.description || '') : (prefill ? (prefill.description || '') : '');
+        document.getElementById('cpPriority').value = project ? (project.priority || 'normal') : 'normal';
+
+        document.getElementById('cpStartDate').value = project && project.startDate ? tsToDateInput(project.startDate) : '';
+        document.getElementById('cpTargetDate').value = project && project.targetDate ? tsToDateInput(project.targetDate) : '';
+        document.getElementById('cpStage').value = project ? (project.stage || 'awaiting_content') : 'awaiting_content';
+        document.getElementById('cpProgress').value = project ? clampProgress(project.progress) : 0;
+        updateCpProgressBar();
+        renderCpDeadlineWarningFromForm();
+
+        document.getElementById('cpContractValue').value = project ? (project.contractValue || 0) : (prefill && prefill.contractValue ? prefill.contractValue : 0);
+        document.getElementById('cpDepositRequired').value = project ? (project.depositRequired || 0) : 0;
+        document.getElementById('cpPaymentArrangement').value = project ? (project.paymentArrangement || '') : (prefill ? (prefill.paymentArrangement || '') : '');
+
+        cpItemsPayments = project ? (project.payments || []).map(p => ({ ...p })) : [];
+        cpItemsChecklist = project ? (project.contentChecklist || []).map(i => ({ ...i })) : [];
+        cpItemsTasks = project ? (project.tasks || []).map(t => ({ ...t })) : [];
+        renderCpPayments();
+        renderCpFinancials();
+        renderCpChecklist();
+        renderCpTasks();
+
+        document.getElementById('cpContentFolderUrl').value = project ? (project.contentFolderUrl || '') : '';
+        renderCpContentFolderLink();
+        document.getElementById('cpInternalNotes').value = project ? (project.internalNotes || '') : '';
+
+        document.getElementById('cpModalOverlay').classList.add('active');
+    }
+
+    document.getElementById('cpModalClose').addEventListener('click', () => document.getElementById('cpModalOverlay').classList.remove('active'));
+    document.getElementById('cpModalOverlay').addEventListener('click', (e) => { if (e.target.id === 'cpModalOverlay') document.getElementById('cpModalOverlay').classList.remove('active'); });
+    document.getElementById('cpViewQuoteLink').addEventListener('click', () => {
+        const quoteId = document.getElementById('cpQuoteId').value;
+        if (!quoteId) return;
+        document.getElementById('cpModalOverlay').classList.remove('active');
+        openQuotePreview(quoteId);
+    });
+    document.getElementById('cpViewLeadLink').addEventListener('click', () => {
+        const leadId = document.getElementById('cpLeadId').value;
+        if (!leadId) return;
+        document.getElementById('cpModalOverlay').classList.remove('active');
+        openLeadDetail(leadId);
+    });
+
+    async function saveClientProject() {
+        const msg = document.getElementById('cpFormMsg');
+        const projectName = document.getElementById('cpProjectName').value.trim();
+        const clientId = document.getElementById('cpClientId').value;
+        if (!projectName) { msg.textContent = '⚠️ Project name is required.'; msg.className = 'form-msg error'; return null; }
+        if (!clientId) { msg.textContent = '⚠️ This project needs a linked client.'; msg.className = 'form-msg error'; return null; }
+
+        const folderUrl = document.getElementById('cpContentFolderUrl').value.trim();
+        if (folderUrl && !isSafeHttpUrl(folderUrl)) { msg.textContent = '⚠️ Content Folder URL must start with http:// or https://'; msg.className = 'form-msg error'; return null; }
+
+        const { contractValue, depositRequired, amountPaid, balance } = renderCpFinancials();
+        let paymentStatus;
+        if (amountPaid <= 0.001) paymentStatus = 'not_paid';
+        else if (balance > 0.001) paymentStatus = 'partial';
+        else if (Math.abs(balance) <= 0.001) paymentStatus = 'paid';
+        else paymentStatus = 'overpaid';
+
+        const stage = document.getElementById('cpStage').value;
+        const progress = clampProgress(document.getElementById('cpProgress').value);
+        const editingId = document.getElementById('cpProjectId').value;
+        const existingProject = editingId ? allClientProjects.find(p => p.id === editingId) : null;
+
+        const record = {
+            clientId,
+            leadId: document.getElementById('cpLeadId').value || null,
+            quoteId: document.getElementById('cpQuoteId').value || null,
+            quoteNumber: document.getElementById('cpQuoteNumber').value || null,
+            projectName,
+            projectType: document.getElementById('cpProjectType').value,
+            description: document.getElementById('cpDescription').value.trim(),
+            stage,
+            priority: document.getElementById('cpPriority').value,
+            progress,
+            startDate: document.getElementById('cpStartDate').value ? fsMod.Timestamp.fromDate(new Date(document.getElementById('cpStartDate').value)) : null,
+            targetDate: document.getElementById('cpTargetDate').value ? fsMod.Timestamp.fromDate(new Date(document.getElementById('cpTargetDate').value)) : null,
+            contractValue, depositRequired, amountPaid, balance, paymentStatus,
+            paymentArrangement: document.getElementById('cpPaymentArrangement').value.trim(),
+            payments: cpItemsPayments,
+            contentChecklist: cpItemsChecklist,
+            tasks: cpItemsTasks,
+            contentFolderUrl: folderUrl || null,
+            internalNotes: document.getElementById('cpInternalNotes').value,
+            updatedAt: fsMod.serverTimestamp()
+        };
+
+        // completedAt recorded once, never silently lost if the stage later
+        // moves away from Completed (Part E/AJ).
+        if (stage === 'completed' && !(existingProject && existingProject.completedAt)) {
+            record.completedAt = fsMod.serverTimestamp();
+        } else if (existingProject && existingProject.completedAt) {
+            record.completedAt = existingProject.completedAt;
+        }
+
+        try {
+            let projectId = editingId;
+            if (editingId) {
+                // quoteNumber/createdAt/createdBy are never in `record` for an
+                // edit, so updateDoc can never silently overwrite them.
+                await fsMod.updateDoc(fsMod.doc(db, 'clientProjects', editingId), record);
+            } else {
+                record.createdAt = fsMod.serverTimestamp();
+                record.createdBy = auth.currentUser.uid;
+                const docRef = fsMod.doc(fsMod.collection(db, 'clientProjects'));
+                await fsMod.setDoc(docRef, record);
+                projectId = docRef.id;
+
+                // Back-links (Part M) — adds two fields only, never touches
+                // any other existing lead/quote data.
+                if (record.leadId) {
+                    fsMod.updateDoc(fsMod.doc(db, 'leads', record.leadId), { clientId, clientProjectId: projectId, updatedAt: fsMod.serverTimestamp() }).catch(() => {});
+                }
+                if (record.quoteId) {
+                    fsMod.updateDoc(fsMod.doc(db, 'quotes', record.quoteId), { clientId, clientProjectId: projectId, updatedAt: fsMod.serverTimestamp() }).catch(() => {});
+                }
+            }
+            msg.textContent = '✅ Project saved.';
+            msg.className = 'form-msg success';
+            await loadClientProjects();
+            if (record.leadId) await loadLeads();
+            if (record.quoteId) await loadQuotes();
+            return projectId;
+        } catch (err) {
+            console.error(err);
+            msg.textContent = '❌ Could not save project: ' + err.message;
+            msg.className = 'form-msg error';
+            return null;
+        }
+    }
+    document.getElementById('cpSaveBtn').addEventListener('click', async () => {
+        const id = await saveClientProject();
+        if (id) document.getElementById('cpModalOverlay').classList.remove('active');
+    });
+    document.getElementById('cpDeleteBtn').addEventListener('click', async () => {
+        const editingId = document.getElementById('cpProjectId').value;
+        if (!editingId) { document.getElementById('cpModalOverlay').classList.remove('active'); return; }
+        if (!confirm('Delete this client project permanently? This cannot be undone.')) return;
+        try {
+            await fsMod.deleteDoc(fsMod.doc(db, 'clientProjects', editingId));
+            document.getElementById('cpModalOverlay').classList.remove('active');
+            loadClientProjects();
+        } catch (err) {
+            alert('Could not delete project: ' + err.message);
+        }
+    });
+
+    /* ── Quote/Lead → Client Project conversion (Parts J, K, L, M) ── */
+
+    async function startProjectFromQuote(quote) {
+        const match = await findMatchingClient(quote.clientEmail, quote.clientPhone);
+        let client, duplicateNote = '';
+        if (match) {
+            client = match;
+            duplicateNote = `Existing client found: ${match.name}${match.businessName ? ' (' + match.businessName + ')' : ''} — linked automatically.`;
+        } else {
+            const clientRef = fsMod.doc(fsMod.collection(db, 'clients'));
+            const clientRecord = {
+                name: quote.clientName, businessName: quote.businessName || null,
+                email: quote.clientEmail || null, phone: quote.clientPhone || null,
+                alternativePhone: null, website: null, status: 'active',
+                sourceLeadId: quote.leadId || null, createdFromQuoteId: quote.id, notes: '',
+                createdAt: fsMod.serverTimestamp(), updatedAt: fsMod.serverTimestamp(), createdBy: auth.currentUser.uid
+            };
+            await fsMod.setDoc(clientRef, clientRecord);
+            client = { id: clientRef.id, ...clientRecord };
+            await loadClients();
+        }
+        openProjectDetail({
+            client, quote, lead: quote.leadId ? { id: quote.leadId } : null,
+            prefill: { projectName: quote.title, description: quote.description, contractValue: quote.total, paymentArrangement: quote.paymentArrangement },
+            duplicateNote
+        });
+    }
+
+    async function startProjectFromLead(lead) {
+        const match = await findMatchingClient(lead.email, lead.phone);
+        let client, duplicateNote = '';
+        if (match) {
+            client = match;
+            duplicateNote = `Existing client found: ${match.name}${match.businessName ? ' (' + match.businessName + ')' : ''} — linked automatically.`;
+        } else {
+            const clientRef = fsMod.doc(fsMod.collection(db, 'clients'));
+            const clientRecord = {
+                name: lead.name, businessName: null, email: lead.email || null, phone: lead.phone || null,
+                alternativePhone: null, website: null, status: 'active',
+                sourceLeadId: lead.id, createdFromQuoteId: null, notes: '',
+                createdAt: fsMod.serverTimestamp(), updatedAt: fsMod.serverTimestamp(), createdBy: auth.currentUser.uid
+            };
+            await fsMod.setDoc(clientRef, clientRecord);
+            client = { id: clientRef.id, ...clientRecord };
+            await loadClients();
+        }
+        openProjectDetail({
+            client, quote: null, lead,
+            prefill: { projectName: lead.packageInterest || lead.serviceInterest || '', description: lead.message || '' },
+            duplicateNote
+        });
+    }
+
+    document.getElementById('qpStartProjectBtn').addEventListener('click', async () => {
+        const quote = allQuotes.find(q => q.id === activeQuoteId);
+        if (!quote) return;
+        const existing = allClientProjects.find(p => p.quoteId === quote.id);
+        document.getElementById('quotePreviewOverlay').classList.remove('active');
+        if (existing) { openProjectDetail({ project: existing }); return; }
+        await startProjectFromQuote(quote);
+    });
+
+    document.getElementById('lmStartProjectBtn').addEventListener('click', async () => {
+        const lead = allLeads.find(l => l.id === activeLeadId);
+        if (!lead) return;
+        const existing = allClientProjects.find(p => p.leadId === lead.id);
+        closeLeadModal();
+        if (existing) { openProjectDetail({ project: existing }); return; }
+        await startProjectFromLead(lead);
     });
 }

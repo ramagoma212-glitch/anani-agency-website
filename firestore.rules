@@ -117,6 +117,18 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
 
+    /* ── Clients & Client Projects (Milestone 18) ──
+       Private business/client-management records — completely
+       separate from the PUBLIC portfolio `projects` collection above
+       (never reuse that collection for this). Same trust model as
+       leads/quotes: admin only. */
+    match /clients/{clientId} {
+      allow read, write: if isAdmin();
+    }
+    match /clientProjects/{clientProjectId} {
+      allow read, write: if isAdmin();
+    }
+
     /* Deny everything else by default. */
     match /{document=**} {
       allow read, write: if false;

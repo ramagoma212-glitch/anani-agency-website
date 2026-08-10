@@ -291,6 +291,124 @@
             .quote-print-header, .quote-totals-block, .quote-print-totals { break-inside: avoid; }
             @page { size: A4; margin: 16mm; }
         }
+
+        /* ============================================================
+           CLIENTS & CLIENT PROJECTS (Milestone 18)
+           ============================================================ */
+        .client-row {
+            display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+            border: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px; flex-wrap: wrap; cursor: pointer;
+        }
+        .client-row:hover, .client-row:focus-visible { border-color: var(--border-glow); }
+        .client-row .info { flex: 1; min-width: 180px; }
+        .client-row .info strong { display: block; font-size: .92rem; word-break: break-word; }
+        .client-row .info span { font-size: .76rem; color: var(--text-mid); word-break: break-word; }
+        .client-row .meta-col { font-size: .76rem; color: var(--text-mid); min-width: 90px; }
+
+        .status-badge.status-active   { color: var(--green); border-color: rgba(0,255,136,.3); }
+        .status-badge.status-past     { color: var(--text-mid); border-color: var(--border); }
+        .status-badge.status-archived { color: var(--text-lo); border-color: var(--border); }
+
+        .stage-badge {
+            font-size: .68rem; padding: 4px 11px; border-radius: 100px; border: 1px solid var(--border);
+            white-space: nowrap; font-weight: 700;
+        }
+        .stage-badge.stage-awaiting_content { color: var(--gold); border-color: rgba(255,214,10,.3); }
+        .stage-badge.stage-planning         { color: var(--cyan); border-color: rgba(0,212,255,.3); }
+        .stage-badge.stage-design           { color: #b98cff; border-color: rgba(185,140,255,.35); }
+        .stage-badge.stage-development      { color: var(--cyan); border-color: rgba(0,212,255,.3); }
+        .stage-badge.stage-client_review    { color: #b98cff; border-color: rgba(185,140,255,.35); }
+        .stage-badge.stage-revisions        { color: #ff9f40; border-color: rgba(255,159,64,.35); }
+        .stage-badge.stage-ready_to_launch  { color: var(--green); border-color: rgba(0,255,136,.3); }
+        .stage-badge.stage-completed        { color: var(--green); border-color: rgba(0,255,136,.5); }
+        .stage-badge.stage-on_hold          { color: var(--text-mid); border-color: var(--border); }
+        .stage-badge.stage-cancelled        { color: #ff7070; border-color: rgba(255,80,80,.3); }
+
+        .priority-badge {
+            font-size: .64rem; padding: 3px 9px; border-radius: 100px; border: 1px solid var(--border);
+            white-space: nowrap; font-weight: 700; text-transform: uppercase; letter-spacing: .3px;
+        }
+        .priority-badge.priority-low    { color: var(--text-lo); }
+        .priority-badge.priority-normal { color: var(--text-mid); }
+        .priority-badge.priority-high   { color: var(--gold); border-color: rgba(255,214,10,.3); }
+        .priority-badge.priority-urgent { color: #ff7070; border-color: rgba(255,80,80,.3); }
+
+        .cp-dashboard { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin-bottom: 14px; }
+        @media (max-width: 900px) { .cp-dashboard { grid-template-columns: repeat(4, 1fr); } }
+        @media (max-width: 480px) { .cp-dashboard { grid-template-columns: repeat(2, 1fr); } }
+        .cp-stat { border: 1px solid var(--border); border-radius: 12px; padding: 12px 8px; text-align: center; }
+        .cp-stat .num { font-family: var(--f-display); font-size: 1.1rem; font-weight: 800; display: block; word-break: break-word; }
+        .cp-stat .lbl { font-size: .62rem; color: var(--text-mid); text-transform: uppercase; letter-spacing: .4px; }
+        .cp-stat.warn .num { color: #ff9f40; }
+
+        .cp-attention {
+            border: 1px solid rgba(255,159,64,.3); background: rgba(255,159,64,.05);
+            border-radius: 14px; padding: 16px 18px; margin-bottom: 18px;
+        }
+        .cp-attention h4 { font-size: .85rem; margin-bottom: 8px; color: #ff9f40; }
+        .cp-attention ul { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+        .cp-attention li { font-size: .82rem; color: var(--text-mid); cursor: pointer; }
+        .cp-attention li:hover { color: var(--text-hi); }
+        .cp-attention .empty-note { padding: 4px 0; }
+
+        .cp-row {
+            display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+            border: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px; flex-wrap: wrap; cursor: pointer;
+        }
+        .cp-row:hover, .cp-row:focus-visible { border-color: var(--border-glow); }
+        .cp-row .info { flex: 1; min-width: 180px; }
+        .cp-row .info strong { display: block; font-size: .92rem; word-break: break-word; }
+        .cp-row .info span { font-size: .76rem; color: var(--text-mid); word-break: break-word; }
+        .cp-row .meta-col { font-size: .76rem; color: var(--text-mid); min-width: 80px; }
+        .cp-row .amount-col { font-family: var(--f-display); font-weight: 700; font-size: .9rem; min-width: 80px; }
+        .cp-row .progress-wrap { min-width: 90px; }
+
+        .progress-bar { height: 6px; border-radius: 100px; background: rgba(255,255,255,.06); overflow: hidden; }
+        .progress-bar .fill { height: 100%; background: var(--grad); border-radius: 100px; transition: width .3s ease; }
+        .progress-label { font-size: .68rem; color: var(--text-mid); margin-top: 3px; }
+
+        .cp-section { border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; margin-bottom: 16px; }
+        .cp-section h4 { font-size: .85rem; margin-bottom: 12px; color: var(--text-hi); }
+
+        .checklist-item, .task-item {
+            display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+        .checklist-item:last-child, .task-item:last-child { border-bottom: none; }
+        .checklist-item .label, .task-item .label { flex: 1; min-width: 140px; font-size: .85rem; word-break: break-word; }
+        .checklist-item.received .label { text-decoration: line-through; color: var(--text-lo); }
+        .task-item.completed .label { text-decoration: line-through; color: var(--text-lo); }
+        .checklist-item button, .task-item button {
+            background: none; border: 1px solid var(--border); color: var(--text-mid);
+            padding: 5px 10px; border-radius: 8px; cursor: pointer; font-size: .74rem;
+        }
+        .checklist-item button:hover, .task-item button:hover { border-color: var(--border-glow); color: var(--text-hi); }
+
+        .payment-row {
+            display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); flex-wrap: wrap;
+        }
+        .payment-row:last-child { border-bottom: none; }
+        .payment-row .amt { font-family: var(--f-display); font-weight: 700; min-width: 90px; }
+        .payment-row .meta { flex: 1; font-size: .78rem; color: var(--text-mid); min-width: 140px; word-break: break-word; }
+        .payment-row button { background: none; border: 1px solid var(--border); color: #ff7070; padding: 4px 10px; border-radius: 8px; cursor: pointer; font-size: .72rem; }
+
+        .financial-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+        @media (max-width: 700px) { .financial-grid { grid-template-columns: repeat(2, 1fr); } }
+        .financial-stat { border: 1px solid var(--border); border-radius: 12px; padding: 12px 10px; text-align: center; }
+        .financial-stat .num { font-family: var(--f-display); font-size: 1.05rem; font-weight: 800; display: block; word-break: break-word; }
+        .financial-stat .lbl { font-size: .62rem; color: var(--text-mid); text-transform: uppercase; letter-spacing: .4px; }
+        .financial-stat.overpaid .num { color: var(--gold); }
+        .financial-stat.balance-due .num { color: #ff9f40; }
+        .financial-stat.paid-full .num { color: var(--green); }
+
+        .cp-modal-box { max-width: 780px; }
+        .cp-quick-link { font-size: .8rem; color: var(--cyan); cursor: pointer; text-decoration: underline; }
+
+        .duplicate-client-note {
+            background: rgba(255,214,10,.06); border: 1px solid rgba(255,214,10,.25); border-radius: 10px;
+            padding: 10px 14px; font-size: .82rem; color: var(--text-mid); margin-bottom: 16px;
+        }
+        .duplicate-client-note button { margin-top: 6px; }
     </style>
 </head>
 <body>
@@ -410,7 +528,8 @@
         </div>
 
         <div class="admin-card">
-            <h2>Existing Projects</h2>
+            <h2>Portfolio Projects</h2>
+            <p style="font-size:.78rem;color:var(--text-lo);margin:-12px 0 16px;">Public website portfolio — separate from Client Projects below, which are private.</p>
             <div id="projectList"></div>
         </div>
 
@@ -561,6 +680,88 @@
                 <p class="empty-note">Loading…</p>
             </div>
         </div>
+
+        <div class="admin-card">
+            <h2>Clients</h2>
+            <p style="font-size:.78rem;color:var(--text-lo);margin:-12px 0 16px;">Converted, paying or past clients — not the same as Leads (prospects).</p>
+
+            <div class="quote-toolbar">
+                <input type="search" id="clientSearch" placeholder="Search name, business, email, phone…" />
+                <select id="clientFilterStatus">
+                    <option value="all">All statuses</option>
+                    <option value="active">Active</option>
+                    <option value="past">Past Client</option>
+                    <option value="archived">Archived</option>
+                </select>
+                <button type="button" class="btn-primary" id="clientNewBtn">New Client</button>
+            </div>
+
+            <div id="clientList">
+                <p class="empty-note">Loading…</p>
+            </div>
+        </div>
+
+        <div class="admin-card">
+            <h2>Client Projects</h2>
+            <p style="font-size:.78rem;color:var(--text-lo);margin:-12px 0 16px;">Private project management — separate from the public Portfolio Projects above.</p>
+
+            <div class="cp-dashboard" id="cpDashboard">
+                <div class="cp-stat"><span class="num" id="cpsActive">0</span><span class="lbl">Active</span></div>
+                <div class="cp-stat"><span class="num" id="cpsAwaitingContent">0</span><span class="lbl">Awaiting Content</span></div>
+                <div class="cp-stat"><span class="num" id="cpsDevelopment">0</span><span class="lbl">In Development</span></div>
+                <div class="cp-stat"><span class="num" id="cpsClientReview">0</span><span class="lbl">Client Review</span></div>
+                <div class="cp-stat"><span class="num" id="cpsReadyToLaunch">0</span><span class="lbl">Ready to Launch</span></div>
+                <div class="cp-stat warn"><span class="num" id="cpsOverdue">0</span><span class="lbl">Overdue</span></div>
+                <div class="cp-stat"><span class="num" id="cpsCompleted">0</span><span class="lbl">Completed</span></div>
+            </div>
+            <div class="financial-grid" id="cpFinancialSummary">
+                <div class="financial-stat"><span class="num" id="cpfContractValue">R0</span><span class="lbl">Total Contract Value</span></div>
+                <div class="financial-stat"><span class="num" id="cpfPaymentsRecorded">R0</span><span class="lbl">Payments Recorded</span></div>
+                <div class="financial-stat balance-due"><span class="num" id="cpfOutstanding">R0</span><span class="lbl">Outstanding Balance</span></div>
+                <div class="financial-stat"><span class="num" id="cpfAccepted">R0</span><span class="lbl">Accepted/Contracted Value</span></div>
+            </div>
+
+            <div class="cp-attention" id="cpAttentionBox">
+                <h4><i class="fas fa-triangle-exclamation"></i> Needs Attention</h4>
+                <ul id="cpAttentionList"><li class="empty-note">Loading…</li></ul>
+            </div>
+
+            <div class="quote-toolbar">
+                <input type="search" id="cpSearch" placeholder="Search project, client, business…" />
+                <select id="cpFilterStage">
+                    <option value="all">All stages</option>
+                    <option value="active">All active</option>
+                    <option value="awaiting_content">Awaiting Content</option>
+                    <option value="planning">Planning</option>
+                    <option value="design">Design</option>
+                    <option value="development">Development</option>
+                    <option value="client_review">Client Review</option>
+                    <option value="revisions">Revisions</option>
+                    <option value="ready_to_launch">Ready to Launch</option>
+                    <option value="completed">Completed</option>
+                    <option value="on_hold">On Hold</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+                <select id="cpFilterPriority">
+                    <option value="all">All priorities</option>
+                    <option value="urgent">Urgent</option>
+                    <option value="high">High</option>
+                    <option value="normal">Normal</option>
+                    <option value="low">Low</option>
+                </select>
+                <select id="cpSort">
+                    <option value="newest">Newest first</option>
+                    <option value="target">By target date</option>
+                    <option value="priority">By priority</option>
+                    <option value="stage">By stage</option>
+                </select>
+                <button type="button" class="btn-primary" id="cpNewBtn">New Project</button>
+            </div>
+
+            <div id="cpList">
+                <p class="empty-note">Loading…</p>
+            </div>
+        </div>
     </div>
 
     <div class="lead-modal-overlay" id="leadModalOverlay">
@@ -595,6 +796,12 @@
             <div style="margin:14px 0;">
                 <button type="button" class="btn-primary" id="lmCreateQuoteBtn" style="width:100%;justify-content:center;">
                     <i class="fas fa-file-invoice-dollar"></i> Create Quote
+                </button>
+            </div>
+
+            <div id="lmStartProjectWrap" style="margin:0 0 14px;display:none;">
+                <button type="button" class="btn-primary" id="lmStartProjectBtn" style="width:100%;justify-content:center;background:var(--grad);">
+                    <i class="fas fa-diagram-project"></i> Start Client Project
                 </button>
             </div>
 
@@ -743,6 +950,7 @@
                 <button type="button" class="btn-logout" id="qpEditBtn"><i class="fas fa-pen"></i> Edit</button>
                 <button type="button" class="btn-logout" id="qpDuplicateBtn"><i class="fas fa-copy"></i> Duplicate</button>
                 <button type="button" class="btn-logout" id="qpDeleteBtn" style="color:#ff7070;border-color:rgba(255,80,80,.3);"><i class="fas fa-trash"></i> Delete</button>
+                <button type="button" class="btn-primary" id="qpStartProjectBtn" style="display:none;background:var(--grad);"><i class="fas fa-diagram-project"></i> Start Client Project</button>
             </div>
 
             <div class="lead-status-row quote-print-noprint">
@@ -813,6 +1021,326 @@
                     </p>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         CLIENT PROFILE (Milestone 18)
+    ============================================================ -->
+    <div class="lead-modal-overlay" id="clientModalOverlay">
+        <div class="lead-modal-box">
+            <button class="lead-modal-close" id="clientModalClose" aria-label="Close">&times;</button>
+            <h3 id="cmHeading">Client</h3>
+            <input type="hidden" id="cmClientId" value="" />
+
+            <div class="lead-status-row">
+                <span class="status-badge" id="cmStatusBadge"></span>
+                <select id="cmStatusSelect">
+                    <option value="active">Active</option>
+                    <option value="past">Past Client</option>
+                    <option value="archived">Archived</option>
+                </select>
+            </div>
+
+            <div class="form-row-2">
+                <div class="field">
+                    <label for="cmName">Name</label>
+                    <input type="text" id="cmName" maxlength="150" required />
+                </div>
+                <div class="field">
+                    <label for="cmBusinessName">Business / Company (optional)</label>
+                    <input type="text" id="cmBusinessName" maxlength="150" />
+                </div>
+            </div>
+            <div class="form-row-2">
+                <div class="field">
+                    <label for="cmEmail">Email (optional)</label>
+                    <input type="text" id="cmEmail" maxlength="200" />
+                </div>
+                <div class="field">
+                    <label for="cmPhone">Phone (optional)</label>
+                    <input type="text" id="cmPhone" maxlength="40" />
+                </div>
+            </div>
+            <div class="form-row-2">
+                <div class="field">
+                    <label for="cmAltPhone">Alternative Phone (optional)</label>
+                    <input type="text" id="cmAltPhone" maxlength="40" />
+                </div>
+                <div class="field">
+                    <label for="cmWebsite">Website (optional)</label>
+                    <input type="text" id="cmWebsite" maxlength="200" placeholder="https://…" />
+                </div>
+            </div>
+            <div class="field">
+                <label for="cmNotes">Notes</label>
+                <textarea id="cmNotes" rows="3" maxlength="4000"></textarea>
+            </div>
+
+            <div class="lead-detail-actions" id="cmContactActions"></div>
+
+            <button type="button" class="btn-primary" id="cmSaveBtn" style="width:100%;justify-content:center;margin-bottom:10px;">Save Client</button>
+
+            <div class="cp-section">
+                <h4>Projects for this Client</h4>
+                <div id="cmProjectsList"><p class="empty-note">—</p></div>
+                <button type="button" class="btn-logout" id="cmNewProjectBtn" style="width:100%;justify-content:center;margin-top:10px;">
+                    <i class="fas fa-diagram-project"></i> Create Project for This Client
+                </button>
+            </div>
+
+            <div style="margin-top:14px; text-align:right;">
+                <button type="button" class="btn-logout" id="cmDeleteBtn" style="color:#ff7070;border-color:rgba(255,80,80,.3);">Archive Client</button>
+            </div>
+            <div id="clientDetailMsg" class="form-msg" role="status" aria-live="polite"></div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         CLIENT PICKER — used when starting a project with no
+         quote/lead/client context (New Project from the dashboard)
+    ============================================================ -->
+    <div class="lead-modal-overlay" id="clientPickerOverlay">
+        <div class="lead-modal-box">
+            <button class="lead-modal-close" id="clientPickerClose" aria-label="Close">&times;</button>
+            <h3>Choose a Client</h3>
+            <div class="field">
+                <label for="cpkSearch">Search existing clients</label>
+                <input type="search" id="cpkSearch" placeholder="Name, business, email, phone…" />
+            </div>
+            <div id="cpkResults" style="max-height:220px;overflow-y:auto;margin-bottom:16px;"></div>
+            <div class="budget-context-note">Can't find them? Fill in their details below to create a new client.</div>
+            <div class="form-row-2">
+                <div class="field">
+                    <label for="cpkName">Name</label>
+                    <input type="text" id="cpkName" maxlength="150" />
+                </div>
+                <div class="field">
+                    <label for="cpkBusiness">Business (optional)</label>
+                    <input type="text" id="cpkBusiness" maxlength="150" />
+                </div>
+            </div>
+            <div class="form-row-2">
+                <div class="field">
+                    <label for="cpkEmail">Email (optional)</label>
+                    <input type="text" id="cpkEmail" maxlength="200" />
+                </div>
+                <div class="field">
+                    <label for="cpkPhone">Phone (optional)</label>
+                    <input type="text" id="cpkPhone" maxlength="40" />
+                </div>
+            </div>
+            <div id="cpkDuplicateNote" class="duplicate-client-note" style="display:none;"></div>
+            <button type="button" class="btn-primary" id="cpkCreateBtn" style="width:100%;justify-content:center;">Create Client &amp; Continue</button>
+            <div id="cpkMsg" class="form-msg" role="status" aria-live="polite"></div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         CLIENT PROJECT DETAIL (Milestone 18)
+         One combined view/edit interface — there is no separate
+         client-facing preview, since Client Projects are private and
+         there is intentionally no client portal (Part AM).
+    ============================================================ -->
+    <div class="lead-modal-overlay" id="cpModalOverlay">
+        <div class="lead-modal-box cp-modal-box">
+            <button class="lead-modal-close" id="cpModalClose" aria-label="Close">&times;</button>
+            <h3 id="cpHeading">New Client Project</h3>
+            <input type="hidden" id="cpProjectId" value="" />
+            <input type="hidden" id="cpClientId" value="" />
+            <input type="hidden" id="cpLeadId" value="" />
+            <input type="hidden" id="cpQuoteId" value="" />
+            <input type="hidden" id="cpQuoteNumber" value="" />
+
+            <div id="cpDuplicateConversionNote" class="duplicate-client-note" style="display:none;"></div>
+
+            <div class="cp-section">
+                <h4>Client</h4>
+                <div id="cpClientDisplay" style="font-size:.9rem;"></div>
+                <div id="cpQuoteLinkRow" style="margin-top:8px;display:none;">
+                    <span class="cp-quick-link" id="cpViewQuoteLink">View related quote →</span>
+                </div>
+                <div id="cpLeadLinkRow" style="margin-top:8px;display:none;">
+                    <span class="cp-quick-link" id="cpViewLeadLink">View related lead →</span>
+                </div>
+                <div class="lead-detail-actions" id="cpContactActions" style="margin-top:10px;"></div>
+            </div>
+
+            <div class="cp-section">
+                <h4>Project Overview</h4>
+                <div class="field">
+                    <label for="cpProjectName">Project Name</label>
+                    <input type="text" id="cpProjectName" maxlength="150" required />
+                </div>
+                <div class="form-row-2">
+                    <div class="field">
+                        <label for="cpProjectType">Project Type</label>
+                        <select id="cpProjectType">
+                            <option value="Landing Page">Landing Page</option>
+                            <option value="Starter Business Website">Starter Business Website</option>
+                            <option value="Professional Business Website">Professional Business Website</option>
+                            <option value="Business Growth Website">Business Growth Website</option>
+                            <option value="Ecommerce Website">Ecommerce Website</option>
+                            <option value="Custom Web System / Portal">Custom Web System / Portal</option>
+                            <option value="Website Redesign">Website Redesign</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="cpPriority">Priority</label>
+                        <select id="cpPriority">
+                            <option value="low">Low</option>
+                            <option value="normal" selected>Normal</option>
+                            <option value="high">High</option>
+                            <option value="urgent">Urgent</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="cpDescription">Description (optional)</label>
+                    <textarea id="cpDescription" rows="3" maxlength="2000"></textarea>
+                </div>
+            </div>
+
+            <div class="cp-section">
+                <h4>Timeline</h4>
+                <div class="form-row-2">
+                    <div class="field">
+                        <label for="cpStartDate">Start Date</label>
+                        <input type="date" id="cpStartDate" />
+                    </div>
+                    <div class="field">
+                        <label for="cpTargetDate">Target Completion Date</label>
+                        <input type="date" id="cpTargetDate" />
+                    </div>
+                </div>
+                <div class="form-row-2">
+                    <div class="field">
+                        <label for="cpStage">Stage</label>
+                        <select id="cpStage">
+                            <option value="awaiting_content">Awaiting Content</option>
+                            <option value="planning">Planning</option>
+                            <option value="design">Design</option>
+                            <option value="development">Development</option>
+                            <option value="client_review">Client Review</option>
+                            <option value="revisions">Revisions</option>
+                            <option value="ready_to_launch">Ready to Launch</option>
+                            <option value="completed">Completed</option>
+                            <option value="on_hold">On Hold</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="cpProgress">Progress (%)</label>
+                        <input type="number" id="cpProgress" min="0" max="100" step="5" value="0" />
+                    </div>
+                </div>
+                <div class="progress-bar"><div class="fill" id="cpProgressFill" style="width:0%;"></div></div>
+                <p id="cpDeadlineWarning" class="field-hint" style="display:none;"></p>
+            </div>
+
+            <div class="cp-section">
+                <h4>Financials</h4>
+                <div class="form-row-2">
+                    <div class="field">
+                        <label for="cpContractValue">Contract Value (R)</label>
+                        <input type="number" id="cpContractValue" min="0" step="0.01" value="0" />
+                    </div>
+                    <div class="field">
+                        <label for="cpDepositRequired">Deposit Required (R, optional)</label>
+                        <input type="number" id="cpDepositRequired" min="0" step="0.01" value="0" />
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="cpPaymentArrangement">Payment Arrangement</label>
+                    <input type="text" id="cpPaymentArrangement" maxlength="200" placeholder="e.g. 50% deposit, 50% before launch" />
+                </div>
+
+                <div class="financial-grid" style="margin-top:14px;">
+                    <div class="financial-stat"><span class="num" id="cpAmountPaidOut">R0</span><span class="lbl">Amount Paid</span></div>
+                    <div class="financial-stat" id="cpBalanceStat"><span class="num" id="cpBalanceOut">R0</span><span class="lbl">Outstanding Balance</span></div>
+                    <div class="financial-stat"><span class="num" id="cpPaymentStatusOut">Not Paid</span><span class="lbl">Payment Status</span></div>
+                    <div class="financial-stat"><span class="num" id="cpDepositStatusOut">—</span><span class="lbl">Deposit</span></div>
+                </div>
+
+                <h4 style="margin-top:16px;">Recorded Payments</h4>
+                <div id="cpPaymentsList"><p class="empty-note">No payments recorded yet.</p></div>
+                <div class="form-row-2" style="margin-top:10px;">
+                    <div class="field">
+                        <label for="cpPayAmount">Amount (R)</label>
+                        <input type="number" id="cpPayAmount" min="0" step="0.01" />
+                    </div>
+                    <div class="field">
+                        <label for="cpPayDate">Date</label>
+                        <input type="date" id="cpPayDate" />
+                    </div>
+                </div>
+                <div class="form-row-2">
+                    <div class="field">
+                        <label for="cpPayMethod">Method</label>
+                        <select id="cpPayMethod">
+                            <option value="EFT">EFT</option>
+                            <option value="Cash">Cash</option>
+                            <option value="Card">Card</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="cpPayReference">Reference (optional)</label>
+                        <input type="text" id="cpPayReference" maxlength="100" />
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="cpPayNotes">Payment Notes (optional)</label>
+                    <input type="text" id="cpPayNotes" maxlength="200" />
+                </div>
+                <button type="button" class="btn-logout" id="cpAddPaymentBtn" style="width:100%;justify-content:center;">+ Record Payment</button>
+                <span class="field-hint">Manually recorded bookkeeping only — not connected to any bank or payment gateway.</span>
+            </div>
+
+            <div class="cp-section">
+                <h4>Content Checklist</h4>
+                <p class="field-hint" id="cpChecklistProgress" style="margin:-4px 0 10px;">0 of 0 received</p>
+                <div id="cpChecklistList"><p class="empty-note">No checklist items yet.</p></div>
+                <div class="quote-item-controls" style="margin-top:10px;">
+                    <input type="text" id="cpChecklistNewItem" placeholder="Add checklist item…" maxlength="150" style="flex:2;min-width:160px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid var(--border);color:var(--text-hi);" />
+                    <button type="button" class="btn-logout" id="cpChecklistAddBtn">+ Add Item</button>
+                    <button type="button" class="btn-logout" id="cpChecklistStarterBtn">+ Add Standard Checklist</button>
+                </div>
+            </div>
+
+            <div class="cp-section">
+                <h4>Tasks</h4>
+                <div id="cpTasksList"><p class="empty-note">No tasks yet.</p></div>
+                <div class="quote-item-controls" style="margin-top:10px;">
+                    <input type="text" id="cpTaskNewTitle" placeholder="Add a task…" maxlength="150" style="flex:2;min-width:160px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid var(--border);color:var(--text-hi);" />
+                    <input type="date" id="cpTaskNewDue" style="max-width:160px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid var(--border);color:var(--text-hi);" />
+                    <button type="button" class="btn-logout" id="cpTaskAddBtn">+ Add Task</button>
+                </div>
+            </div>
+
+            <div class="cp-section">
+                <h4>Content Folder</h4>
+                <div class="field">
+                    <label for="cpContentFolderUrl">Shared Folder URL (Google Drive / Dropbox / OneDrive, optional)</label>
+                    <input type="url" id="cpContentFolderUrl" maxlength="500" placeholder="https://…" />
+                </div>
+                <div id="cpContentFolderLinkRow" style="display:none;">
+                    <span class="cp-quick-link" id="cpOpenContentFolder">Open shared folder →</span>
+                </div>
+            </div>
+
+            <div class="cp-section">
+                <h4>Internal Notes</h4>
+                <p class="field-hint" style="margin:-4px 0 10px;">Admin only — never shown publicly, in quotes, or anywhere client-facing. Never store passwords or credentials here.</p>
+                <textarea id="cpInternalNotes" rows="4" maxlength="6000"></textarea>
+            </div>
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:6px;">
+                <button type="button" class="btn-primary" id="cpSaveBtn" style="flex:1;justify-content:center;">Save Project</button>
+                <button type="button" class="btn-logout" id="cpDeleteBtn" style="color:#ff7070;border-color:rgba(255,80,80,.3);">Delete</button>
+            </div>
+            <div id="cpFormMsg" class="form-msg" role="status" aria-live="polite"></div>
         </div>
     </div>
 

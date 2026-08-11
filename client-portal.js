@@ -92,6 +92,13 @@ async function runPortal() {
         cards.forEach(c => { document.getElementById(c).style.display = c === id ? 'block' : 'none'; });
     }
 
+    /* Global Escape-key close for the read-only Project/Invoice/Receipt
+       modals (Milestone 24 accessibility audit). */
+    document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        document.querySelectorAll('.lead-modal-overlay.active').forEach(overlay => overlay.classList.remove('active'));
+    });
+
     /* Capture ?invite=TOKEN once, persist it (the client may need to
        leave the tab to check email for verification and come back),
        and never let the value flow anywhere except the one redemption

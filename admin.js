@@ -268,6 +268,15 @@ async function runAdmin() {
 
     document.getElementById('logoutBtn').addEventListener('click', () => authMod.signOut(auth));
 
+    /* Global Escape-key close for every modal overlay (Milestone 24
+       accessibility audit) — every admin modal shares the
+       .lead-modal-overlay class, so one listener covers all of them
+       without touching any individual modal's open/close logic. */
+    document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        document.querySelectorAll('.lead-modal-overlay.active').forEach(overlay => overlay.classList.remove('active'));
+    });
+
     /* ============================================================
        REVIEWS (pending / approved / rejected tabs)
        ============================================================ */

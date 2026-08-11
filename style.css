@@ -39,7 +39,14 @@
 
 /* ===== RESET ===== */
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-html { scroll-behavior: smooth; }
+/* overflow-x:hidden on BOTH html and body — body alone doesn't contain
+   position:fixed elements (e.g. .mobile-menu below), which are clipped
+   relative to the viewport/initial containing block, not body. Without
+   the html-level guard too, a fixed off-canvas panel positioned via
+   right:-100% could still inflate document.documentElement.scrollWidth
+   and cause real horizontal scroll on some pages/devices even though
+   body itself stayed correctly clipped (Milestone 24 mobile audit). */
+html { scroll-behavior: smooth; overflow-x: hidden; }
 body {
     font-family: var(--f-body);
     background: var(--bg-base);

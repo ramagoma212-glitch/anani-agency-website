@@ -195,21 +195,43 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
-    /* ── Client Portal invites (Milestone 22) ──
+    /* ── Client Portal invites (Milestone 22; hardened post-22) ──
        inviteId is itself the unguessable crypto-random token — the
        ONLY thing the invite URL ever contains (never a clientId,
-       phone number, or any other identifier). Reading a single invite
-       by its exact, unguessable ID is required for a Cloud-Function-
-       free registration flow (no Cloud Functions this milestone) and
-       is the same trust model as any secret-link invite/reset flow —
-       listing the collection is never allowed to anyone but admin, so
-       there is no way to enumerate or browse invites. The narrow
-       client update path lets a client mark ONLY their own
-       just-redeemed invite as used; clientId/email/createdAt/
-       expiresAt can never be changed by a client, only
-       active/redeemedAt/redeemedBy. */
+       phone number, or any other identifier). EARLIER VERSION of this
+       rule allowed `allow get: if true` reasoning that the token
+       itself was the secret — that was wrong: a Firestore read
+       returns the WHOLE document (clientId, email, active,
+       createdAt, expiresAt, redeemedAt, redeemedBy), and a leaked or
+       forwarded invite URL (email client link-preview bots, browser
+       history, a screenshot, a shared inbox) would hand all of that
+       to anyone, not just the intended client. The read is now
+       gated behind the SAME identity check as everything else in this
+       file: signed in, verified email, and that verified email
+       matching the invite's own email — so only the person the invite
+       was actually addressed to (proven via Firebase Auth, not a URL
+       parameter) can ever read it, and a wrong authenticated email
+       gets a plain permission-denied without learning anything about
+       the invite (Part "final client portal security hardening").
+       This means client-portal.js must never fetch this document for
+       an unauthenticated visitor — register/verify/sign-in happens
+       FIRST, using only the locally-held token, and the invite is
+       only fetched afterwards. Listing the collection is never
+       allowed to anyone but admin, so there is no way to enumerate or
+       browse invites either way. The narrow client update path lets a
+       client mark ONLY their own just-redeemed invite as used;
+       clientId/email/createdAt/expiresAt can never be changed by a
+       client, only active/redeemedAt/redeemedBy. */
     match /portalInvites/{inviteId} {
-      allow get: if true;
+      allow get: if isAdmin() || (
+          isSignedIn()
+          && request.auth.token.email_verified == true
+          && resource.data.active == true
+          && resource.data.expiresAt > request.time
+          && resource.data.email is string
+          && request.auth.token.email is string
+          && resource.data.email.lower() == request.auth.token.email.lower()
+      );
       allow list: if isAdmin();
       allow create, delete: if isAdmin();
       allow update: if isAdmin() || (

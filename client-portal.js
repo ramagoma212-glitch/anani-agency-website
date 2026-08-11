@@ -1,5 +1,6 @@
 /* ============================================================
-   RM Digitals — Client Portal logic (Milestone 22)
+   RM Digitals — Client Portal logic (Milestone 22, invite flow
+   hardened post-22)
    ============================================================
    Security model: a signed-in user only ever sees data reachable
    through their OWN clientAccounts/{uid} mapping — never a value
@@ -7,6 +8,14 @@
    the resolved clientId (rules are not filters — see
    firebase/README.md and firestore.rules for the matching server
    side of every rule referenced here).
+
+   Invite handling: the ?invite= token is held locally (this tab
+   only, see PENDING_INVITE_KEY) and is NEVER used to fetch
+   portalInvites/{token} until the visitor is signed in AND their
+   email is verified — firestore.rules itself now enforces that same
+   gate server-side (an anonymous or wrong-email get() is denied
+   outright, returning nothing about the invite), so this is
+   defense-in-depth, not the actual boundary. See redeemInvite().
    ============================================================ */
 
 import { isFirebaseConfigured } from './firebase-config.js';
@@ -78,11 +87,17 @@ async function runPortal() {
     const auth = authMod.getAuth(app);
     const db = fsMod.getFirestore(app);
 
+    /* sessionStorage, not localStorage — the token is never persisted
+       beyond this browser tab's lifetime ("session-only handling" per
+       the hardening brief). This still covers the real use case (client
+       leaves THIS tab open to check email for verification, comes back
+       to it) — if they instead close the tab and click the invite link
+       again later, the URL still carries the token and re-seeds this. */
     function pendingInviteToken() {
-        try { return localStorage.getItem(PENDING_INVITE_KEY); } catch { return null; }
+        try { return sessionStorage.getItem(PENDING_INVITE_KEY); } catch { return null; }
     }
     function clearPendingInviteToken() {
-        try { localStorage.removeItem(PENDING_INVITE_KEY); } catch { /* ignore */ }
+        try { sessionStorage.removeItem(PENDING_INVITE_KEY); } catch { /* ignore */ }
     }
 
     const cards = ['signInCard', 'registerCard', 'forgotCard', 'verifyCard', 'noAccessCard'];
@@ -99,14 +114,16 @@ async function runPortal() {
         document.querySelectorAll('.lead-modal-overlay.active').forEach(overlay => overlay.classList.remove('active'));
     });
 
-    /* Capture ?invite=TOKEN once, persist it (the client may need to
-       leave the tab to check email for verification and come back),
-       and never let the value flow anywhere except the one redemption
-       call below — it is never used as an identifier or trusted for
-       authorization by itself. */
+    /* Capture ?invite=TOKEN once, hold it for this tab only (see
+       pendingInviteToken() above), and never let the value flow
+       anywhere except the one redemption call below — it is never used
+       as an identifier or trusted for authorization by itself, never
+       logged, and this page never fetches the invite document for an
+       unauthenticated visitor (see redeemInvite()) — only the token
+       itself is held locally until sign-in + email verification. */
     const urlToken = new URLSearchParams(window.location.search).get('invite');
     if (urlToken) {
-        try { localStorage.setItem(PENDING_INVITE_KEY, urlToken); } catch { /* ignore storage errors */ }
+        try { sessionStorage.setItem(PENDING_INVITE_KEY, urlToken); } catch { /* ignore storage errors */ }
         switchAuthCard('registerCard');
     }
 
@@ -192,25 +209,33 @@ async function runPortal() {
     document.getElementById('portalSignOutBtn').addEventListener('click', () => authMod.signOut(auth));
 
     /* ── Invite redemption ──
-       Everything here is re-validated server-side by firestore.rules
-       regardless of what this function does — this is UX (clear
-       messaging, avoiding a doomed write) not the actual security
-       boundary. */
+       Only ever called for a signed-in, verified user (checked below,
+       and re-checked server-side). firestore.rules now gates the read
+       itself — it only succeeds when this user's verified email
+       matches the invite's email AND the invite is active AND
+       unexpired, all three checked server-side (see the "hardened
+       post-22" note in firestore.rules). That means a denied read is
+       the EXPECTED, correct outcome for a wrong email, an expired
+       invite, or an already-used one — and this function deliberately
+       cannot tell those apart anymore (neither can the message it
+       returns), because distinguishing them would itself leak which
+       reason applied to whoever's asking. Nothing here trusts the
+       client — every write below is independently re-validated by its
+       own rule regardless of what this function does. */
     async function redeemInvite(token) {
         const user = auth.currentUser;
         if (!user || !user.emailVerified) return { ok: false, reason: 'not_verified' };
+
         let inviteSnap;
         try {
             inviteSnap = await fsMod.getDoc(fsMod.doc(db, 'portalInvites', token));
-        } catch (err) {
-            return { ok: false, reason: 'read_failed', message: err.message };
+        } catch {
+            // Deliberately no error detail captured or logged here — see
+            // the comment above. One uniform outcome for every denial.
+            return { ok: false, reason: 'not_eligible' };
         }
-        if (!inviteSnap.exists()) return { ok: false, reason: 'invalid' };
+        if (!inviteSnap.exists()) return { ok: false, reason: 'not_eligible' };
         const invite = inviteSnap.data();
-        if (!invite.active) return { ok: false, reason: 'used' };
-        const expiresAt = invite.expiresAt && invite.expiresAt.toDate ? invite.expiresAt.toDate() : new Date(invite.expiresAt);
-        if (expiresAt.getTime() < Date.now()) return { ok: false, reason: 'expired' };
-        if ((invite.email || '').toLowerCase() !== (user.email || '').toLowerCase()) return { ok: false, reason: 'email_mismatch' };
 
         try {
             await fsMod.setDoc(fsMod.doc(db, 'clientAccounts', user.uid), {
@@ -220,8 +245,8 @@ async function runPortal() {
                 createdAt: fsMod.serverTimestamp(),
                 inviteId: token
             });
-        } catch (err) {
-            return { ok: false, reason: 'create_failed', message: err.message };
+        } catch {
+            return { ok: false, reason: 'create_failed' };
         }
         try {
             await fsMod.updateDoc(fsMod.doc(db, 'portalInvites', token), {
@@ -229,7 +254,8 @@ async function runPortal() {
             });
         } catch (err) {
             // Non-fatal — the account mapping above already succeeded,
-            // which is the part that actually matters for access.
+            // which is the part that actually matters for access. Logs
+            // only the error message, never the token itself.
             console.warn('Could not mark invite as redeemed:', err.message);
         }
         return { ok: true, clientId: invite.clientId };
@@ -268,13 +294,15 @@ async function runPortal() {
                     enterPortal(result.clientId, user);
                     return;
                 }
+                /* One deliberately uniform message covers "not_eligible"
+                   whether the real cause was a wrong email, an expired
+                   invite, or an already-used one — the server-side rule
+                   can no longer be read in any of those cases, so this
+                   page has no way to tell them apart, and intentionally
+                   doesn't try to (see redeemInvite()'s comment). */
                 const reasonMessages = {
                     not_verified: 'Please verify your email first.',
-                    invalid: 'This invite link is not valid. Please contact RM Digitals for a new one.',
-                    used: 'This invite link has already been used. If this seems wrong, please contact RM Digitals.',
-                    expired: 'This invite link has expired. Please contact RM Digitals for a new one.',
-                    email_mismatch: "This invite was sent to a different email address than the one you're signed in with.",
-                    read_failed: 'We could not check your invite right now. Please try again shortly.',
+                    not_eligible: "We couldn't find an active invite for your account. Please make sure you're signed in with the exact email address RM Digitals sent the invite to, and that the link hasn't expired or already been used. Contact RM Digitals if you need a new invite.",
                     create_failed: 'We could not activate your account right now. Please try again shortly.'
                 };
                 showNoAccess(reasonMessages[result.reason] || 'We could not link your account. Please contact RM Digitals.');

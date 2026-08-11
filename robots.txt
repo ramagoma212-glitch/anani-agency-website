@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin.html
 Disallow: /client-portal.html
 
-Sitemap: https://ramagoma212-glitch.github.io/anani-agency-website/sitemap.xml
+Sitemap: https://rmdigitals.co.za/sitemap.xml

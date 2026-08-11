@@ -173,10 +173,10 @@ const REVIEW_REQUEST_LABELS = {
     not_requested: 'Not Requested', requested: 'Requested', submitted: 'Submitted / Pending Approval',
     approved: 'Approved', declined: 'Submitted / Not Approved'
 };
-/* Current live production URL (custom domain intentionally deferred —
-   see Milestones 15/16). Update this constant, nowhere else, if/when
-   the site moves to rmdigitals.co.za. */
-const PUBLIC_SITE_URL = 'https://ramagoma212-glitch.github.io/anani-agency-website/';
+/* Current live production URL — rmdigitals.co.za went live at
+   Milestone 9 (custom domain migration). Update this constant, nowhere
+   else, if the production domain ever changes again. */
+const PUBLIC_SITE_URL = 'https://rmdigitals.co.za/';
 function reviewRequestUrl() { return PUBLIC_SITE_URL + '?review=1#testimonials'; }
 function reviewRequestMessage(name) {
     return `Hi ${name || ''}, thank you for trusting RM Digitals with your website project. We'd appreciate hearing about your experience — your feedback helps us improve and helps other businesses understand what it's like to work with us. You can share it here: ${reviewRequestUrl()}`;

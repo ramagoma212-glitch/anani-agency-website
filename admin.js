@@ -3462,6 +3462,8 @@ async function runAdmin() {
             msg.textContent = '✅ Invoice saved.';
             msg.className = 'form-msg success';
             await loadInvoices();
+            const savedInvoice = allInvoices.find(i => i.id === invoiceId);
+            if (savedInvoice) await syncClientPortalInvoice(savedInvoice);
             if (andPreview) {
                 document.getElementById('invoiceBuilderOverlay').classList.remove('active');
                 openInvoicePreview(invoiceId);
@@ -3615,6 +3617,8 @@ async function runAdmin() {
         try {
             await fsMod.updateDoc(fsMod.doc(db, 'invoices', activeInvoiceId), update);
             await loadInvoices();
+            const updatedInvoice = allInvoices.find(i => i.id === activeInvoiceId);
+            if (updatedInvoice) await syncClientPortalInvoice(updatedInvoice);
             openInvoicePreview(activeInvoiceId);
         } catch (err) {
             alert('Could not update invoice status: ' + err.message);
@@ -3636,6 +3640,10 @@ async function runAdmin() {
                 }
             }
             await fsMod.deleteDoc(fsMod.doc(db, 'invoices', activeInvoiceId));
+            // The mirror's source of truth is gone — delete it too, rather
+            // than leaving a stale clientPortalInvoices document behind.
+            try { await fsMod.deleteDoc(fsMod.doc(db, 'clientPortalInvoices', activeInvoiceId)); }
+            catch (err) { console.warn('Could not remove client portal invoice mirror:', err.message); }
             document.getElementById('invoicePreviewOverlay').classList.remove('active');
             activeInvoiceId = null;
             loadInvoices();
@@ -3707,6 +3715,7 @@ async function runAdmin() {
             await fsMod.updateDoc(fsMod.doc(db, 'clientProjects', project.id), { payments: updatedPayments, amountPaid, balance, paymentStatus, updatedAt: fsMod.serverTimestamp() });
             await loadClientProjects();
             syncOpenProjectPaymentsBuffer(project.id, updatedPayments);
+            await syncClientPortalInvoice(invoice); // paid/outstanding changed
             document.getElementById('invoicePaymentOverlay').classList.remove('active');
             openInvoicePreview(invoice.id);
         } catch (err) {
@@ -3732,6 +3741,7 @@ async function runAdmin() {
             await fsMod.updateDoc(fsMod.doc(db, 'clientProjects', project.id), { payments: updatedPayments, updatedAt: fsMod.serverTimestamp() });
             await loadClientProjects();
             syncOpenProjectPaymentsBuffer(project.id, updatedPayments);
+            await syncClientPortalInvoice(invoice); // paid/outstanding changed
             openInvoicePreview(invoice.id);
         } catch (err) {
             alert('Could not allocate payment: ' + err.message);
@@ -3811,6 +3821,8 @@ async function runAdmin() {
             const docRef = fsMod.doc(fsMod.collection(db, 'receipts'));
             await fsMod.setDoc(docRef, record);
             await loadReceipts();
+            const savedReceipt = allReceipts.find(r => r.id === docRef.id);
+            if (savedReceipt) await syncClientPortalReceipt(savedReceipt);
             openReceiptPreview(docRef.id);
         } catch (err) {
             alert('Could not create receipt: ' + err.message);
@@ -3847,6 +3859,8 @@ async function runAdmin() {
             const docRef = fsMod.doc(fsMod.collection(db, 'receipts'));
             await fsMod.setDoc(docRef, record);
             await loadReceipts();
+            const savedReceipt = allReceipts.find(r => r.id === docRef.id);
+            if (savedReceipt) await syncClientPortalReceipt(savedReceipt);
             openReceiptPreview(docRef.id);
         } catch (err) {
             alert('Could not create receipt: ' + err.message);
@@ -3885,6 +3899,8 @@ async function runAdmin() {
         try {
             await fsMod.updateDoc(fsMod.doc(db, 'receipts', activeReceiptId), { voided: true, voidedAt: fsMod.serverTimestamp(), voidReason: reason });
             await loadReceipts();
+            const voidedReceipt = allReceipts.find(r => r.id === activeReceiptId);
+            if (voidedReceipt) await syncClientPortalReceipt(voidedReceipt);
             openReceiptPreview(activeReceiptId);
         } catch (err) {
             alert('Could not void receipt: ' + err.message);
@@ -4179,6 +4195,113 @@ async function runAdmin() {
             alert('Note: this project could not be updated in the Client Portal (' + err.message + '). The private project itself was saved successfully — please try saving again, or check the Client Portal manually.');
         }
     }
+
+    /* ── Client Portal financial mirrors (post-22 privacy hardening) ──
+       The ONLY two places that write clientPortalInvoices/
+       clientPortalReceipts. Every field is named explicitly — NEVER
+       `{ ...invoice }` / `{ ...receipt }` — so a future private field
+       added to the authoritative collections can never leak into a
+       client's view just by existing; it has to be deliberately added
+       here too. Paid/outstanding/displayStatus are computed here using
+       the SAME functions the admin invoice list uses
+       (computeInvoiceTotals/displayInvoiceStatus), which read the
+       linked project's payments — something the portal itself has no
+       access to, so this is also strictly more accurate than the old
+       receipts-only approximation client-portal.js used to compute
+       client-side. A sync failure never touches the private document —
+       it only reports the problem, same contract as
+       syncClientPortalProject() above. */
+    async function syncClientPortalInvoice(invoice) {
+        if (!invoice) return;
+        const mirrorRef = fsMod.doc(db, 'clientPortalInvoices', invoice.id);
+        try {
+            const { paid, outstanding } = computeInvoiceTotals(invoice);
+            const disp = displayInvoiceStatus(invoice);
+            await fsMod.setDoc(mirrorRef, {
+                clientId: invoice.clientId,
+                invoiceNumber: invoice.invoiceNumber,
+                invoiceType: invoice.invoiceType || 'standard',
+                title: invoice.title || '',
+                description: invoice.description || '',
+                issueDate: invoice.issueDate || null,
+                dueDate: invoice.dueDate || null,
+                items: (invoice.items || []).map(it => ({
+                    description: (it.description || '').toString(),
+                    quantity: Math.max(0, Number(it.quantity) || 0),
+                    unitPrice: Math.max(0, Number(it.unitPrice) || 0),
+                    lineTotal: Math.max(0, Number(it.lineTotal) || 0)
+                })),
+                subtotal: Math.max(0, Number(invoice.subtotal) || 0),
+                discountType: invoice.discountType || 'none',
+                discountValue: Math.max(0, Number(invoice.discountValue) || 0),
+                discountAmount: Math.max(0, Number(invoice.discountAmount) || 0),
+                total: Math.max(0, Number(invoice.total) || 0),
+                paid: Math.max(0, paid),
+                outstanding,
+                displayStatus: disp,
+                cancelled: invoice.workflowStatus === 'cancelled',
+                paymentArrangement: invoice.paymentArrangement || '',
+                paymentInstructions: invoice.paymentInstructions || '',
+                portalVisible: invoice.workflowStatus !== 'draft',
+                createdAt: invoice.createdAt || null,
+                updatedAt: fsMod.serverTimestamp()
+            });
+        } catch (err) {
+            console.warn('Could not sync client portal invoice:', err.message);
+            alert('Note: this invoice could not be updated in the Client Portal (' + err.message + '). The private invoice itself was saved successfully — please try again, or use "Rebuild Client Portal Financial Data" in Data & Backup.');
+        }
+    }
+
+    /* Deliberately excludes paymentReference/notes/paymentId/createdBy —
+       none of those are shown anywhere in the client-facing receipt
+       view today, so none of them are mirrored (Part "field leakage
+       test" — only genuinely-used fields ever cross into this
+       collection). */
+    async function syncClientPortalReceipt(receipt) {
+        if (!receipt) return;
+        const mirrorRef = fsMod.doc(db, 'clientPortalReceipts', receipt.id);
+        try {
+            await fsMod.setDoc(mirrorRef, {
+                clientId: receipt.clientId,
+                receiptNumber: receipt.receiptNumber,
+                invoiceNumber: receipt.invoiceNumber || null,
+                amount: Math.max(0, Number(receipt.amount) || 0),
+                paymentDate: receipt.paymentDate || null,
+                paymentMethod: receipt.paymentMethod || '',
+                description: receipt.description || '',
+                voided: !!receipt.voided,
+                portalVisible: true,
+                createdAt: receipt.createdAt || null,
+                updatedAt: fsMod.serverTimestamp()
+            });
+        } catch (err) {
+            console.warn('Could not sync client portal receipt:', err.message);
+            alert('Note: this receipt could not be updated in the Client Portal (' + err.message + '). The private receipt itself was saved successfully — please try again, or use "Rebuild Client Portal Financial Data" in Data & Backup.');
+        }
+    }
+
+    /* Reads the private invoices/receipts as admin and re-runs the exact
+       same sync helpers above for every one of them — never alters the
+       original financial documents. Exists for: records created before
+       this mirror architecture existed, and recovering from any
+       individual sync failure reported earlier. */
+    document.getElementById('rebuildPortalFinancialBtn').addEventListener('click', async () => {
+        if (!confirm(`Rebuild Client Portal financial data for all ${allInvoices.length} invoice(s) and ${allReceipts.length} receipt(s)? This only updates the client-facing mirrors — your private invoice/receipt records are never changed.`)) return;
+        const msg = document.getElementById('rebuildPortalFinancialMsg');
+        msg.textContent = 'Rebuilding…';
+        msg.className = 'form-msg';
+        let invoiceCount = 0, receiptCount = 0;
+        for (const inv of allInvoices) {
+            await syncClientPortalInvoice(inv);
+            invoiceCount++;
+        }
+        for (const r of allReceipts) {
+            await syncClientPortalReceipt(r);
+            receiptCount++;
+        }
+        msg.textContent = `✅ Rebuilt ${invoiceCount} invoice mirror(s) and ${receiptCount} receipt mirror(s).`;
+        msg.className = 'form-msg success';
+    });
 
     /* ── Portal Access (Client Profile section) ── */
     async function renderPortalAccessSection(client) {
@@ -4645,6 +4768,15 @@ async function runAdmin() {
         container.innerHTML = '<p class="empty-note">Checking…</p>';
         let reviews = [];
         try { reviews = await getReviewsForExport(); } catch { /* review-link checks below just get skipped */ }
+        let portalInvoiceIds = new Set(), portalReceiptIds = new Set();
+        try {
+            const [invSnap, recSnap] = await Promise.all([
+                fsMod.getDocs(fsMod.collection(db, 'clientPortalInvoices')),
+                fsMod.getDocs(fsMod.collection(db, 'clientPortalReceipts'))
+            ]);
+            portalInvoiceIds = new Set(invSnap.docs.map(d => d.id));
+            portalReceiptIds = new Set(recSnap.docs.map(d => d.id));
+        } catch { /* portal-mirror checks below just get skipped */ }
 
         const issues = [];
         const clientIds = new Set(allClients.map(c => c.id));
@@ -4671,10 +4803,12 @@ async function runAdmin() {
             if (!inv.clientId || !clientIds.has(inv.clientId)) issues.push({ text: `Invoice ${inv.invoiceNumber} has no matching client.`, action: () => openInvoicePreview(inv.id) });
             if (inv.clientProjectId && !allClientProjects.some(p => p.id === inv.clientProjectId)) issues.push({ text: `Invoice ${inv.invoiceNumber} references a project that no longer exists.`, action: () => openInvoicePreview(inv.id) });
             if (Number(inv.total) < 0) issues.push({ text: `Invoice ${inv.invoiceNumber} has a negative total.`, action: () => openInvoicePreview(inv.id) });
+            if (inv.workflowStatus !== 'draft' && !portalInvoiceIds.has(inv.id)) issues.push({ text: `Invoice ${inv.invoiceNumber} is missing its Client Portal mirror — use "Rebuild Client Portal Financial Data" in Data & Backup.`, action: () => openInvoicePreview(inv.id) });
         });
         allReceipts.forEach(r => {
             if (r.invoiceId && !invoiceIds.has(r.invoiceId)) issues.push({ text: `Receipt ${r.receiptNumber} references an invoice that no longer exists.`, action: () => openReceiptPreview(r.id) });
             if (Number(r.amount) < 0) issues.push({ text: `Receipt ${r.receiptNumber} has a negative amount.`, action: () => openReceiptPreview(r.id) });
+            if (!portalReceiptIds.has(r.id)) issues.push({ text: `Receipt ${r.receiptNumber} is missing its Client Portal mirror — use "Rebuild Client Portal Financial Data" in Data & Backup.`, action: () => openReceiptPreview(r.id) });
         });
 
         function findDuplicates(list, keyFn, label) {

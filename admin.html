@@ -1064,6 +1064,11 @@
             </div>
             <div id="restoreResult" style="font-size:.85rem;margin-bottom:22px;"></div>
 
+            <h4 style="font-size:.85rem;margin-bottom:10px;">Client Portal Financial Data</h4>
+            <p class="field-hint" style="margin-bottom:10px;">Rebuilds the sanitised clientPortalInvoices/clientPortalReceipts mirrors clients actually read from — useful after this feature was first added, or if a sync ever failed. Never touches your private invoices/receipts.</p>
+            <button type="button" class="btn-logout" id="rebuildPortalFinancialBtn" style="margin-bottom:8px;">Rebuild Client Portal Financial Data</button>
+            <div id="rebuildPortalFinancialMsg" class="form-msg" role="status" aria-live="polite" style="margin-bottom:22px;"></div>
+
             <h4 style="font-size:.85rem;margin-bottom:10px;">Data Integrity Check</h4>
             <button type="button" class="btn-logout" id="runIntegrityCheckBtn" style="margin-bottom:12px;">Run Data Integrity Check</button>
             <div id="integrityResults"><p class="empty-note">Not run yet.</p></div>

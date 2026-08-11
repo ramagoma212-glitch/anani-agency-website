@@ -330,9 +330,14 @@ async function runPortal() {
         document.getElementById('portalPanel').style.display = 'block';
         document.getElementById('whoName').textContent = user.email || '';
 
+        // Paid/outstanding/displayStatus now come precomputed on the
+        // invoice mirror itself (admin.js computes them from the
+        // authoritative payments data this page can't see) — invoices no
+        // longer need receipts loaded first, so all three load in parallel.
         await Promise.all([
             loadPortalProjects(clientId),
-            loadPortalReceipts(clientId).then(() => loadPortalInvoices(clientId))
+            loadPortalInvoices(clientId),
+            loadPortalReceipts(clientId)
         ]);
     }
 
@@ -340,7 +345,16 @@ async function runPortal() {
         const list = document.getElementById('portalProjectsList');
         list.innerHTML = '<p class="empty-note">Loading…</p>';
         try {
-            const q = fsMod.query(fsMod.collection(db, 'clientPortalProjects'), fsMod.where('clientId', '==', clientId));
+            // Both constraints are required, not just clientId — the rule
+            // also checks portalVisible, and Firestore rejects an entire
+            // list query outright if it can't prove every possible match
+            // satisfies the rule (rules are not filters; see the matching
+            // note in firestore.rules).
+            const q = fsMod.query(
+                fsMod.collection(db, 'clientPortalProjects'),
+                fsMod.where('clientId', '==', clientId),
+                fsMod.where('portalVisible', '==', true)
+            );
             const snap = await fsMod.getDocs(q);
             activeProjects = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         } catch (err) {
@@ -426,19 +440,22 @@ async function runPortal() {
     document.getElementById('projectDetailClose').addEventListener('click', () => document.getElementById('projectDetailOverlay').classList.remove('active'));
     document.getElementById('projectDetailOverlay').addEventListener('click', (e) => { if (e.target.id === 'projectDetailOverlay') document.getElementById('projectDetailOverlay').classList.remove('active'); });
 
-    /* ── Receipts (loaded first — invoices derive "Paid" from these) ──
-       The portal has no access to clientProjects (by design — see
-       firestore.rules), so it can't read raw payment records the way
-       admin.js does. Receipts are the client-facing proof-of-payment
-       record, already scoped to this client, so they're the honest,
-       secure source for what a client sees as "paid" here — an
-       invoice payment the admin hasn't yet issued a receipt for
-       simply won't show as paid until it does. */
+    /* ── Receipts ──
+       Reads only clientPortalReceipts (a sanitised, admin-synced
+       mirror of the private receipts collection) — never the private
+       collection itself. See firestore.rules and
+       syncClientPortalReceipt() in admin.js for the other half of this
+       (post-22 financial privacy hardening). */
     async function loadPortalReceipts(clientId) {
         const list = document.getElementById('portalReceiptsList');
         list.innerHTML = '<p class="empty-note">Loading…</p>';
         try {
-            const q = fsMod.query(fsMod.collection(db, 'receipts'), fsMod.where('clientId', '==', clientId));
+            // Both constraints required — see the note in loadPortalProjects().
+            const q = fsMod.query(
+                fsMod.collection(db, 'clientPortalReceipts'),
+                fsMod.where('clientId', '==', clientId),
+                fsMod.where('portalVisible', '==', true)
+            );
             const snap = await fsMod.getDocs(q);
             activeReceipts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         } catch (err) {
@@ -486,36 +503,25 @@ async function runPortal() {
     document.getElementById('receiptPreviewOverlay').addEventListener('click', (e) => { if (e.target.id === 'receiptPreviewOverlay') document.getElementById('receiptPreviewOverlay').classList.remove('active'); });
     document.getElementById('rpPrintBtn').addEventListener('click', () => window.print());
 
-    function computePortalInvoicePaid(invoice) {
-        return activeReceipts
-            .filter(r => r.invoiceId === invoice.id && !r.voided)
-            .reduce((sum, r) => sum + Math.max(0, Number(r.amount) || 0), 0);
-    }
-    function portalInvoiceStatus(invoice, paid) {
-        if (invoice.workflowStatus === 'cancelled') return 'cancelled';
-        if (invoice.workflowStatus === 'draft') return 'draft';
-        const total = Math.max(0, Number(invoice.total) || 0);
-        const outstanding = total - paid;
-        if (paid > total + 0.001) return 'overpaid';
-        if (outstanding <= 0.001) return 'paid';
-        if (invoice.workflowStatus === 'sent' && invoice.dueDate && outstanding > 0.001) {
-            const due = invoice.dueDate.toDate ? invoice.dueDate.toDate() : new Date(invoice.dueDate);
-            const startOfToday = new Date(); startOfToday.setHours(0, 0, 0, 0);
-            if (due.getTime() < startOfToday.getTime()) return 'overdue';
-        }
-        if (paid > 0.001) return 'part_paid';
-        return 'sent';
-    }
-
+    /* ── Invoices ──
+       Reads only clientPortalInvoices — never the private invoices
+       collection. paid/outstanding/displayStatus arrive precomputed on
+       the mirror (admin.js computes them from the authoritative
+       payments data this page has no access to) — this page just
+       displays them, it never recomputes them. Draft invoices are
+       simply absent here: admin.js only ever syncs portalVisible:true
+       once an invoice leaves draft status. */
     async function loadPortalInvoices(clientId) {
         const list = document.getElementById('portalInvoicesList');
         list.innerHTML = '<p class="empty-note">Loading…</p>';
         try {
-            const q = fsMod.query(fsMod.collection(db, 'invoices'), fsMod.where('clientId', '==', clientId));
+            const q = fsMod.query(
+                fsMod.collection(db, 'clientPortalInvoices'),
+                fsMod.where('clientId', '==', clientId),
+                fsMod.where('portalVisible', '==', true)
+            );
             const snap = await fsMod.getDocs(q);
-            // Draft invoices are internal working documents — never shown to
-            // the client until the admin marks them Sent.
-            activeInvoices = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(inv => inv.workflowStatus !== 'draft');
+            activeInvoices = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         } catch (err) {
             list.innerHTML = `<p class="empty-note">Could not load your invoices: ${escapeHtml(err.message)}</p>`;
             return;
@@ -530,8 +536,7 @@ async function runPortal() {
                 return bt - at;
             })
             .forEach(inv => {
-                const paid = computePortalInvoicePaid(inv);
-                const disp = portalInvoiceStatus(inv, paid);
+                const disp = inv.cancelled ? 'cancelled' : (inv.displayStatus || 'sent');
                 const row = document.createElement('div');
                 row.className = 'portal-row';
                 row.tabIndex = 0;
@@ -551,10 +556,10 @@ async function runPortal() {
     }
 
     function openInvoicePreview(invoice) {
-        const paid = computePortalInvoicePaid(invoice);
         const total = Math.max(0, Number(invoice.total) || 0);
-        const outstanding = total - paid;
-        const disp = portalInvoiceStatus(invoice, paid);
+        const paid = Math.max(0, Number(invoice.paid) || 0);
+        const outstanding = Number(invoice.outstanding) || 0;
+        const disp = invoice.cancelled ? 'cancelled' : (invoice.displayStatus || 'sent');
 
         const badge = document.getElementById('ipStatusBadge');
         badge.textContent = INVOICE_DISPLAY_LABELS[disp] || disp;

@@ -144,23 +144,24 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
 
-    /* ── Invoices & Receipts (Milestone 20; extended in Milestone 22) ──
-       Private financial records. Admin keeps full read/write. A
-       mapped, active portal client may additionally READ ONLY their
-       own records (resource.data.clientId must equal their mapped
-       clientId) — write access is never introduced for clients. The
-       portal's own queries must still filter on clientId themselves
-       (rules are not filters — an unconstrained list query would be
-       rejected even though every result would individually pass). */
+    /* ── Invoices & Receipts (Milestone 20; client access REMOVED
+       post-22 financial privacy hardening) ──
+       Private financial records — admin only, full stop. EARLIER
+       VERSION of this rule let a mapped client read their own
+       invoice/receipt documents directly; that was wrong for the same
+       reason clientProjects was never given to clients in the first
+       place — a Firestore read returns the WHOLE document, and these
+       documents carry fields no client should ever see (createdBy,
+       quoteId, clientProjectId, paymentId, internal notes, other
+       bookkeeping metadata), even though the portal UI only ever
+       rendered a handful of them. Clients now only ever see the
+       sanitised clientPortalInvoices/clientPortalReceipts mirrors
+       below — never this collection directly. */
     match /invoices/{invoiceId} {
-      allow read: if isAdmin()
-          || (isActiveClientAccount() && resource.data.clientId == myClientId());
-      allow write: if isAdmin();
+      allow read, write: if isAdmin();
     }
     match /receipts/{receiptId} {
-      allow read: if isAdmin()
-          || (isActiveClientAccount() && resource.data.clientId == myClientId());
-      allow write: if isAdmin();
+      allow read, write: if isAdmin();
     }
 
     /* ── Client Portal accounts (Milestone 22) ──
@@ -256,9 +257,42 @@ service cloud.firestore {
        true (belt-and-braces alongside the admin only syncing when the
        private project's portalEnabled flag is on) and the requester's
        mapped clientId must match the document's clientId — never a
-       client-supplied value. As with invoices/receipts, the portal's
-       own query must filter on clientId itself. */
+       client-supplied value. IMPORTANT for whoever writes the portal
+       query: because this rule checks portalVisible as well as
+       clientId, the query itself MUST include
+       where('portalVisible','==',true) too — Firestore rejects an
+       entire list query outright (not a silent partial filter) if it
+       can't prove every possible match satisfies the rule, so a query
+       constrained on clientId alone would fail the moment this client
+       has even one portalVisible:false document sitting in the
+       collection (see the identical note on the two mirrors below). */
     match /clientPortalProjects/{projectId} {
+      allow read: if isAdmin()
+          || (isActiveClientAccount() && resource.data.clientId == myClientId() && resource.data.portalVisible == true);
+      allow write: if isAdmin();
+    }
+
+    /* ── Client Portal invoices & receipts (post-22 financial privacy
+       hardening) ──
+       Sanitised, admin-synced MIRRORS of the private invoices/receipts
+       collections above — same architecture as clientPortalProjects,
+       for the same reason: a client must never read the authoritative
+       document directly. syncClientPortalInvoice()/
+       syncClientPortalReceipt() in admin.js build every field of these
+       documents by explicit, individually-named assignment (never
+       object-spread) so a future private field added to invoices/
+       receipts can never leak into a client's view by accident. The
+       portal's own queries must include BOTH
+       where('clientId','==', myClientId) AND
+       where('portalVisible','==', true) — see the note on
+       clientPortalProjects above for exactly why the second constraint
+       is required, not optional. */
+    match /clientPortalInvoices/{invoiceId} {
+      allow read: if isAdmin()
+          || (isActiveClientAccount() && resource.data.clientId == myClientId() && resource.data.portalVisible == true);
+      allow write: if isAdmin();
+    }
+    match /clientPortalReceipts/{receiptId} {
       allow read: if isAdmin()
           || (isActiveClientAccount() && resource.data.clientId == myClientId() && resource.data.portalVisible == true);
       allow write: if isAdmin();
